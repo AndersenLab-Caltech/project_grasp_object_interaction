@@ -8,30 +8,13 @@ subject_id = 's2';  % s2 or p3 or n1
 subject_id = 's3';  % s2 or p3 or n1
 
 subject = hst.Subject(subject_id);
-
-flag8TrialBlocks = false; 
-flag16TrialBlocks = true; 
 flag_dPCA = true; 
 
 if strcmp(subject_id, 's2')
-    session_dates = {'20210712', '20210722','20210729','20210923','20210930','20211011','20211018','20211027','20211103', '20220323'};
-    flag8TrialBlocks = false;
-    flag16TrialBlocks = false;
+    
 elseif strcmp(subject_id, 's3')
-    session_dates = {'20230106','20230706','20230712','20230713'};
-    
-    if flag8TrialBlocks
-        session_dates = {'20230106','20230106','20230706','20230706','20230706','20230706','20230712','20230712','20230712',...
-            '20230713','20230713','20230713','20230713'};
-    end
-    
-    if flag16TrialBlocks
-        session_dates = {'20230106','20230706','20230706','20230712','20230713','20230713'};
-    end
-
-
-    %for 20230706, only the 1st run does not have S1 data. I could rewrite
-    %the code to include S1 data for the 3 other runs. keep in mind!
+    session_dates = {'20230721','20230724'};
+  
 else 
     error('unknown subject')
 end 
@@ -40,53 +23,26 @@ save_data = true;
 flagRemoveTrials = true; 
 
 
-%spike_sorting_type = 'sorting_aligned_thr_-4.5_noSmoothing';
-%spike_sorting_type = 'sorting_aligned_thr_-4.5_smoothed';
-%spike_sorting_type = 'sorting_aligned_noratefilt_4.5';
-%spike_sorting_type = 'unsorted_aligned_thr_-4.0';
-%spike_sorting_type = 'sorting_aligned_thr_-4.5';
-%spike_sorting_type = 'sorting_aligned_noratefilt_4.5';
-
-%Might explain why they looked so different over different session days. It
-%could be that thresholding it will improve the accuracy that I have? idk
+spike_sorting_type = 'unsorted_aligned_thr_-4.5';
+%spike_sorting_type = 'unsorted_aligned_noratefilt_4.5';
 
 %spike_sorting_type = 'unsorted_aligned_noratefilt_4.5';
 %spike_sorting_type = 'unsorted_aligned_noratefilt';
 %spike_sorting_type = 'sorting'; % I did not rethreshold the session before spike sorting... idk if that will work? 
 
-if strcmp(subject_id, 's2')
-    spike_sorting_type = 'sorting_aligned_thr_-4.5';
-elseif strcmp(subject_id, 's3')
-    spike_sorting_type = 'sorting';
-    spike_sorting_type = 'sorting_noratefilt';
-
-end 
-
-%spike_sorting_type = 'unsorted_aligned_noratefilt';
-
-
-%GraspCue = 'SpeechTraining';
 
 if strcmp(subject_id, 's2')
-    TaskCue = 'Speech';
+    TaskCue = 'GraspObject';
 elseif strcmp(subject_id, 's3')
-    TaskCue = 'Speech_WrittenCue';
-    
-    if flag8TrialBlocks
-        TaskCue = 'Speech_WrittenCue_8TrialBlocks';
-    end
-    
-    if flag16TrialBlocks
-        TaskCue = 'Speech_WrittenCue_16TrialBlocks';
-    end
+    TaskCue = 'GraspObject';
 else
     keyboard
 end
 
 
-save_data_pathway = ['C:\Users\Sarah\OneDrive - California Institute of Technology\Data\InternalSpeechPaper\' subject_id '\Data\IndividualFiles\' TaskCue '\' spike_sorting_type];
-audio_data_pathway = ['C:\Users\Sarah\OneDrive - California Institute of Technology\Data\InternalSpeechPaper\' subject_id '\Data\AudioFiles'];
+save_data_pathway = ['C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\' subject_id '\Data\IndividualFiles\' TaskCue '\' spike_sorting_type];
 
+%create the folder if it does not exist in the path yet
 if ~exist(save_data_pathway)
     mkdir(save_data_pathway)
 end
