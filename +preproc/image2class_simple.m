@@ -21,29 +21,42 @@ for n_words = 1:image_n
             imagename = imagename_all;
         end 
 
-        if strcmp('Battlefield', imagename)
+        if strcmp('MediumWrap_Hand', imagename)
              class =1;
 
-         elseif strcmp('Cowboy', imagename)
+        elseif strcmp('PalmarPinch_Hand', imagename)
              class =2;
 
-        elseif strcmp('Python', imagename)
+        elseif strcmp('Lateral_Hand', imagename)
              class =3;
 
-        elseif strcmp('Spoon', imagename)
+        elseif strcmp('Sphere3Finger_Hand', imagename)
               class =4;
 
-        elseif strcmp('Swimming', imagename)
+        elseif strcmp('MediumWrap_Hand_Object', imagename)
                class =5;
 
-        elseif strcmp('Telephone', imagename)
+        elseif strcmp('PalmarPinch_Hand_Object', imagename)
                class =6;
 
-        elseif strcmp('Bindip', imagename)
+        elseif strcmp('Lateral_Hand_Object', imagename)
                class =7;
 
-        elseif strcmp('Nifzig', imagename)
+        elseif strcmp('Sphere3Finger_Hand_Object', imagename)
                 class =8;
+
+        elseif strcmp('MediumWrap_Object', imagename)
+                class =9;
+
+        elseif strcmp('PalmarPinch_Object', imagename)
+                class =10;
+
+        elseif strcmp('Lateral_Object', imagename)
+                class =11;
+
+        elseif strcmp('Sphere3Finger_Object', imagename)
+                class =12;
+
         else
 
             error([ imagename ' - Unknown label, add it to list']);
@@ -55,28 +68,40 @@ for n_words = 1:image_n
         imagename = imagename_all(n_words);
 
         if imagename ==1 
-             class = 'Battlefield';
+             class = 'MediumWrap_Hand';
 
         elseif imagename == 2
-             class ='Cowboy';
+             class ='PalmarPinch_Hand';
 
         elseif  imagename == 3
-             class = 'Python';
+             class = 'Lateral_Hand';
 
         elseif imagename ==4
-              class ='Spoon'; 
+              class ='Sphere3Finger_Hand'; 
 
         elseif imagename== 5
-               class = 'Swimming';
+               class = 'MediumWrap_Hand_Object';
 
         elseif imagename ==6
-               class ='Telephone';
+               class ='PalmarPinch_Hand_Object';
 
         elseif imagename == 7
-               class ='Bindip';
+               class ='Lateral_Hand_Object';
 
         elseif imagename == 8
-                class ='Nifzig';                   
+                class ='Sphere3Finger_Hand_Object'; 
+
+        elseif imagename == 9
+                class ='MediumWrap_Object'; 
+              
+        elseif imagename == 10
+                class ='PalmarPinch_Object'; 
+
+        elseif imagename == 11
+                class ='Lateral_Object'; 
+
+        elseif imagename == 12
+                class ='Sphere3Finger_Object'; 
         else
             error([ imagename 'Unknown grasp, add it to list']);
         end

@@ -4,7 +4,7 @@ function [data_info] = get_neural_data_paper(task,varargin)
 % Default variables values
 
 %Control which brain regions to extract: 1: NSP1, 2: NSP2, 3:NSP3 and all combinations. Default SMG and PMV
-[varargin,data_info.brain_region] = Utilities.argkeyval('brainregion',varargin, [1,2]); 
+[varargin,data_info.brain_region] = Utilities.argkeyval('brainregion',varargin, [1,2,3]); 
 %Control which data is extracted: sorting (sorted spikes), noisy (includes noise units), unsorted (unsorted data), smoothed (halfkerner = 0 and causal = 0, how much the neuronal data is smoothed). 
 [varargin,data_info.spikes_sorting] = Utilities.argkeyval('spikes',varargin, 'sorting');
 %Control which trials are taken into account. Default: all trials
@@ -25,30 +25,17 @@ disp(data_info.spikes)
 
 debug = Debug.Debugger('testing');
 
-%fr = firing rate
-%relt: recording time. If <0, recorded before trial started.
-%[fr,relt,featdef] = proc.task.bin(task,data_info.params,debug);
-
 data_info.params.dt.cacheread = 0; %put cacheread to 0 to not automatically extract the S1 data again. 
-data_info.params.tm.bufferpost = 1;
-data_info.params.tm.bufferpre = 1;
-% extract firing rates for trials. 
-%[fr1,relt1,featdef1] = proc.task.bin(task,data_info.params,debug, 'trialidx', data_info.trials);
+
 data_info.params.tm.bufferpost = 0; % do not extract data after trial.
 data_info.params.tm.bufferpre = 0; % do not extract data before trial.
+
+
+%fr = firing rate: [#Bins x #Channels x #Trials]
+%relt: same dimesion as number of bins. recording time. If <0, recorded before trial started.
+%[fr,relt,featdef] = proc.task.bin(task,data_info.params,debug);
+
 [fr,relt,featdef] = proc.task.bin(task,data_info.params,debug, 'trialidx', data_info.trials);
-
-%NOTE: depending on how much data we take to extract, featdef can have
-%different number of neurons because of the noratefilt kicking out process.
-%E.g. I think that when we have a 1s buffer before and after, it kicks out
-%more because we are in the ITI phase. 
-%This explains why I am not extracting the same numeber of neurons in "old
-%method" vs. "new method"
-
-%realized issue: sometimes 1 trial is too short -> process it OUTSIDE so
-%that I can pat that 1 trial with zeros instead of making all trials
-%shorter. May or may not be in this dataset, so can ignore it 
-
 
 %calculate phase labels 
 phaseTimes = task.phaseTimes; % have to remove additional trials later otherwise calculations do not work out
@@ -72,6 +59,7 @@ end
 phaseTimeDuration(numTrials,numPhases) = nanmedian(phaseTimeDuration(:,numPhases));
 medianPhaseTimeDuration = median(phaseTimeDuration);
 
+
 if nnz(std(phaseTimeDuration) > data_info.params.spk.binwidth)
     disp('Big time difference in trial duration'); 
     %keyboard; 
@@ -82,8 +70,8 @@ end
 avgPhaseTimeDuration = mean(phaseTimeDuration);
 minPhaseTimeDuraction = min(phaseTimeDuration); 
 %take shorted Action phase trial to not include ITI data
-%phaseTimesAvg(end+1) = phaseTimesAvg(end) + avgPhaseTimeDuration(end);
-phaseTimesAvg(end+1) = 7.9;
+phaseTimesAvg(end+1) = phaseTimesAvg(end) + avgPhaseTimeDuration(end);
+%phaseTimesAvg(end+1) = 7.9;
 
 %calculate phase labels
 phase_labels = arrayfun(@(x)phaseTimesAvg(x)<=relt, 1:length(phaseTimesAvg), 'UniformOutput', false);

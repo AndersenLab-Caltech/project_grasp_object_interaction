@@ -18,7 +18,7 @@ Blackrock.thresholdSession('20230803', 's3', 'THRESHOLD', -4.5, 'noise_model', '
 
 tasktype = {};
 end_comment = {};
-session_dates = {'20230810'};
+session_dates = {'20230721'};
 taskfileTest = 2;
 
 idxToRemove = [];

@@ -47,7 +47,7 @@ if ~exist(save_data_pathway)
     mkdir(save_data_pathway)
 end
 
-min_timebin_length = 157;
+min_timebin_length = 134;
 
 flagRemoveErrorTrials = true; %remove trials were errors occured
 session_date_idx = 1:length(session_dates);
@@ -66,80 +66,59 @@ for n_session = session_date_idx
     disp(['Current save mode is : ' num2str(save_data)]); 
 
     session = hst.Session(session_dates{n_session}, subject);
-    taskfiles = session.getTaskFiles('Speech');
+    taskfiles = session.getTaskFiles(TaskCue);
 
     %Extract correct datasets from excel files 
     filename = [subject_id '_good_trials_' TaskCue '.xlsx'];
     
-    [numb,txt,raw] = xlsread(['C:\Users\Sarah\Dropbox\Code\project_speech_paper\ExcelFiles\' filename]); 
+    [numb,txt,raw] = xlsread(fullfile(pwd,'ExcelFiles',filename));
    
     session_date = str2double(session_dates{n_session});
-    good_datasets = numb(session_date==numb(:,1), 2:end);
+    good_datablocks = numb(session_date==numb(:,1), 2:end);
+        
+    good_datablocks(isnan(good_datablocks)) = [];
     
-    if last_session_date ~= session_date
-        dayIdx = 1;
-    else
-        dayIdx = dayIdx+1;
-    end
-    dayIdx
-    last_session_date = session_date;
-    good_datasets = good_datasets(dayIdx,:);
-    
-    good_datasets(isnan(good_datasets)) = [];
-    
-    if (length(good_datasets) <1)
+    if (length(good_datablocks) <1)
         error ('Add to excel sheet, No good dataset present, skip or check for problem')
-    elseif good_datasets == 0
+    elseif good_datablocks == 0
         error('No good dataset present for this day, has been checked, skip')  
-    elseif any(ismember(good_datasets, 1000))
+    elseif any(ismember(good_datablocks, 1000))
         warning('There is a problem with one of the datasets, ask Spencer? Removing it for now');
-        good_datasets(ismember(good_datasets,1000)) = []; 
-    
-    elseif good_datasets == 100
-        disp(['No auditory dataset for session ' num2str(session_date)])       
-        continue
+        good_datablocks(ismember(good_datablocks,1000)) = []; 
     else
         disp('Everything seems ok');
     end
 
     
-    disp(['Good_datasets : ' num2str(good_datasets)]); 
+    disp(['Good_datasets : ' num2str(good_datablocks)]); 
        
  
     %%
     %to verify length of time bins
-    time_bin_size = zeros(1,length(good_datasets)); 
+    time_bin_size = zeros(1,length(good_datablocks)); 
     
     %Either sorting (sorted spikes), noisy (includes noise units), unsorted
     %(unsorted data), smoothed (halfkerner = 0 and causal = 0, how much the
     %neuronal data is smoothed). 
 
-    individual_runs = cell(1,length(good_datasets));
-    featdef = cell(1,length(good_datasets));
+    individual_runs = cell(1,length(good_datablocks));
+    featdef = cell(1,length(good_datablocks));
     
     %predeclare variables
     TrialNumber = [];
     LabelNames = {};
+    TrialType = {};
+    TrialOutput = [];
     GoLabels = [];
     session_date = [];
-    run_labels = [];
     cueType = {};
     time_phase_labels = [];
     time_trial = [];
-    
-    %predeclare variables for audio data
-    
-    Audio_raw = {};
-    Audio_envelope = {};
-    Audio_time = {};
-   
-    blubData = [];
-    blubLabels = [];
 
-    for n_dataset = 1:length(good_datasets) 
+    for n_dataset = 1:length(good_datablocks) 
     
             %load task 
-            task = hst.Task(taskfiles{good_datasets(n_dataset)});  
+            task = hst.Task(taskfiles{good_datablocks(n_dataset)});  
             
             %idx of trials to include                                  
             if flagRemoveErrorTrials
@@ -157,14 +136,7 @@ for n_session = session_date_idx
                 'trials',data_subset,...
                 'min_timebin_length', min_timebin_length);
                        
-            %to be removed - verification
-            neuralData = individual_runs{n_dataset}.fr_adapted;
-            neuralDataInternal = neuralData(individual_runs{n_dataset}.phase_labels == 4,:,:);
-            neuralDataInternalSMG = squeeze(mean(neuralDataInternal(:,individual_runs{n_dataset}.featdef.nsp  == 1,:),1));
-            Labels = vertcat(task.trialparams.Image_number);            
-            [a,errTest] = classification.classification_simple(neuralDataInternalSMG',Labels(data_subset),'PCA_percentage', 95, 'LeaveOneOut', true);
-            classification_result(n_session,n_dataset) = errTest;
-            
+                       
             %save relevant variables for analysis 
             time_bin_size(n_dataset) = size(individual_runs{n_dataset}.fr_adapted,1);
                 
@@ -172,14 +144,39 @@ for n_session = session_date_idx
             LabelNames_ind = {task.trialparams(:).action}';
             individual_runs{n_dataset}.Labels = LabelNames_ind;
             LabelNames = vertcat(LabelNames, LabelNames_ind(data_subset) );
+            
+            TrialType_ind = {task.trialparams(:).action}';
+            for i = 1:numel(TrialType_ind)
+                label = TrialType_ind{i};  % Extract the current trial label
+                
+                % Check for conditions using strfind function
+                if contains(label, 'Hand') && ~contains(label, 'Object')
+                    TrialType{i} = 'Hand';
+                elseif contains(label, 'Object') && ~contains(label, 'Hand')
+                    TrialType{i} = 'Object';
+                elseif contains(label, 'Hand') && contains(label, 'Object')
+                    TrialType{i} = 'Hand_Object';
+                else
+                    % Handle cases where the label doesn't match any predefined pattern
+                    TrialType{i} = 'Unknown';  
+                end
+            end
+            TrialType = vertcat(TrialType, TrialType_ind);
+
+            TrialOutput_ind = {task.trialparams(:).cue}';
+            for i = 1:numel(TrialOutput_ind)
+                if TrialOutput_ind{i} == 1
+                   TrialOutput{i} = 'Go';
+                elseif TrialOutput_ind{i} == 0
+                   TrialOutput{i} = 'No_Go';
+                end
+            end
+            TrialOutput = vertcat(TrialOutput, TrialOutput_ind);
+
             cueType_ind = {task.trialparams(:).cueType}';
             cueType = vertcat(cueType, cueType_ind(data_subset));
             session_date_val = {session_dates{n_session}};
-            if flag8TrialBlocks || flag16TrialBlocks
-                
-                session_date_val{1,1} = [session_date_val{1,1} '_' num2str(dayIdx)];
-            end
-            
+         
             session_date_ind =  repmat(session_date_val,numTrials , 1);
             session_date = vertcat(session_date, session_date_ind);
             time_phase_labels_ind = repmat({individual_runs{n_dataset}.phase_labels'},numTrials , 1);
@@ -187,27 +184,13 @@ for n_session = session_date_idx
             time_trial_ind = repmat({individual_runs{n_dataset}.relt},numTrials , 1);
             time_trial = vertcat(time_trial, time_trial_ind);
             
-            %load audio data
-            
-            audio_file_name = fullfile(audio_data_pathway, [task.taskString '_errorTrials.mat']);
-            
-            if exist(audio_file_name)
-                audio = load(fullfile(audio_data_pathway, [task.taskString '_errorTrials.mat']));
-                Audio_raw = vertcat(Audio_raw, audio.audio_per_trial');
-                Audio_envelope = vertcat(Audio_envelope, audio.envelope_per_trial');
-                Audio_time = vertcat(Audio_time, audio.time_per_trial');
-            else                              
-                Audio_raw = vertcat(Audio_raw, cell(numTrials,1));
-                Audio_envelope = vertcat(Audio_envelope, cell(numTrials,1));
-                Audio_time = vertcat(Audio_time, cell(numTrials,1));
-            end
     end
  
   
     %when combining datasets of different blocks, select features that are
     %present in each block. e.g. ratefilt might kick features our in block
     %1 but not block 2 -> allows combining datasets
-    if (length(good_datasets) >1)
+    if (length(good_datablocks) >1)
         [combined_all, IA, IB] = intersect(individual_runs{1,1}.featdef(:,{'nsp', 'channel' ,'unit'}),individual_runs{1,2}.featdef(:,{ 'nsp','channel' ,'unit'}));
         c1 = individual_runs{1,1}.featdef(IA, 1:5); %KICK OUT DATASET
         c2 = individual_runs{1,2}.featdef(IB, 1:5); 
@@ -220,8 +203,8 @@ for n_session = session_date_idx
 
     %if there are more than 2 dataset, repeat so that all combined dataset
     %include the same features
-    if length(good_datasets) > 2  
-        for kk = 3:(length(good_datasets))
+    if length(good_datablocks) > 2  
+        for kk = 3:(length(good_datablocks))
             [combined_all, IA, IB] = intersect(combined_all, individual_runs{1,kk}.featdef(:,{ 'nsp', 'channel' ,'unit'})); 
             disp(['Original number of units for dataset' num2str(kk) ' : ' num2str(size(individual_runs{1,kk}.featdef,1))]);
             disp(['Number of kept units: ' num2str(size(combined_all,1))]);
@@ -238,7 +221,7 @@ for n_session = session_date_idx
     M1_Go  = [];
     dPca_data_tmp = [];
 
-    for n_dataset = 1:length(good_datasets) 
+    for n_dataset = 1:length(good_datablocks) 
         
         featdef_ind = individual_runs{1,n_dataset}.featdef;
         feature_index_to_keep= ismember(featdef_ind(:,{ 'nsp', 'channel' ,'unit'}),combined_all); 
@@ -299,12 +282,14 @@ for n_session = session_date_idx
     GoLabels = cell(size(TrialNumber))';
 
     if strcmp(subject_id, 's2')
-        Go_data = [array2table(TrialNumber') cell2table(LabelNames) cell2table(cueType)  cell2table(SMG_Go) cell2table(PMV_Go) cell2table(S1X_Go) cell2table(GoLabels) ...
-        cell2table(session_date) cell2table(time_phase_labels) cell2table(time_trial) cell2table(Audio_raw) cell2table(Audio_envelope) cell2table(Audio_time)];
+        Go_data = [array2table(TrialNumber') cell2table(LabelNames) cell2table(TrialType') cell2table(TrialOutput')
+                    cell2table(cueType)  cell2table(SMG_Go) cell2table(PMV_Go) cell2table(S1X_Go) cell2table(GoLabels) ...
+                    cell2table(session_date) cell2table(time_phase_labels) cell2table(time_trial)];
 
     elseif strcmp(subject_id, 's3')
-        Go_data = [array2table(TrialNumber') cell2table(LabelNames) cell2table(cueType)  cell2table(SMG_Go) cell2table(PMV_Go) cell2table(S1X_Go) cell2table(AIP_Go) cell2table(M1_Go) cell2table(GoLabels) ...
-        cell2table(session_date) cell2table(time_phase_labels) cell2table(time_trial) cell2table(Audio_raw) cell2table(Audio_envelope) cell2table(Audio_time)];
+        Go_data = [array2table(TrialNumber') cell2table(LabelNames) cell2table(TrialType) cell2table(TrialOutput) 
+                    cell2table(cueType)  cell2table(SMG_Go) cell2table(PMV_Go) cell2table(S1X_Go) cell2table(AIP_Go) cell2table(M1_Go) cell2table(GoLabels) ...
+                    cell2table(session_date) cell2table(time_phase_labels) cell2table(time_trial)];
     end 
   
     Go_data = renamevars(Go_data,'Var1','TrialNumber');
@@ -367,9 +352,7 @@ for n_session = session_date_idx
  
    filename_save = [subject_id '_' session_dates{n_session} '_' spike_sorting_type '_' TaskCue '.mat'];
    
-   if flag8TrialBlocks || flag16TrialBlocks
-      filename_save = [subject_id '_' session_dates{n_session} '_' spike_sorting_type '_' TaskCue '_' num2str(dayIdx) '.mat'];
-   end 
+  
    filename_save = fullfile(save_data_pathway,filename_save);
    
     
@@ -425,7 +408,7 @@ for n_session = 1:length(datafiles)
 end 
 
 Go_data.TrialNumber = (1:size(Go_data,1))';
-
+%transform name of condition into code
 Go_data.GoLabels = (preproc.image2class_simple(Go_data.LabelNames))';
 if flagdPCA
     Go_data.dPCA(1:5) = dPca_comb;

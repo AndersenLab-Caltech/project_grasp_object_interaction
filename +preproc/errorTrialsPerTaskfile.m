@@ -24,11 +24,30 @@ if strcmp(subject, 's2')
 
 elseif strcmp(subject, 's3')
     
-     if strcmp(taskfile,'')
+     if strcmp(taskfile,   '20230721-095625-100057-GraspObject')
         wrongTrials = [];   
         
      
-   % elseif strcmp(taskfile,'')
+    elseif strcmp(taskfile,'20230721-095625-100644-GraspObject')
+        wrongTrials = [];   
+
+
+    elseif strcmp(taskfile,'20230721-101242-101247-GraspObject')
+        wrongTrials = [];   
+
+    elseif strcmp(taskfile,   '20230721-101242-101923-GraspObject')
+        wrongTrials = [];   
+        
+     
+    elseif strcmp(taskfile,'20230721-102408-102434-GraspObject')
+        wrongTrials = [];   
+
+
+    elseif strcmp(taskfile,'20230721-102408-103034-GraspObject')
+        wrongTrials = [];      
+
+
+        % elseif strcmp(taskfile,'')
     %    wrongTrials = [];   
         
      else
