@@ -4,15 +4,16 @@ clc
 clear all
 close all
 
-subject_id = 's3';  
-%subject_id = 's2';  
+subject_id = 's3';  %AN
+%subject_id = 's2'; %FG
 
 subject = hst.Subject(subject_id);
 
-Blackrock.thresholdSession('20230721', 's3', 'THRESHOLD', -4.5, 'noise_model', 'Gaussian')
-Blackrock.thresholdSession('20230803', 's3', 'THRESHOLD', -4.5, 'noise_model', 'Gaussian')
+%threshold session using blackrock filter. You can define the threshold
+%here. 
+Blackrock.thresholdSession('20230721', 's3', 'THRESHOLD', -4.5, 'noise_model', 'Blackrock')
+Blackrock.thresholdSession('20230803', 's3', 'THRESHOLD', -4.5, 'noise_model', 'Blackrock')
 
-%Blackrock.thresholdSession('20230322', 's2', 'THRESHOLD', -3.5, 'noise_model', 'Blackrock') %might be weird
 %%
 
 tasktype = {};
