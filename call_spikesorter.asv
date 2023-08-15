@@ -4,40 +4,38 @@ clc
 clear all
 close all
 
-subject_id = 's3';  
-%subject_id = 's2';  
+subject_id = 's3';  %AN
+%subject_id = 's2'; %FG
 
 subject = hst.Subject(subject_id);
 
-%threshold session using blackrock filter. 
-Blackrock.thresholdSession('20230721', 's3', 'THRESHOLD', -4.5, 'noise_model', 'Blackrock')
-Blackrock.thresholdSession('20230803', 's3', 'THRESHOLD', -4.5, 'noise_model', 'Blackrock')
+%threshold session using blackrock filter. You can define the threshold
+%here. 
+% Blackrock.thresholdSession('20230721', 's3', 'THRESHOLD', -4.5, 'noise_model', 'Blackrock')
+% Blackrock.thresholdSession('20230803', 's3', 'THRESHOLD', -4.5, 'noise_model', 'Blackrock')
+% Blackrock.thresholdSession('20230724', 's3', 'THRESHOLD', -4.5, 'noise_model', 'Blackrock')
+
 
 %%
 
 tasktype = {};
 end_comment = {};
-session_dates = {'20230810'};
+session_dates = {'20230724'};
 taskfileTest = 2;
 
 idxToRemove = [];
-for blub= 1:length(session_dates)
-    session_date = session_dates{blub};
+for n_session_dates= 1:length(session_dates)
+    session_date = session_dates{n_session_dates};
     session = hst.Session(session_date, subject);
-    taskfiles = session.getTaskFiles('Speech');
-    %taskfiles = session.getTaskFiles('SpeechTrainingInternal');
-
-    %taskfiles = session.getTaskFiles('RecordOnly');
-    %h = SpikeSorter.GUI(fileparts(taskfiles{1})) %Select the nev files to import them. If several sessions the same day, select them all at the same time
-
-
+    taskfiles = session.getTaskFiles('GraspObject');
+    
     for i = 1:length(taskfiles)
 
         try
             task = hst.Task(taskfiles{i});
-            tasktype{blub,i} = task.task.params.user.cue_type;
+            tasktype{n_session_dates,i} = task.task.params.user.cue_type;
             %end_comment{blub,i} = task.userEndComment;  
-            end_comment{blub,i} = task.parameterName;
+            end_comment{n_session_dates,i} = task.parameterName;
             
             if size(task.trialparams,2) ~= task.numTrials
                 disp('probably aborded trial')
@@ -45,20 +43,16 @@ for blub= 1:length(session_dates)
             end 
         catch
             disp('???')
-            %probably need to remove this one too 
             idxToRemove = [idxToRemove, i];
-           % keyboard
-           % error('Probabily need to change the file names and remove the last three numbers')
-        end 
+                end 
     end
     end_comment;
 end  
-%end 
 
 good_blocks = setdiff(1:length(taskfiles), idxToRemove);
 good_blocks
 taskfiles(good_blocks)
-
+%%
  keyboard
 h = SpikeSorter.GUI(fileparts(taskfiles{1}))
 
@@ -66,7 +60,7 @@ task = hst.Task(taskfiles{1});
 
 
 
-blub = [session_dates' tasktype end_comment]
+n_session_dates = [session_dates' tasktype end_comment]
 
 blub2 = 'Z:\Data\s2\20190423\PMV\20190423-144935-145018-GraspShape.mat'
 %Check the endcomments to find out which sessions to combine while spike

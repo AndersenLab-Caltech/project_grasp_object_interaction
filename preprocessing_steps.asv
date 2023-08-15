@@ -4,17 +4,18 @@ clc
 clear all
 %close all
 
-subject_id = 's2';  % s2 or p3 or n1
+% subject_id = 's2';  % s2 or p3 or n1
 subject_id = 's3';  % s2 or p3 or n1
 
 subject = hst.Subject(subject_id);
-flag_dPCA = true; 
+flag_dPCA = false; 
 
 if strcmp(subject_id, 's2')
     
 elseif strcmp(subject_id, 's3')
-    session_dates = {'20230721','20230724'};
-  
+    %session_dates = {'20230721','20230724','20230803'};
+    session_dates = {'20230803','20230724','20230721'};
+
 else 
     error('unknown subject')
 end 
@@ -23,11 +24,11 @@ save_data = true;
 flagRemoveTrials = true; 
 
 
-spike_sorting_type = 'unsorted_aligned_thr_-4.5';
+%spike_sorting_type = 'unsorted_aligned_thr_-4.5';
 %spike_sorting_type = 'unsorted_aligned_noratefilt_4.5';
 
 %spike_sorting_type = 'unsorted_aligned_noratefilt_4.5';
-%spike_sorting_type = 'unsorted_aligned_noratefilt';
+spike_sorting_type = 'unsorted_aligned_noratefilt';
 %spike_sorting_type = 'sorting'; % I did not rethreshold the session before spike sorting... idk if that will work? 
 
 
@@ -108,7 +109,7 @@ for n_session = session_date_idx
     TrialNumber = [];
     LabelNames = {};
     TrialType = {};
-    TrialOutput = [];
+    TrialCue = [];
     GoLabels = [];
     session_date = [];
     cueType = {};
@@ -143,36 +144,30 @@ for n_session = session_date_idx
             individual_runs{n_dataset}.task.hDebug= []; %remove saving debugger, created errors later when loading the file
             LabelNames_ind = {task.trialparams(:).action}';
             individual_runs{n_dataset}.Labels = LabelNames_ind;
-            LabelNames = vertcat(LabelNames, LabelNames_ind(data_subset) );
+            LabelNames = vertcat(LabelNames, LabelNames_ind(data_subset));
+            
+            TrialCue_ind = {task.trialparams(:).cue}';
+            individual_runs{n_dataset}.Cue = TrialCue_ind;
+            TrialCue = vertcat(TrialCue, TrialCue_ind(data_subset));
             
             TrialType_ind = {task.trialparams(:).action}';
             for i = 1:numel(TrialType_ind)
                 label = TrialType_ind{i};  % Extract the current trial label
-                
-                % Check for conditions using strfind function
                 if contains(label, 'Hand') && ~contains(label, 'Object')
-                    TrialType{i} = 'Hand';
+                    TrialType_ind{i} = 'Hand';
                 elseif contains(label, 'Object') && ~contains(label, 'Hand')
-                    TrialType{i} = 'Object';
+                    TrialType_ind{i} = 'Object';
                 elseif contains(label, 'Hand') && contains(label, 'Object')
-                    TrialType{i} = 'Hand_Object';
+                    TrialType_ind{i} = 'Hand_Object';
                 else
                     % Handle cases where the label doesn't match any predefined pattern
-                    TrialType{i} = 'Unknown';  
+                    TrialType_ind{i} = 'Unknown';  
                 end
             end
-            TrialType = vertcat(TrialType, TrialType_ind);
+            individual_runs{n_dataset}.TrialType = TrialType_ind;
+            TrialType = vertcat(TrialType, TrialType_ind(data_subset)); 
 
-            TrialOutput_ind = {task.trialparams(:).cue}';
-            for i = 1:numel(TrialOutput_ind)
-                if TrialOutput_ind{i} == 1
-                   TrialOutput{i} = 'Go';
-                elseif TrialOutput_ind{i} == 0
-                   TrialOutput{i} = 'No_Go';
-                end
-            end
-            TrialOutput = vertcat(TrialOutput, TrialOutput_ind);
-
+            
             cueType_ind = {task.trialparams(:).cueType}';
             cueType = vertcat(cueType, cueType_ind(data_subset));
             session_date_val = {session_dates{n_session}};
@@ -185,7 +180,6 @@ for n_session = session_date_idx
             time_trial = vertcat(time_trial, time_trial_ind);
             
     end
- 
   
     %when combining datasets of different blocks, select features that are
     %present in each block. e.g. ratefilt might kick features our in block
@@ -282,17 +276,21 @@ for n_session = session_date_idx
     GoLabels = cell(size(TrialNumber))';
 
     if strcmp(subject_id, 's2')
-        Go_data = [array2table(TrialNumber') cell2table(LabelNames) cell2table(TrialType') cell2table(TrialOutput')
+        Go_data = [array2table(TrialNumber') cell2table(LabelNames) cell2table(TrialType) array2table(TrialCue) ...
                     cell2table(cueType)  cell2table(SMG_Go) cell2table(PMV_Go) cell2table(S1X_Go) cell2table(GoLabels) ...
                     cell2table(session_date) cell2table(time_phase_labels) cell2table(time_trial)];
 
     elseif strcmp(subject_id, 's3')
-        Go_data = [array2table(TrialNumber') cell2table(LabelNames) cell2table(TrialType) cell2table(TrialOutput) 
+        Go_data = [array2table(TrialNumber') cell2table(LabelNames) cell2table(TrialType) array2table(TrialCue) ...
                     cell2table(cueType)  cell2table(SMG_Go) cell2table(PMV_Go) cell2table(S1X_Go) cell2table(AIP_Go) cell2table(M1_Go) cell2table(GoLabels) ...
                     cell2table(session_date) cell2table(time_phase_labels) cell2table(time_trial)];
     end 
   
     Go_data = renamevars(Go_data,'Var1','TrialNumber');
+    blub = Go_data.LabelNames;
+    GraspType = cellfun(@(x) strsplit(x, '_'), blub,'UniformOutput',false);
+    GraspType = cellfun(@(x) x{1,1}, GraspType,'UniformOutput',false);
+    Go_data = addvars(Go_data,GraspType);
       
         if flag_dPCA 
             % pred data for dPCA
@@ -352,15 +350,16 @@ for n_session = session_date_idx
  
    filename_save = [subject_id '_' session_dates{n_session} '_' spike_sorting_type '_' TaskCue '.mat'];
    
-  
+   disp(['Processed file '  filename_save])
+
    filename_save = fullfile(save_data_pathway,filename_save);
    
     
    save(filename_save, 'Go_data', '-v7.3'); 
- 
+
+   
 
 end  
-
 
 
  
@@ -385,22 +384,19 @@ subject_id = 's3';  % s2 or p3 or n1
 %spike_sorting_type = 'unsorted_aligned';
 
 %save_data_pathway = ['D:\Users\Sarah\Documents\Saved_Data\InternalSpeechPaper\' subject_id '\Data\IndividualFiles\' spike_sorting_type];
-save_data_pathway = ['C:\Users\Sarah\OneDrive - California Institute of Technology\Data\InternalSpeechPaper\' subject_id '\Data\IndividualFiles\' TaskCue '\' spike_sorting_type];
-datafiles = dir([save_data_pathway '\*.mat']);
+%save_data_pathway = ['C:\Users\Sarah\OneDrive - California Institute of Technology\Data\InternalSpeechPaper\' subject_id '\Data\IndividualFiles\' TaskCue '\' spike_sorting_type];
+save_data_pathway =  ['C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\' subject_id '\Data\IndividualFiles\' TaskCue '\' spike_sorting_type];
 
+datafiles = dir([save_data_pathway '\*.mat']);
+flagdPCA = false;
 dPca_comb = cell(1,5);
-flagdPCA = true;
 for n_session = 1:length(datafiles)
     
     Data = load(fullfile(datafiles(n_session).folder, datafiles(n_session).name));
     if n_session == 1
         Go_data = Data.Go_data;       
     else
-        if flagdPCA
             Go_data = vertcat(Go_data, Data.Go_data);
-        else
-            Go_data = vertcat(Go_data, Data.Go_data(:,1:15));
-        end
     end 
     if flagdPCA
         dPca_comb(1:5) = arrayfun(@(x) cat(1,dPca_comb{x}, Data.Go_data.dPCA{x}), 1:5, 'UniformOutput', false);
@@ -410,9 +406,7 @@ end
 Go_data.TrialNumber = (1:size(Go_data,1))';
 %transform name of condition into code
 Go_data.GoLabels = (preproc.image2class_simple(Go_data.LabelNames))';
-if flagdPCA
-    Go_data.dPCA(1:5) = dPca_comb;
-end
+
 
 %keyboard
 
