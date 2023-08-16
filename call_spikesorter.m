@@ -11,9 +11,9 @@ subject = hst.Subject(subject_id);
 
 %threshold session using blackrock filter. You can define the threshold
 %here. 
-% Blackrock.thresholdSession('20230721', 's3', 'THRESHOLD', -4.5, 'noise_model', 'Blackrock')
-% Blackrock.thresholdSession('20230803', 's3', 'THRESHOLD', -4.5, 'noise_model', 'Blackrock')
-% Blackrock.thresholdSession('20230724', 's3', 'THRESHOLD', -4.5, 'noise_model', 'Blackrock')
+Blackrock.thresholdSession('20230721', 's3', 'THRESHOLD', -4.5, 'noise_model', 'Blackrock')
+Blackrock.thresholdSession('20230803', 's3', 'THRESHOLD', -4.5, 'noise_model', 'Blackrock')
+Blackrock.thresholdSession('20230724', 's3', 'THRESHOLD', -4.5, 'noise_model', 'Blackrock')
 
 
 %%

@@ -24,11 +24,11 @@ save_data = true;
 flagRemoveTrials = true; 
 
 
-%spike_sorting_type = 'unsorted_aligned_thr_-4.5';
+spike_sorting_type = 'unsorted_aligned_thr_-4.5';
 %spike_sorting_type = 'unsorted_aligned_noratefilt_4.5';
 
 %spike_sorting_type = 'unsorted_aligned_noratefilt_4.5';
-spike_sorting_type = 'unsorted_aligned_noratefilt';
+% spike_sorting_type = 'unsorted_aligned_noratefilt';
 %spike_sorting_type = 'sorting'; % I did not rethreshold the session before spike sorting... idk if that will work? 
 
 
@@ -146,6 +146,9 @@ for n_session = session_date_idx
             individual_runs{n_dataset}.Labels = LabelNames_ind;
             LabelNames = vertcat(LabelNames, LabelNames_ind(data_subset));
             
+            GraspType = cellfun(@(x) strsplit(x, '_'), LabelNames,'UniformOutput',false);
+            GraspType = cellfun(@(x) x{1,1}, GraspType,'UniformOutput',false);
+
             TrialCue_ind = {task.trialparams(:).cue}';
             individual_runs{n_dataset}.Cue = TrialCue_ind;
             TrialCue = vertcat(TrialCue, TrialCue_ind(data_subset));
@@ -276,22 +279,19 @@ for n_session = session_date_idx
     GoLabels = cell(size(TrialNumber))';
 
     if strcmp(subject_id, 's2')
-        Go_data = [array2table(TrialNumber') cell2table(LabelNames) cell2table(TrialType) array2table(TrialCue) ...
+        Go_data = [array2table(TrialNumber') cell2table(LabelNames) cell2table(GraspType) cell2table(TrialType) array2table(TrialCue) ...
                     cell2table(cueType)  cell2table(SMG_Go) cell2table(PMV_Go) cell2table(S1X_Go) cell2table(GoLabels) ...
                     cell2table(session_date) cell2table(time_phase_labels) cell2table(time_trial)];
 
     elseif strcmp(subject_id, 's3')
-        Go_data = [array2table(TrialNumber') cell2table(LabelNames) cell2table(TrialType) array2table(TrialCue) ...
+        Go_data = [array2table(TrialNumber') cell2table(LabelNames) cell2table(GraspType) cell2table(TrialType) array2table(TrialCue) ...
                     cell2table(cueType)  cell2table(SMG_Go) cell2table(PMV_Go) cell2table(S1X_Go) cell2table(AIP_Go) cell2table(M1_Go) cell2table(GoLabels) ...
                     cell2table(session_date) cell2table(time_phase_labels) cell2table(time_trial)];
     end 
-  
-    Go_data = renamevars(Go_data,'Var1','TrialNumber');
-    blub = Go_data.LabelNames;
-    GraspType = cellfun(@(x) strsplit(x, '_'), blub,'UniformOutput',false);
-    GraspType = cellfun(@(x) x{1,1}, GraspType,'UniformOutput',false);
-    Go_data = addvars(Go_data,GraspType);
+    
       
+
+
         if flag_dPCA 
             % pred data for dPCA
             LabelsInd = (preproc.image2class_simple(LabelNames))';
@@ -346,7 +346,15 @@ for n_session = session_date_idx
             dPCA{6} = Brain_areas;
 
              Go_data = [Go_data cell2table(dPCA)];
-       end
+        end
+
+
+    frPerChannelAll = arrayfun(@(x) dPca_data_tmp(Brain_idx(:,x),:,:), 1:size(Brain_idx,2), 'UniformOutput', false);
+    frPerChannel = cell(size(TrialNumber))';
+    frPerChannel(1:length(frPerChannelAll)) = frPerChannelAll;
+    frPerChannel{length(frPerChannelAll)+1} = Brain_areas;
+    
+    Go_data = [Go_data cell2table(frPerChannel)];
  
    filename_save = [subject_id '_' session_dates{n_session} '_' spike_sorting_type '_' TaskCue '.mat'];
    
@@ -361,9 +369,8 @@ for n_session = session_date_idx
 
 end  
 
-
+%keyboard
  
-keyboard
 %%
 %combine data together
     
@@ -388,8 +395,7 @@ subject_id = 's3';  % s2 or p3 or n1
 save_data_pathway =  ['C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\' subject_id '\Data\IndividualFiles\' TaskCue '\' spike_sorting_type];
 
 datafiles = dir([save_data_pathway '\*.mat']);
-flagdPCA = false;
-dPca_comb = cell(1,5);
+
 for n_session = 1:length(datafiles)
     
     Data = load(fullfile(datafiles(n_session).folder, datafiles(n_session).name));
@@ -398,9 +404,7 @@ for n_session = 1:length(datafiles)
     else
             Go_data = vertcat(Go_data, Data.Go_data);
     end 
-    if flagdPCA
-        dPca_comb(1:5) = arrayfun(@(x) cat(1,dPca_comb{x}, Data.Go_data.dPCA{x}), 1:5, 'UniformOutput', false);
-    end 
+    
 end 
 
 Go_data.TrialNumber = (1:size(Go_data,1))';
@@ -408,31 +412,11 @@ Go_data.TrialNumber = (1:size(Go_data,1))';
 Go_data.GoLabels = (preproc.image2class_simple(Go_data.LabelNames))';
 
 
-%keyboard
+filename_save = ['Table_' subject_id '_' TaskCue '_' spike_sorting_type   '.mat'];
 
-%%
-flagIncludeAudio = false;
-%filename 
-filenameTmp = strsplit(datafiles(1).name, '.mat');
-filenameTmp = strsplit(filenameTmp{1}, '_');
-filenameTmp = filenameTmp(setdiff(1:length(filenameTmp),2));
+save_data_pathway =  ['C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\' subject_id '\Data'];
 
-if flagIncludeAudio
-    filenameTmp{end+1} = 'Audio';
-end 
-filename_save1 = ['Table_' strjoin(filenameTmp, '_') '.mat'];
+filename_save = fullfile(save_data_pathway,filename_save);
 
-%remove audio data to save file space
-if ~flagIncludeAudio 
-    audioIdx = ismember(Go_data.Properties.VariableNames, {'Audio_raw','Audio_envelope','Audio_time'});
-    Go_data = Go_data(:,~audioIdx);
-end
-
-save_data_pathway = ['C:\Users\Sarah\OneDrive - California Institute of Technology\Data\InternalSpeechPaper\' subject_id '\Data'];
-
-filename_save = fullfile(save_data_pathway,filename_save1);
-
-%if ~exist(filename_save)
-    save(filename_save, 'Go_data', '-v7.3'); 
-    disp([ 'saved ' filename_save1])
-%end 
+save(filename_save, 'Go_data', '-v7.3'); 
+disp([ 'saved ' filename_save])

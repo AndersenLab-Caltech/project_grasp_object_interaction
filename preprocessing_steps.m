@@ -24,11 +24,11 @@ save_data = true;
 flagRemoveTrials = true; 
 
 
-%spike_sorting_type = 'unsorted_aligned_thr_-4.5';
+spike_sorting_type = 'unsorted_aligned_thr_-4.5';
 %spike_sorting_type = 'unsorted_aligned_noratefilt_4.5';
 
 %spike_sorting_type = 'unsorted_aligned_noratefilt_4.5';
-spike_sorting_type = 'unsorted_aligned_noratefilt';
+% spike_sorting_type = 'unsorted_aligned_noratefilt';
 %spike_sorting_type = 'sorting'; % I did not rethreshold the session before spike sorting... idk if that will work? 
 
 
@@ -146,6 +146,9 @@ for n_session = session_date_idx
             individual_runs{n_dataset}.Labels = LabelNames_ind;
             LabelNames = vertcat(LabelNames, LabelNames_ind(data_subset));
             
+            GraspType = cellfun(@(x) strsplit(x, '_'), LabelNames,'UniformOutput',false);
+            GraspType = cellfun(@(x) x{1,1}, GraspType,'UniformOutput',false);
+
             TrialCue_ind = {task.trialparams(:).cue}';
             individual_runs{n_dataset}.Cue = TrialCue_ind;
             TrialCue = vertcat(TrialCue, TrialCue_ind(data_subset));
@@ -276,22 +279,19 @@ for n_session = session_date_idx
     GoLabels = cell(size(TrialNumber))';
 
     if strcmp(subject_id, 's2')
-        Go_data = [array2table(TrialNumber') cell2table(LabelNames) cell2table(TrialType) array2table(TrialCue) ...
+        Go_data = [array2table(TrialNumber') cell2table(LabelNames) cell2table(GraspType) cell2table(TrialType) array2table(TrialCue) ...
                     cell2table(cueType)  cell2table(SMG_Go) cell2table(PMV_Go) cell2table(S1X_Go) cell2table(GoLabels) ...
                     cell2table(session_date) cell2table(time_phase_labels) cell2table(time_trial)];
 
     elseif strcmp(subject_id, 's3')
-        Go_data = [array2table(TrialNumber') cell2table(LabelNames) cell2table(TrialType) array2table(TrialCue) ...
+        Go_data = [array2table(TrialNumber') cell2table(LabelNames) cell2table(GraspType) cell2table(TrialType) array2table(TrialCue) ...
                     cell2table(cueType)  cell2table(SMG_Go) cell2table(PMV_Go) cell2table(S1X_Go) cell2table(AIP_Go) cell2table(M1_Go) cell2table(GoLabels) ...
                     cell2table(session_date) cell2table(time_phase_labels) cell2table(time_trial)];
     end 
-  
-    Go_data = renamevars(Go_data,'Var1','TrialNumber');
-    blub = Go_data.LabelNames;
-    GraspType = cellfun(@(x) strsplit(x, '_'), blub,'UniformOutput',false);
-    GraspType = cellfun(@(x) x{1,1}, GraspType,'UniformOutput',false);
-    Go_data = addvars(Go_data,GraspType);
+    
       
+
+
         if flag_dPCA 
             % pred data for dPCA
             LabelsInd = (preproc.image2class_simple(LabelNames))';
@@ -346,7 +346,15 @@ for n_session = session_date_idx
             dPCA{6} = Brain_areas;
 
              Go_data = [Go_data cell2table(dPCA)];
-       end
+        end
+
+
+    frPerChannelAll = arrayfun(@(x) dPca_data_tmp(Brain_idx(:,x),:,:), 1:size(Brain_idx,2), 'UniformOutput', false);
+    frPerChannel = cell(size(TrialNumber))';
+    frPerChannel(1:length(frPerChannelAll)) = frPerChannelAll;
+    frPerChannel{length(frPerChannelAll)+1} = Brain_areas;
+    
+    Go_data = [Go_data cell2table(frPerChannel)];
  
    filename_save = [subject_id '_' session_dates{n_session} '_' spike_sorting_type '_' TaskCue '.mat'];
    
@@ -361,9 +369,8 @@ for n_session = session_date_idx
 
 end  
 
-
+%keyboard
  
-keyboard
 %%
 %combine data together
     
