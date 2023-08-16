@@ -4,17 +4,18 @@ clc
 clear all
 %close all
 
-% subject_id = 's2';  % s2 or p3 or n1
-subject_id = 's3';  % s2 or p3 or n1
+subject_id = 's2';  % s2 or p3 or n1
+%subject_id = 's3';  % s2 or p3 or n1
 
 subject = hst.Subject(subject_id);
 flag_dPCA = false; 
 
 if strcmp(subject_id, 's2')
+    session_dates = {'20230720','20230725','20230803','20230810'};
     
 elseif strcmp(subject_id, 's3')
     %session_dates = {'20230721','20230724','20230803'};
-    session_dates = {'20230803','20230724','20230721'};
+    %session_dates = {'20230724','20230721'};
 
 else 
     error('unknown subject')
