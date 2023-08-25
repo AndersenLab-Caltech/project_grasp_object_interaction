@@ -34,7 +34,7 @@ while ~isempty(varargin)
             flagRandomPerm = varargin{2};           
         case 'numrep'
             numRep = varargin{2};
-        case 'flagerrorratrix'
+        case 'flagerrormatrix'
             flagErrorMatrix = varargin{2};
         otherwise
             error(['Unexpected option: ' varargin{1}])
@@ -155,14 +155,10 @@ end
 
 %plot error matrix
 if flagErrorMatrix
+    figure(); 
     
-    labelsTest = cell2mat(labelsTestAll);
-    labelsTest = labelsTest(:);
-    
-    predictedTestAll = cell2mat(predictedTestAll);
-    predictedTestAll = predictedTestAll(:);
-    
-    [cm,gn] = confusionmat(labelsTest, predictedTestAll);
+     
+    [cm,gn] = confusionmat(labelsTestAll, predictedTestAll);
     class_names = preproc.image2class_simple(gn);
 
     confusionchart(cm,class_names)

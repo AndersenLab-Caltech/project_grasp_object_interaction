@@ -51,6 +51,32 @@ if strcmp(subject, 's2')
     elseif strcmp(taskfile, '20230810-165337-165705-GraspObject')
         wrongTrials = [];
 
+    elseif strcmp(taskfile, '20230817-154012-154020-GraspObject')
+        wrongTrials = [];
+    elseif strcmp(taskfile, '20230817-154012-154432-GraspObject')
+        wrongTrials = [];
+    elseif strcmp(taskfile, '20230817-154806-154814-GraspObject')
+        wrongTrials = [];
+    elseif strcmp(taskfile, '20230817-154806-155138-GraspObject')
+        wrongTrials = [];
+    elseif strcmp(taskfile, '20230817-155456-155505-GraspObject')
+        wrongTrials = [];
+    elseif strcmp(taskfile, '20230817-155456-155910-GraspObject')
+        wrongTrials = [];
+
+    elseif strcmp(taskfile, '20230824-155938-155946-GraspObject')
+        wrongTrials = [7,14];
+    elseif strcmp(taskfile, '20230824-155938-160341-GraspObject')
+        wrongTrials = [18];
+    elseif strcmp(taskfile, '20230824-160653-160701-GraspObject')
+        wrongTrials = [7,10];
+    elseif strcmp(taskfile, '20230824-160653-161048-GraspObject')
+        wrongTrials = [];
+    elseif strcmp(taskfile, '20230824-161418-161426-GraspObject')
+        wrongTrials = [19];
+    elseif strcmp(taskfile, '20230824-161418-161834-GraspObject')
+        wrongTrials = [];
+
  %  elseif strcmp(taskfile, '')
  %       wrongTrials = [];
 

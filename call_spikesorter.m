@@ -16,16 +16,16 @@ subject = hst.Subject(subject_id);
 % Blackrock.thresholdSession('20230724', 's3', 'THRESHOLD', -4.5, 'noise_model', 'Blackrock')
 
 
-Blackrock.thresholdSession('20230720', 's2', 'THRESHOLD', -4.5, 'noise_model', 'Blackrock')
-Blackrock.thresholdSession('20230725', 's2', 'THRESHOLD', -4.5, 'noise_model', 'Blackrock')
-Blackrock.thresholdSession('20230803', 's2', 'THRESHOLD', -4.5, 'noise_model', 'Blackrock')
-Blackrock.thresholdSession('20230810', 's2', 'THRESHOLD', -4.5, 'noise_model', 'Blackrock')
+Blackrock.thresholdSession('20230824', 's2', 'THRESHOLD', -4.5, 'noise_model', 'Blackrock')
+% Blackrock.thresholdSession('20230725', 's2', 'THRESHOLD', -4.5, 'noise_model', 'Blackrock')
+% Blackrock.thresholdSession('20230803', 's2', 'THRESHOLD', -4.5, 'noise_model', 'Blackrock')
+% Blackrock.thresholdSession('20230810', 's2', 'THRESHOLD', -4.5, 'noise_model', 'Blackrock')
 
 %%
 
 tasktype = {};
 end_comment = {};
-session_dates = {'20230810'};
+session_dates = {'20230824'};
 taskfileTest = 2;
 
 idxToRemove = [];

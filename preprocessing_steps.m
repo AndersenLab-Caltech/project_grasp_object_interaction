@@ -11,7 +11,8 @@ subject = hst.Subject(subject_id);
 flag_dPCA = false; 
 
 if strcmp(subject_id, 's2')
-    session_dates = {'20230720','20230725','20230803','20230810'};
+    % session_dates = {'20230720','20230725','20230803','20230810'};
+    session_dates = {'20230824'};
     
 elseif strcmp(subject_id, 's3')
     %session_dates = {'20230721','20230724','20230803'};
@@ -24,12 +25,9 @@ end
 save_data = true; 
 flagRemoveTrials = true; 
 
-
 spike_sorting_type = 'unsorted_aligned_thr_-4.5';
 %spike_sorting_type = 'unsorted_aligned_noratefilt_4.5';
-
-%spike_sorting_type = 'unsorted_aligned_noratefilt_4.5';
-% spike_sorting_type = 'unsorted_aligned_noratefilt';
+%spike_sorting_type = 'unsorted_aligned_noratefilt';
 %spike_sorting_type = 'sorting'; % I did not rethreshold the session before spike sorting... idk if that will work? 
 
 
@@ -238,8 +236,8 @@ for n_session = session_date_idx
         %separate channels according to brain area
         if strcmp(subject_id, 's2')
             SMG_idx = dataset_channel <= 96;
-            PMV_idx = dataset_channel > 96 & dataset_channel <= 192;
-            S1_idx = dataset_channel > 192;
+            PMV_idx = dataset_channel > 96 & dataset_channel <= 224;
+            S1_idx = dataset_channel > 225;
             AIP_idx = dataset_channel < 0; %does not exist for s2
             M1_idx = dataset_channel < 0; %does not exist for s2
         elseif strcmp(subject_id, 's3')
@@ -384,7 +382,9 @@ end
  
 
 % Combine datasets into one
-subject_id = 's3';  % s2 or p3 or n1
+subject_id = 's2';  % s2 or p3 or n1
+spike_sorting_type = 'unsorted_aligned_thr_-4.5';
+TaskCue = 'GraspObject';
 %spike_sorting_type = 'sorting_aligned_thr_-4.5';
 %spike_sorting_type = 'sorting_aligned_noratefilt_4.5';
 

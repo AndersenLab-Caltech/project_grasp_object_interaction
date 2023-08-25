@@ -44,7 +44,7 @@ for n_brain = 2:4 %:length(brainAreas)
     frData = Data.frPerChannel{n_brain};
     numChannels = size(frData, 1);
     
-    for n_channel = 1:numChannels
+    for n_channel = 15:20 %1:numChannels
         figure('units','normalized','outerposition',[0 0 0.5 1])
         sgtitle([brainAreas{n_brain} ' - Channel ' num2str(n_channel)]);
         
