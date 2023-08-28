@@ -39,7 +39,7 @@ phaseNames = {'ITI', 'Cue', 'Delay', 'Action'};
 uniqueGraspTypes = unique(Data.GraspType);
 uniqueCueTypes = unique(Data.TrialType);
 
-for n_brain = 2:4 %:length(brainAreas)
+for n_brain = 1:3 %:length(brainAreas) 1:5 for AN, 1:3 for FG
     
     frData = Data.frPerChannel{n_brain};
     numChannels = size(frData, 1);

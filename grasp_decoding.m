@@ -4,7 +4,7 @@ clear all
 
 spike_sorting_type = '_unsorted_aligned_thr_-4.5';
 taskName = 'GraspObject';
-subject_id = 's3';
+subject_id = 's2';
 
 % Data = load('C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\s3\Data\IndividualFiles\GraspObject\unsorted_aligned_thr_-4.5\s3_20230803_unsorted_aligned_thr_-4.5_GraspObject');
 %Data = load('C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\s3\Data\IndividualFiles\GraspObject\unsorted_aligned_thr_-4.5\s3_20230724_unsorted_aligned_thr_-4.5_GraspObject');
@@ -14,7 +14,7 @@ Data = load(['C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\Gras
 
 %%
 Go_data = Data.Go_data;
-unit_region = 'M1';
+unit_region = 'PMV';
 brainAreas = Go_data.frPerChannel{6};
 phase_time_idx = Go_data.time_phase_labels{1,1};
 numPhases = numel(unique(phase_time_idx));
@@ -116,7 +116,7 @@ for n_session = 1:numSessions
 
     end 
 
-    subplot(2,2,n_session)
+    subplot(3,2,n_session) % code using var names instead of hard 
 
   %  figure();
     bar(errTest)

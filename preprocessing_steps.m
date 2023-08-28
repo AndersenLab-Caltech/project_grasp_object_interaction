@@ -11,8 +11,8 @@ subject = hst.Subject(subject_id);
 flag_dPCA = false; 
 
 if strcmp(subject_id, 's2')
-    % session_dates = {'20230720','20230725','20230803','20230810'};
-    session_dates = {'20230824'};
+    session_dates = {'20230720','20230725','20230803','20230810','20230824'};
+    %session_dates = {'20230720'};
     
 elseif strcmp(subject_id, 's3')
     %session_dates = {'20230721','20230724','20230803'};
@@ -40,7 +40,7 @@ else
 end
 
 
-save_data_pathway = ['C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\' subject_id '\Data\IndividualFiles\' TaskCue '\' spike_sorting_type];
+save_data_pathway = ['C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\' subject_id '\Data\IndividualFilesTest\' TaskCue '\' spike_sorting_type];
 
 %create the folder if it does not exist in the path yet
 if ~exist(save_data_pathway)
@@ -225,7 +225,8 @@ for n_session = session_date_idx
         
         %adapt featureset and data according to features to keep
         featdef_ind_sub = featdef_ind(feature_index_to_keep,:);
-        dataset_channel = featdef_ind_sub.dataset_channel;        
+        dataset_channel = featdef_ind_sub.dataset_channel;   
+        channel = featdef_ind_sub.channel;   
         data_ind = individual_runs{1, n_dataset}.fr_adapted;
         data_ind = data_ind(:,feature_index_to_keep,:); 
         
@@ -235,11 +236,24 @@ for n_session = session_date_idx
         
         %separate channels according to brain area
         if strcmp(subject_id, 's2')
-            SMG_idx = dataset_channel <= 96;
-            PMV_idx = dataset_channel > 96 & dataset_channel <= 224;
-            S1_idx = dataset_channel > 225;
+            SMG_idx = channel <= 96 .* ismember(featdef_ind_sub.nsp_name, 'APX');
+            PMV_idx = logical((channel > 96 & channel <= 224) .* ismember(featdef_ind_sub.nsp_name, 'APX'));
+            S1_idx = channel <= 96   & ismember(featdef_ind_sub.nsp_name, 'S1X_S1');
             AIP_idx = dataset_channel < 0; %does not exist for s2
             M1_idx = dataset_channel < 0; %does not exist for s2
+
+            %SMG_idx = dataset_channel <= 96 .* ismember(featdef_ind_sub.nsp_name, 'APX');
+            %PMV_idx1 = (dataset_channel > 96 & dataset_channel <= 224) .* ismember(featdef_ind_sub.nsp_name, 'APX');
+            %S1_idx2 = dataset_channel > 225  & ismember(featdef_ind_sub.nsp_name, 'S1X_S1');
+            %AIP_idx = dataset_channel < 0; %does not exist for s2
+            %M1_idx = dataset_channel < 0; %does not exist for s2
+
+            if nnz(PMV_idx) ~= nnz(PMV_idx1)
+                keyboard
+                %problem with separating channels into appropriate brian
+                %area
+            end
+
         elseif strcmp(subject_id, 's3')
             %implement dataset channels for s3 for SMG, PMv and S1
             SMG_idx =  ismember(dataset_channel,[129:160, 225:256]);
@@ -362,13 +376,13 @@ for n_session = session_date_idx
    filename_save = fullfile(save_data_pathway,filename_save);
    
     
-   save(filename_save, 'Go_data', '-v7.3'); 
+   save(filename_save, 'Go_data', 'individual_runs', '-v7.3'); 
 
    
 
 end  
 
-%keyboard
+keyboard
  
 %%
 %combine data together
@@ -384,6 +398,7 @@ end
 % Combine datasets into one
 subject_id = 's2';  % s2 or p3 or n1
 spike_sorting_type = 'unsorted_aligned_thr_-4.5';
+%spike_sorting_type = 'unsorted_aligned_noratefilt_4.5';
 TaskCue = 'GraspObject';
 %spike_sorting_type = 'sorting_aligned_thr_-4.5';
 %spike_sorting_type = 'sorting_aligned_noratefilt_4.5';
@@ -393,7 +408,7 @@ TaskCue = 'GraspObject';
 
 %save_data_pathway = ['D:\Users\Sarah\Documents\Saved_Data\InternalSpeechPaper\' subject_id '\Data\IndividualFiles\' spike_sorting_type];
 %save_data_pathway = ['C:\Users\Sarah\OneDrive - California Institute of Technology\Data\InternalSpeechPaper\' subject_id '\Data\IndividualFiles\' TaskCue '\' spike_sorting_type];
-save_data_pathway =  ['C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\' subject_id '\Data\IndividualFiles\' TaskCue '\' spike_sorting_type];
+save_data_pathway =  ['C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\' subject_id '\Data\IndividualFilesTest\' TaskCue '\' spike_sorting_type];
 
 datafiles = dir([save_data_pathway '\*.mat']);
 
@@ -413,7 +428,7 @@ Go_data.TrialNumber = (1:size(Go_data,1))';
 Go_data.GoLabels = (preproc.image2class_simple(Go_data.LabelNames))';
 
 
-filename_save = ['Table_' subject_id '_' TaskCue '_' spike_sorting_type   '.mat'];
+filename_save = ['Table_' subject_id '_' TaskCue '_' spike_sorting_type   'Test.mat'];
 
 save_data_pathway =  ['C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\' subject_id '\Data'];
 
