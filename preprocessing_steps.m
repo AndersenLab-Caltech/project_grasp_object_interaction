@@ -248,11 +248,11 @@ for n_session = session_date_idx
             %AIP_idx = dataset_channel < 0; %does not exist for s2
             %M1_idx = dataset_channel < 0; %does not exist for s2
 
-            if nnz(PMV_idx) ~= nnz(PMV_idx1)
-                keyboard
-                %problem with separating channels into appropriate brian
-                %area
-            end
+            % if nnz(PMV_idx) ~= nnz(PMV_idx1)
+            %     keyboard
+            %     %problem with separating channels into appropriate brian
+            %     %area
+            % end
 
         elseif strcmp(subject_id, 's3')
             %implement dataset channels for s3 for SMG, PMv and S1
