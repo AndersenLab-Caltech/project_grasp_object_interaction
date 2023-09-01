@@ -22,18 +22,19 @@ session_dates = {'20230824'};
 % 
 % end 
 
-% Data = load('C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\s3\Data\IndividualFiles\GraspObject\unsorted_aligned_thr_-4.5\s3_20230803_unsorted_aligned_thr_-4.5_GraspObject');
-%Data = load('C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\s3\Data\IndividualFiles\GraspObject\unsorted_aligned_thr_-4.5\s3_20230724_unsorted_aligned_thr_-4.5_GraspObject');
-% Data = load('C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\s3\Data\IndividualFiles\GraspObject\unsorted_aligned_thr_-4.5\s3_20230721_unsorted_aligned_thr_-4.5_GraspObject');
+
+%Data = load('C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\s3\Data\IndividualFiles\GraspObject\unsorted_aligned_thr_-4.5\s2_20230720_unsorted_aligned_thr_-4.5_GraspObject');
+%Data = load('C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\s3\Data\IndividualFiles\GraspObject\unsorted_aligned_thr_-4.5\s2_20230725_unsorted_aligned_thr_-4.5_GraspObject');
+% Data = load('C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\s3\Data\IndividualFiles\GraspObject\unsorted_aligned_thr_-4.5\s2_20230803_unsorted_aligned_thr_-4.5_GraspObject');
 Data = load('C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\s2\Data\IndividualFiles\GraspObject\unsorted_aligned_thr_-4.5\s2_20230824_unsorted_aligned_thr_-4.5_GraspObject');
 Data = Data.Go_data;
 
 brainAreas = Data.frPerChannel{6};
 phase_time_idx = Data.time_phase_labels{1,1};
 numPhases = numel(unique(phase_time_idx));
-blub = diff(phase_time_idx);
+phase_changes_idx = diff(phase_time_idx);
 phase_changes(1) = 1;
-phase_changes(2:numPhases) = find(blub) + 1;
+phase_changes(2:numPhases) = find(phase_changes_idx) + 1;
 phaseNames = {'ITI', 'Cue', 'Delay', 'Action'};
 
 uniqueGraspTypes = unique(Data.GraspType);
@@ -75,8 +76,10 @@ for n_brain = 1:3 %:length(brainAreas) 1:5 for AN, 1:3 for FG
                 CI95 = tinv([0.025 0.975], N-1);  % Calculate 95% Probability Intervals Of t-Distribution
                 yCI95 = bsxfun(@times, sem, CI95(:)); % Calculate 95% Confidence Intervals Of All Experiments At Each Value Of ‘x’
            
+                data_std = std(dataTmp);
+                data_mean = mean(dataTmp);
 
-
+                shadedErrorBar(mean(dataTmp),1:length(dataTmp));
 
                 %%figure(); 
                 %subplot(2,1,1)
