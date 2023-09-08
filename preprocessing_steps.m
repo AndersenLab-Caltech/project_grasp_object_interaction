@@ -2,22 +2,19 @@
 
 clc 
 clear all
-%close all
+close all
 
-subject_id = 's2';  % s2 or p3 or n1
-%subject_id = 's3';  % s2 or p3 or n1
+%subject_id = 's2';  % s2 or p3 or n1
+subject_id = 's3';  % s2 or p3 or n1
 
 subject = hst.Subject(subject_id);
 flag_dPCA = false; 
+flag_4S = true; 
 
 if strcmp(subject_id, 's2')
-    session_dates = {'20230720','20230725','20230803','20230810','20230824'};
-    %session_dates = {'20230720'};
-    
+    session_dates = {'20230831','20230907'};
 elseif strcmp(subject_id, 's3')
-    %session_dates = {'20230721','20230724','20230803'};
-    %session_dates = {'20230724','20230721'};
-
+    session_dates = {'20230830'};
 else 
     error('unknown subject')
 end 
@@ -31,23 +28,23 @@ spike_sorting_type = 'unsorted_aligned_thr_-4.5';
 %spike_sorting_type = 'sorting'; % I did not rethreshold the session before spike sorting... idk if that will work? 
 
 
-if strcmp(subject_id, 's2')
+if ~flag_4S
     TaskCue = 'GraspObject';
-elseif strcmp(subject_id, 's3')
-    TaskCue = 'GraspObject';
+    min_timebin_length = 134; % NOT VALID FOR 20230831    
 else
-    keyboard
-end
+    TaskCue = 'GraspObject_4S_Action';
+    min_timebin_length = 174; 
+end 
 
 
-save_data_pathway = ['C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\' subject_id '\Data\IndividualFilesTest\' TaskCue '\' spike_sorting_type];
+
+save_data_pathway = ['C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\' subject_id '\Data\IndividualFiles\' TaskCue '\' spike_sorting_type];
 
 %create the folder if it does not exist in the path yet
 if ~exist(save_data_pathway)
     mkdir(save_data_pathway)
 end
 
-min_timebin_length = 134;
 
 flagRemoveErrorTrials = true; %remove trials were errors occured
 session_date_idx = 1:length(session_dates);
@@ -66,13 +63,13 @@ for n_session = session_date_idx
     disp(['Current save mode is : ' num2str(save_data)]); 
 
     session = hst.Session(session_dates{n_session}, subject);
-    taskfiles = session.getTaskFiles(TaskCue);
+    taskfiles = session.getTaskFiles('GraspObject');
 
     %Extract correct datasets from excel files 
     filename = [subject_id '_good_trials_' TaskCue '.xlsx'];
     
     [numb,txt,raw] = xlsread(fullfile(pwd,'ExcelFiles',filename));
-   
+
     session_date = str2double(session_dates{n_session});
     good_datablocks = numb(session_date==numb(:,1), 2:end);
         
@@ -396,10 +393,10 @@ keyboard
  
 
 % Combine datasets into one
-subject_id = 's2';  % s2 or p3 or n1
+subject_id = 's3';  % s2 or p3 or n1
 spike_sorting_type = 'unsorted_aligned_thr_-4.5';
 %spike_sorting_type = 'unsorted_aligned_noratefilt_4.5';
-TaskCue = 'GraspObject';
+TaskCue = 'GraspObject_4S_Action';
 %spike_sorting_type = 'sorting_aligned_thr_-4.5';
 %spike_sorting_type = 'sorting_aligned_noratefilt_4.5';
 
@@ -408,7 +405,7 @@ TaskCue = 'GraspObject';
 
 %save_data_pathway = ['D:\Users\Sarah\Documents\Saved_Data\InternalSpeechPaper\' subject_id '\Data\IndividualFiles\' spike_sorting_type];
 %save_data_pathway = ['C:\Users\Sarah\OneDrive - California Institute of Technology\Data\InternalSpeechPaper\' subject_id '\Data\IndividualFiles\' TaskCue '\' spike_sorting_type];
-save_data_pathway =  ['C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\' subject_id '\Data\IndividualFilesTest\' TaskCue '\' spike_sorting_type];
+save_data_pathway =  ['C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\' subject_id '\Data\IndividualFiles\' TaskCue '\' spike_sorting_type];
 
 datafiles = dir([save_data_pathway '\*.mat']);
 
@@ -428,7 +425,7 @@ Go_data.TrialNumber = (1:size(Go_data,1))';
 Go_data.GoLabels = (preproc.image2class_simple(Go_data.LabelNames))';
 
 
-filename_save = ['Table_' subject_id '_' TaskCue '_' spike_sorting_type   'Test.mat'];
+filename_save = ['Table_' subject_id '_' TaskCue '_' spike_sorting_type   '.mat'];
 
 save_data_pathway =  ['C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\' subject_id '\Data'];
 

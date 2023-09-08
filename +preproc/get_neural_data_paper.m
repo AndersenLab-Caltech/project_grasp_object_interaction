@@ -36,7 +36,7 @@ data_info.params.tm.bufferpre = 0; % do not extract data before trial.
 %[fr,relt,featdef] = proc.task.bin(task,data_info.params,debug);
 
 [fr,relt,featdef] = proc.task.bin(task,data_info.params,debug, 'trialidx', data_info.trials);
-
+%[fr,relt,featdef] = proc.task.bin(task,data_info.params,debug,'UniformOutput', false,'trialidx', data_info.trials); % use this to find min_timebin_length
 %calculate phase labels 
 phaseTimes = task.phaseTimes; % have to remove additional trials later otherwise calculations do not work out
 

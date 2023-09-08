@@ -38,6 +38,7 @@ uniqueCueTypes = unique(Go_data.TrialType);
 sessions_all = unique(Go_data.session_date);
 numSessions = numel(sessions_all);
 
+
 flagGoTrials = true; %if true, extract Go trials, if false, extract NoGo trials
 figure(); 
 
@@ -63,7 +64,12 @@ for n_session = 1:numSessions
             SessionData = Go_data.AIP_Go(idxThisSession,:);
         else
             error([unit_region ' does not exist '])
-    end
+     end
+
+     % skip session days that are empty - relevant for S1 session 20230810
+     if isempty(SessionData{1})
+        continue
+     end
     
     %labels 
     sessionLabels = Go_data.GoLabels(idxThisSession,:);
@@ -107,10 +113,11 @@ for n_session = 1:numSessions
             errTest(n_phase,n_type) =  (1-mean(errTestTmp))*100;
            
             data_per_phase_per_all = cell2mat(arrayfun(@(x,y) mean(x{1,1}(y{:}== n_phase,:),1),SessionData,time_phase_labels, 'UniformOutput', false));
-            % if n_phase ~= 1
-            %     [errTrain, errTestTmp] = classification.LDA_classification_rep(data_per_phase_per_all,sessionLabels, 'flagErrorMatrix', true, 'PCA_variance', 95, 'flagLeaveOneOut', true);
-            % 
-            % end
+            if n_phase ~= 1
+                [errTrain, errTestTmp] = classification.LDA_classification_rep(data_per_phase_per_all,sessionLabels, 'flagErrorMatrix', true, 'PCA_variance', 95, 'flagLeaveOneOut', true);
+                
+                title([ sessions_all{n_session} ' - ' unit_region ' - ' phaseNames{n_phase} ])
+            end
 
         end 
 

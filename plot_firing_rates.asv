@@ -100,7 +100,6 @@ for n_brain = 1:3 %:length(brainAreas) 1:5 for AN, 1:3 for FG
                 % err_bar{n_cueType} = plot(1:length(dataTmp), mean(dataTmp), 'LineWidth',2);
                 % figure();
                 %yCI95Shaded = mean(dataTmp) + yCI95;
-                err_bar = {};
                 if n_cueType == 1
                     err_bar{n_cueType} = utile.shadedErrorBar(1:length(dataTmp),mean(dataTmp),yCI95(1,:),'lineprops','-c','transparent',true);
                     hold on;
@@ -120,12 +119,10 @@ for n_brain = 1:3 %:length(brainAreas) 1:5 for AN, 1:3 for FG
         end
         xlabel('Time');
         ylabel('Average Firing Rate');
-        
+        legend([err_bar(:)],uniqueCueTypes, 'Location', 'Best', 'Interpreter', 'none');
     end
 end
 
-err_bar = cell2mat(err_bar);
-legend([err_bar(:)],uniqueCueTypes, 'Location', 'Best', 'Interpreter', 'none');
 
 %% CI example
 

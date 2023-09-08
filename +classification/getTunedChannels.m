@@ -5,8 +5,8 @@ function [TunedCombinedChannels, TunedChannelsPerPhase, TunedChannelsPerBin, sum
 
 %default values
 flagMultipleCompare = true;
-flagBinperBin = false;
-flagCombineTunedChannels = true;
+flagBinperBin = false; % perform tuning for each 50ms time step
+flagCombineTunedChannels = true; % combine tuned channels from different task phases
 flagRemoveITItuning = false;
 flagShuffleTest = false;
 
@@ -33,8 +33,8 @@ end
 
 
 numChannels = size(Data{1},2);
-UniqueTmp = unique(TimePhaseLabels{1});
-numPhases = length(UniqueTmp);
+uniquePhaseLabels = unique(TimePhaseLabels{1});
+numPhases = length(uniquePhaseLabels);
 numBins = size(Data{1},1);
 numUnits = size(Data{1},2);
 p_per_phase = ones(numChannels, numPhases);
@@ -44,8 +44,10 @@ p_multcomp_per_phase = ones(numChannels, numPhases);
 p_multcomp_per_bin = ones(numChannels, numBins);
 
 for n_phase = 1:numPhases
+
+    %seperate data according to task phase
     try
-        DataPerPhase = cell2mat(arrayfun(@(x,y) mean(x{1,1}(y{:}== UniqueTmp(n_phase),:),1),Data,TimePhaseLabels, 'UniformOutput', false));
+        DataPerPhase = cell2mat(arrayfun(@(x,y) mean(x{1,1}(y{:}== uniquePhaseLabels(n_phase),:),1),Data,TimePhaseLabels, 'UniformOutput', false));
     catch
         keyboard
     end 
@@ -58,7 +60,11 @@ for n_phase = 1:numPhases
       
       DataPerTrial = DataPerPhase(:,n_channel);
       %perform kruskal wallis test 
-      [p_per_phase(n_channel,n_phase), ~, ~] = kruskalwallis(DataPerTrial,Labels,'off');
+      %[p_per_phase(n_channel,n_phase), anovatab,stats] = kruskalwallis(DataPerTrial,Labels,'on');
+      % [comparison,means,h,gnames]  = multcompare(stats);
+
+       [p_per_phase(n_channel,n_phase), ~, ~] = kruskalwallis(DataPerTrial,Labels,'off');
+
 
   end
   
@@ -88,17 +94,13 @@ end
 if flagMultipleCompare
     for n_channel = 1:numChannels
         [~,~,p_multcomp_per_phase(n_channel,:)] = utile.MultipleComparisonsCorrection(p_per_phase(n_channel,:),'method', 'fdr'); 
+      %  [~,~,p_multcomp_per_bin(:,n_channel)] = utile.MultipleComparisonsCorrection(p_per_bin(:,n_channel)','method', 'fdr');
 
     end 
 
-
-%DELETE
-  %  for n_unit = 1:numUnits
-   %     [~,~,p_multcomp_per_bin(:,n_unit)] = utile.MultipleComparisonsCorrection(p_per_bin(:,n_unit)','method', 'fdr');
-    %end 
     %replace old p values by multcompare p values
     p_per_phase = p_multcomp_per_phase; 
-   % p_per_bin = p_multcomp_per_bin;
+  %  p_per_bin = p_multcomp_per_bin;
 
 
 end 
