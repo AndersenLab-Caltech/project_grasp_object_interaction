@@ -148,44 +148,44 @@ for n_session = 1:numSessions
        
 end 
 
-% for n_cueType = 1:numel(taskCuesAll)
-%     dataTmp = fr_sep_cue_type_trial{n_cueType}';
-%     % N = size(dataTmp, 1);
-%     % sem = std(dataTmp) / sqrt(N);  % standard error of the mean
-%     % CI95 = tinv([0.025 0.975], N-1);  % Calculate 95% Probability Intervals Of t-Distribution
-%     % yCI95 = bsxfun(@times, sem, CI95(:)); % Calculate 95% Confidence Intervals Of All Experiments At Each Value Of ‘x’
-%     % 
-%     data_std = std(dataTmp);
-%     data_mean = mean(dataTmp);
-% 
-%     %%figure(); 
-%     %subplot(2,1,1)
-%    % plot(1:length(dataTmp), mean(dataTmp), 'LineWidth', 2);
-%     %hold on 
-%    % plot(1:length(dataTmp), mean(dataTmp) +yCI95 , 'LineWidth', 2);
-%     %subplot(2,1,2)
-%     % figure();
-%     % errorbar(mean(dataTmp), yCI95);
-%     % hold on 
-%     % err_bar{n_cueType} = plot(1:length(dataTmp), mean(dataTmp), 'LineWidth',2);
-%     % figure();
-%     %yCI95Shaded = mean(dataTmp) + yCI95;
-% 
-%     hold on
-%     err_bar{n_cueType} = plot(1:length(dataTmp),mean(dataTmp),'Color', color_info{n_cueType},'LineWidth',2);
-% 
-%     ER.mainLine.Color = color_info{n_cueType};
-%     ER.patch.FaceColor = color_info{n_cueType};
-%     ER.edge(1).Color = color_info{n_cueType};
-%     ER.edge(2).Color = color_info{n_cueType};
-%       %  err_bar{n_cueType} = utile.shadedErrorBar(1:length(dataTmp),mean(dataTmp),yCI95(1,:),'lineprops','-b','transparent',true);
-% 
-%     % Capture the plot handle for this data series
-%     %plotHandles = [plotHandles, err_bar{n_cueType}.mainLine];
-% 
-%    % hold on;
-%     %plot(mean(dataTmp), 'LineWidth',2,)
-% end
+for n_cueType = 1:numel(taskCuesAll)
+    dataTmp = fr_sep_cue_type_trial{n_cueType}';
+    % N = size(dataTmp, 1);
+    % sem = std(dataTmp) / sqrt(N);  % standard error of the mean
+    % CI95 = tinv([0.025 0.975], N-1);  % Calculate 95% Probability Intervals Of t-Distribution
+    % yCI95 = bsxfun(@times, sem, CI95(:)); % Calculate 95% Confidence Intervals Of All Experiments At Each Value Of ‘x’
+    % 
+    data_std = std(dataTmp);
+    data_mean = mean(dataTmp);
+
+    %%figure(); 
+    %subplot(2,1,1)
+   % plot(1:length(dataTmp), mean(dataTmp), 'LineWidth', 2);
+    %hold on 
+   % plot(1:length(dataTmp), mean(dataTmp) +yCI95 , 'LineWidth', 2);
+    %subplot(2,1,2)
+    % figure();
+    % errorbar(mean(dataTmp), yCI95);
+    % hold on 
+    % err_bar{n_cueType} = plot(1:length(dataTmp), mean(dataTmp), 'LineWidth',2);
+    % figure();
+    %yCI95Shaded = mean(dataTmp) + yCI95;
+
+    hold on
+    err_bar{n_cueType} = plot(1:length(dataTmp),mean(dataTmp),'Color', color_info{n_cueType},'LineWidth',2);
+
+    ER.mainLine.Color = color_info{n_cueType};
+    ER.patch.FaceColor = color_info{n_cueType};
+    ER.edge(1).Color = color_info{n_cueType};
+    ER.edge(2).Color = color_info{n_cueType};
+      %  err_bar{n_cueType} = utile.shadedErrorBar(1:length(dataTmp),mean(dataTmp),yCI95(1,:),'lineprops','-b','transparent',true);
+
+    % Capture the plot handle for this data series
+    %plotHandles = [plotHandles, err_bar{n_cueType}.mainLine];
+
+   % hold on;
+    %plot(mean(dataTmp), 'LineWidth',2,)
+end
 
 
 for n_type = 1:numel(unTrialType) 
@@ -212,7 +212,7 @@ end
 figure(); 
 bar(tunedUnitsPerType'./sum(numUnitsPerSession));
 hold on;
-errorbar(mean(dataTmp),yCI95);
+errorbar(dataTmp,yCI95);
 title(['Tuned Units in ' unit_region]);
 xticklabels(phaseNames);
 ylabel('% of Tuned Units');

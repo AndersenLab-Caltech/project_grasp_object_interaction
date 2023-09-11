@@ -76,17 +76,26 @@ for n_brain = 1:3 %:length(brainAreas) 1:5 for AN, 1:3 for FG
             
             %chan_fr = cell2mat(cellfun(@(x) x(n_channel,:), fr_sep_cue_type_mean, 'UniformOutput',false));
             err_bar = {};
+            color_info = {[.8471 .1059 .3765],[.1176 .5333 .8980],[1 .7569 .0275]};
+
             for n_cueType = 1:numel(uniqueCueTypes)
                 dataTmp = fr_sep_cue_type_trial{n_cueType}';
-                N = size(dataTmp, 1);
-                sem = std(dataTmp) / sqrt(N);  % standard error of the mean
-                CI95 = tinv([0.025 0.975], N-1);  % Calculate 95% Probability Intervals Of t-Distribution
-                yCI95 = bsxfun(@times, sem, CI95(:)); % Calculate 95% Confidence Intervals Of All Experiments At Each Value Of ‘x’
-           
+
+                ci = bootci(1000, {@mean,dataTmp});
+                Mean_FR = squeeze(mean(dataTmp));
+    
+                %to correctly plot confidence interval on the figure substract mean
+                %FR
+                err_ci(1,:) = ci(2,:) - Mean_FR; 
+                err_ci(2,:) = Mean_FR - ci(1,:); 
+                
+                % N = size(dataTmp, 1);
+                % sem = std(dataTmp) / sqrt(N);  % standard error of the mean
+                % CI95 = tinv([0.025 0.975], N-1);  % Calculate 95% Probability Intervals Of t-Distribution
+                % yCI95 = bsxfun(@times, sem, CI95(:)); % Calculate 95% Confidence Intervals Of All Experiments At Each Value Of ‘x’
+                % 
                 data_std = std(dataTmp);
                 data_mean = mean(dataTmp);
-
-                %shadedErrorBar(mean(dataTmp),1:length(dataTmp),{@mean,@std});
 
                 %%figure(); 
                 %subplot(2,1,1)
@@ -100,32 +109,40 @@ for n_brain = 1:3 %:length(brainAreas) 1:5 for AN, 1:3 for FG
                 % err_bar{n_cueType} = plot(1:length(dataTmp), mean(dataTmp), 'LineWidth',2);
                 % figure();
                 %yCI95Shaded = mean(dataTmp) + yCI95;
-                err_bar = {};
-                if n_cueType == 1
-                    err_bar{n_cueType} = utile.shadedErrorBar(1:length(dataTmp),mean(dataTmp),yCI95(1,:),'lineprops','-c','transparent',true);
-                    hold on;
-                elseif n_cueType == 2
-                    err_bar{n_cueType} = utile.shadedErrorBar(1:length(dataTmp),mean(dataTmp),yCI95(1,:),'lineprops','-g','transparent',true);
-                    hold on;
-                elseif n_cueType == 3
-                    err_bar{n_cueType} = utile.shadedErrorBar(1:length(dataTmp),mean(dataTmp),yCI95(1,:),'lineprops','-m','transparent',true);
-                    hold on;
-                end
-                
-                hold on;
-                plot(mean(dataTmp), 'LineWidth',2)
+              
+  
+
+              %  ER = utile.shadedErrorBar(1:length(dataTmp),mean(dataTmp),err_ci,'lineprops',color_info{n_cueType},'transparent',true);
+                ER = utile.shadedErrorBar(1:length(dataTmp),mean(dataTmp),err_ci);
+
+                hold on
+                err_bar{n_cueType} = plot(1:length(dataTmp),mean(dataTmp),'Color', color_info{n_cueType},'LineWidth',2);
+
+                ER.mainLine.Color = color_info{n_cueType};
+                ER.patch.FaceColor = color_info{n_cueType};
+                ER.edge(1).Color = color_info{n_cueType};
+                ER.edge(2).Color = color_info{n_cueType};
+                  %  err_bar{n_cueType} = utile.shadedErrorBar(1:length(dataTmp),mean(dataTmp),yCI95(1,:),'lineprops','-b','transparent',true);
+
+                % Capture the plot handle for this data series
+                %plotHandles = [plotHandles, err_bar{n_cueType}.mainLine];
+
+               % hold on;
+                %plot(mean(dataTmp), 'LineWidth',2,)
             end 
             title([uniqueGraspTypes{n_grasp} ' Grasp']);
+            %legend(plotHandles, uniqueCueTypes);
+            legend([err_bar{:}], uniqueCueTypes','Interpreter', 'none');
+             set(gca, 'FontSize', 12)
+
             hold off;
         end
         xlabel('Time');
         ylabel('Average Firing Rate');
+        set(gca, 'FontSize', 12);
         
     end
 end
-
-err_bar = cell2mat(err_bar);
-legend([err_bar(:)],uniqueCueTypes, 'Location', 'Best', 'Interpreter', 'none');
 
 %% CI example
 
