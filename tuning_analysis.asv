@@ -1,15 +1,16 @@
 clc
 clear all
-%close all
+close all
 
 
 
 subject_id = 's3';
-unit_region = 'SMG';
+unit_region = '';
 
 spike_sorting_type = '_unsorted_aligned_thr_-4.5';
-taskName = 'GraspObject_4S_Action';
-flag_4S = true; % updated 4S action phase
+%taskName = 'GraspObject_4S_Action';
+taskName = 'GraspObject';
+flag_4S = false; % true = updated 4S action phase; false = original 2S action phase
 
 if ~flag_4S
     TaskCue = 'GraspObject';
@@ -19,7 +20,11 @@ else
     min_timebin_length = 174; 
 end 
 
-Data = load(['C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\' subject_id '\Data\Table_' subject_id '_GraspObject_4S_Action_unsorted_aligned_thr_-4.5']);
+% Data = load(['C:\Users\macthurston\OneDrive - Kaiser
+% Permanente\CaltechData\GraspObject_project\' subject_id '\Data\Table_'
+% subject_id '_GraspObject_4S_Action_unsorted_aligned_thr_-4.5']); % 4s
+% action
+Data = load(['C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\' subject_id '\Data\Table_' subject_id '_GraspObject_unsorted_aligned_thr_-4.5']);
 
 Go_data = Data.Go_data;
 
@@ -148,72 +153,67 @@ for n_session = 1:numSessions
        
 end 
 
-for n_cueType = 1:numel(taskCuesAll)
-    dataTmp = fr_sep_cue_type_trial{n_cueType}';
-    % N = size(dataTmp, 1);
-    % sem = std(dataTmp) / sqrt(N);  % standard error of the mean
-    % CI95 = tinv([0.025 0.975], N-1);  % Calculate 95% Probability Intervals Of t-Distribution
-    % yCI95 = bsxfun(@times, sem, CI95(:)); % Calculate 95% Confidence Intervals Of All Experiments At Each Value Of ‘x’
-    % 
-    data_std = std(dataTmp);
-    data_mean = mean(dataTmp);
+% for n_cueType = 1:numel(taskCuesAll)
+%     dataTmp = fr_sep_cue_type_trial{n_cueType}';
+%     % N = size(dataTmp, 1);
+%     % sem = std(dataTmp) / sqrt(N);  % standard error of the mean
+%     % CI95 = tinv([0.025 0.975], N-1);  % Calculate 95% Probability Intervals Of t-Distribution
+%     % yCI95 = bsxfun(@times, sem, CI95(:)); % Calculate 95% Confidence Intervals Of All Experiments At Each Value Of ‘x’
+%     % 
+%     data_std = std(dataTmp);
+%     data_mean = mean(dataTmp);
+% 
+%     %%figure(); 
+%     %subplot(2,1,1)
+%    % plot(1:length(dataTmp), mean(dataTmp), 'LineWidth', 2);
+%     %hold on 
+%    % plot(1:length(dataTmp), mean(dataTmp) +yCI95 , 'LineWidth', 2);
+%     %subplot(2,1,2)
+%     % figure();
+%     % errorbar(mean(dataTmp), yCI95);
+%     % hold on 
+%     % err_bar{n_cueType} = plot(1:length(dataTmp), mean(dataTmp), 'LineWidth',2);
+%     % figure();
+%     %yCI95Shaded = mean(dataTmp) + yCI95;
+% 
+%     hold on
+%     err_bar{n_cueType} = plot(1:length(dataTmp),mean(dataTmp),'Color', color_info{n_cueType},'LineWidth',2);
+% 
+%     ER.mainLine.Color = color_info{n_cueType};
+%     ER.patch.FaceColor = color_info{n_cueType};
+%     ER.edge(1).Color = color_info{n_cueType};
+%     ER.edge(2).Color = color_info{n_cueType};
+%       %  err_bar{n_cueType} = utile.shadedErrorBar(1:length(dataTmp),mean(dataTmp),yCI95(1,:),'lineprops','-b','transparent',true);
+% 
+%     % Capture the plot handle for this data series
+%     %plotHandles = [plotHandles, err_bar{n_cueType}.mainLine];
+% 
+%    % hold on;
+%     %plot(mean(dataTmp), 'LineWidth',2,)
+% end
 
-    %%figure(); 
-    %subplot(2,1,1)
-   % plot(1:length(dataTmp), mean(dataTmp), 'LineWidth', 2);
-    %hold on 
-   % plot(1:length(dataTmp), mean(dataTmp) +yCI95 , 'LineWidth', 2);
-    %subplot(2,1,2)
-    % figure();
-    % errorbar(mean(dataTmp), yCI95);
-    % hold on 
-    % err_bar{n_cueType} = plot(1:length(dataTmp), mean(dataTmp), 'LineWidth',2);
-    % figure();
-    %yCI95Shaded = mean(dataTmp) + yCI95;
-
-    hold on
-    err_bar{n_cueType} = plot(1:length(dataTmp),mean(dataTmp),'Color', color_info{n_cueType},'LineWidth',2);
-
-    ER.mainLine.Color = color_info{n_cueType};
-    ER.patch.FaceColor = color_info{n_cueType};
-    ER.edge(1).Color = color_info{n_cueType};
-    ER.edge(2).Color = color_info{n_cueType};
-      %  err_bar{n_cueType} = utile.shadedErrorBar(1:length(dataTmp),mean(dataTmp),yCI95(1,:),'lineprops','-b','transparent',true);
-
-    % Capture the plot handle for this data series
-    %plotHandles = [plotHandles, err_bar{n_cueType}.mainLine];
-
-   % hold on;
-    %plot(mean(dataTmp), 'LineWidth',2,)
-end
-
-
+% err_bar = [];
 for n_type = 1:numel(unTrialType) 
     if numSessions ~= 1
         tunedUnitsPerType(n_type,:) = sum(cell2mat(tuned_channels_per_phase(n_type,:)'));
-    
+
     else
         tunedUnitsPerType(n_type,:) = cell2mat(tuned_channels_per_phase(n_type,:)');
 
     end 
-    
-    dataTmp = tunedUnitsPerType(n_type,:);
-    N = size(dataTmp,2);
-    sem = std(dataTmp) / sqrt(N);  % standard error of the mean
-    CI95 = tinv([0.025 0.975], N-1);  % Calculate 95% Probability Intervals Of t-Distribution
-    yCI95 = bsxfun(@times, sem, CI95(:)); % Calculate 95% Confidence Intervals Of All Experiments At Each Value Of ‘x’
-    
-    data_std = std(dataTmp);
-    data_mean = mean(dataTmp);
-    
-end 
+end
 
+% N = size(tunedUnitsPerType, 2);
+% sem = std(tunedUnitsPerType(:,1)) / sqrt(N);  % standard error of the mean
+% CI95 = tinv([0.025 0.975], N-1);  % Calculate 95% Probability Intervals Of t-Distribution
+% yCI95 = bsxfun(@times, sem, CI95(:)); % Calculate 95% Confidence Intervals Of All Experiments At Each Value Of ‘x’
+% err_bar(n_type) = [mean(dataTmp)./sum(numUnitsPerSession) yCI95(2,:)./sum(numUnitsPerSession)];
 
 figure(); 
 bar(tunedUnitsPerType'./sum(numUnitsPerSession));
 hold on;
-errorbar(dataTmp,yCI95);
 title(['Tuned Units in ' unit_region]);
+xticks(1:numel(phaseNames));
 xticklabels(phaseNames);
 ylabel('% of Tuned Units');
 ylim([0 0.7]);
@@ -222,18 +222,22 @@ set(gca, 'FontSize', 12);
 hold off
 
 
+% err_bar = {};
 for n_type = 1:numel(unTrialType)
     tunedUnitsPerTypeBin(n_type,:)  = sum(cell2mat(sum_bin_all(n_type,:)),2);
-    dataTmp = tunedUnitsPerTypeBin(n_type,:);
-    N = size(dataTmp, 1);
-    sem = std(dataTmp) / sqrt(N);  % standard error of the mean
-    CI95 = tinv([0.025 0.975], N-1);  % Calculate 95% Probability Intervals Of t-Distribution
-    yCI95 = bsxfun(@times, sem, CI95(:)); % Calculate 95% Confidence Intervals Of All Experiments At Each Value Of ‘x’
-    
-    data_std = std(dataTmp);
-    data_mean = mean(dataTmp);
+    % dataTmp = tunedUnitsPerTypeBin(n_type,:)./sum(numUnitsPerSession);
+    % N = size(dataTmp, 2);
+    % sem = std(dataTmp) / sqrt(N);  % standard error of the mean
+    % CI95 = tinv([0.025 0.975], N-1);  % Calculate 95% Probability Intervals Of t-Distribution
+    % yCI95 = bsxfun(@times, sem, CI95(:)); % Calculate 95% Confidence Intervals Of All Experiments At Each Value Of ‘x’
 
-    err_bar{n_type} = utile.shadedErrorBar(1:length(dataTmp),mean(dataTmp),yCI95(1,:));
+    % ER = utile.shadedErrorBar(1:length(dataTmp),mean(dataTmp),yCI95(:,1));
+    % err_bar{n_type} = plot(1:length(dataTmp),mean(dataTmp),'Color', color_info{n_type},'LineWidth',2);
+    % 
+    % ER.mainLine.Color = color_info{n_type};
+    % ER.patch.FaceColor = color_info{n_type};
+    % ER.edge(1).Color = color_info{n_type};
+    % ER.edge(2).Color = color_info{n_type};
 end 
 
 figure(); 
@@ -242,7 +246,7 @@ hold on
 for n_phase = 1:numPhases
     xline(phase_changes(n_phase), 'k--', phaseNames{n_phase}, 'LineWidth', 1.5);
 end
-title(['Tuned Units Across Time in ' unit_region]);
+title(['Tuned Units Throughout Trial in ' unit_region]);
 xlabel('Time (ms)');
 xlim([0 (min_timebin_length + 5)])
 ylabel('% of Tuned Units');
