@@ -15,7 +15,7 @@ Data = load(['C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\Gras
 
 %%
 Go_data = Data.Go_data;
-unit_region = 'S1';
+unit_region = 'PM';
 brainAreas = Go_data.frPerChannel{6};
 phase_time_idx = Go_data.time_phase_labels{1,1};
 numPhases = numel(unique(phase_time_idx));

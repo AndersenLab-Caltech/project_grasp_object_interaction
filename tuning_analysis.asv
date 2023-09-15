@@ -4,8 +4,8 @@ close all
 
 
 
-subject_id = 's3';
-unit_region = '';
+subject_id = 's2';
+unit_region = 'SMG';
 
 spike_sorting_type = '_unsorted_aligned_thr_-4.5';
 %taskName = 'GraspObject_4S_Action';
@@ -19,11 +19,10 @@ else
     TaskCue = 'GraspObject_4S_Action';
     min_timebin_length = 174; 
 end 
+% 4S data
+%Data = load(['C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\' subject_id '\Data\Table_' subject_id '_GraspObject_4S_Action_unsorted_aligned_thr_-4.5']);
 
-% Data = load(['C:\Users\macthurston\OneDrive - Kaiser
-% Permanente\CaltechData\GraspObject_project\' subject_id '\Data\Table_'
-% subject_id '_GraspObject_4S_Action_unsorted_aligned_thr_-4.5']); % 4s
-% action
+% original 2S data
 Data = load(['C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\' subject_id '\Data\Table_' subject_id '_GraspObject_unsorted_aligned_thr_-4.5']);
 
 Go_data = Data.Go_data;
@@ -147,52 +146,54 @@ for n_session = 1:numSessions
             tuned_channels_per_phase{n_type,n_session} = sumPhase;
             tuned_channels_per_phase_vector{n_type,n_session} = tunedChannelsPhase;
          
-
          end
     end 
        
 end 
 
-% for n_cueType = 1:numel(taskCuesAll)
-%     dataTmp = fr_sep_cue_type_trial{n_cueType}';
-%     % N = size(dataTmp, 1);
-%     % sem = std(dataTmp) / sqrt(N);  % standard error of the mean
-%     % CI95 = tinv([0.025 0.975], N-1);  % Calculate 95% Probability Intervals Of t-Distribution
-%     % yCI95 = bsxfun(@times, sem, CI95(:)); % Calculate 95% Confidence Intervals Of All Experiments At Each Value Of ‘x’
-%     % 
-%     data_std = std(dataTmp);
-%     data_mean = mean(dataTmp);
-% 
-%     %%figure(); 
-%     %subplot(2,1,1)
-%    % plot(1:length(dataTmp), mean(dataTmp), 'LineWidth', 2);
-%     %hold on 
-%    % plot(1:length(dataTmp), mean(dataTmp) +yCI95 , 'LineWidth', 2);
-%     %subplot(2,1,2)
-%     % figure();
-%     % errorbar(mean(dataTmp), yCI95);
-%     % hold on 
-%     % err_bar{n_cueType} = plot(1:length(dataTmp), mean(dataTmp), 'LineWidth',2);
-%     % figure();
-%     %yCI95Shaded = mean(dataTmp) + yCI95;
-% 
-%     hold on
-%     err_bar{n_cueType} = plot(1:length(dataTmp),mean(dataTmp),'Color', color_info{n_cueType},'LineWidth',2);
-% 
-%     ER.mainLine.Color = color_info{n_cueType};
-%     ER.patch.FaceColor = color_info{n_cueType};
-%     ER.edge(1).Color = color_info{n_cueType};
-%     ER.edge(2).Color = color_info{n_cueType};
-%       %  err_bar{n_cueType} = utile.shadedErrorBar(1:length(dataTmp),mean(dataTmp),yCI95(1,:),'lineprops','-b','transparent',true);
-% 
-%     % Capture the plot handle for this data series
-%     %plotHandles = [plotHandles, err_bar{n_cueType}.mainLine];
-% 
-%    % hold on;
-%     %plot(mean(dataTmp), 'LineWidth',2,)
-% end
 
-% err_bar = [];
+phase_yCI95 = [];
+phase_tuned_mean = [];
+%sessionToInclude = setdiff(1:numSessions,1);
+
+% code for empty/missing session data
+rowsToKeep = numUnitsPerSession ~= 0;
+numUnitsPerSession = numUnitsPerSession(rowsToKeep);
+sessionToInclude = 1:numel(numUnitsPerSession);
+colsToKeep = true(1,numSessions);
+for n_session = 1:numSessions
+    if all(cellfun('isempty',tuned_channels_per_phase(:,n_session)))
+        colsToKeep(n_session) = false;
+    end
+end
+tuned_channels_per_phase = tuned_channels_per_phase(:,colsToKeep);
+
+
+for n_type = 1:numel(taskCuesAll)
+    dataTmp = cell2mat(tuned_channels_per_phase(n_type,sessionToInclude)');
+    percentage_tuned = dataTmp./numUnitsPerSession(sessionToInclude);
+    yCI95tmp = utile.calculate_CI(percentage_tuned);
+    phase_yCI95(n_type,:) = yCI95tmp(2,:);
+    phase_tuned_mean(n_type,:) = mean(percentage_tuned,1);
+    % figure()
+    subplot(1,numel(taskCuesAll),n_type)
+    hold on
+    bar(phase_tuned_mean(n_type,:),'b');
+    hold on
+    errorbar(phase_tuned_mean(n_type,:),phase_yCI95(n_type,:),'r');
+    title(taskCuesAll(n_type));
+    xticks(1:numel(phaseNames));
+    xticklabels(phaseNames);
+    xtickangle(45);
+    ylabel('% of Tuned Units');
+    ylim([0 0.7]);
+    sgtitle(['Tuned Units in ' unit_region])
+    set(gca, 'FontSize', 11);
+end
+
+
+%% try to add error bars with all 3 on one plot and fix the colors of each
+
 for n_type = 1:numel(unTrialType) 
     if numSessions ~= 1
         tunedUnitsPerType(n_type,:) = sum(cell2mat(tuned_channels_per_phase(n_type,:)'));
@@ -221,23 +222,11 @@ legend(taskCuesAll, 'Location', 'Best', 'Interpreter', 'none');
 set(gca, 'FontSize', 12);
 hold off
 
-
+%%
 % err_bar = {};
 for n_type = 1:numel(unTrialType)
     tunedUnitsPerTypeBin(n_type,:)  = sum(cell2mat(sum_bin_all(n_type,:)),2);
-    % dataTmp = tunedUnitsPerTypeBin(n_type,:)./sum(numUnitsPerSession);
-    % N = size(dataTmp, 2);
-    % sem = std(dataTmp) / sqrt(N);  % standard error of the mean
-    % CI95 = tinv([0.025 0.975], N-1);  % Calculate 95% Probability Intervals Of t-Distribution
-    % yCI95 = bsxfun(@times, sem, CI95(:)); % Calculate 95% Confidence Intervals Of All Experiments At Each Value Of ‘x’
-
-    % ER = utile.shadedErrorBar(1:length(dataTmp),mean(dataTmp),yCI95(:,1));
-    % err_bar{n_type} = plot(1:length(dataTmp),mean(dataTmp),'Color', color_info{n_type},'LineWidth',2);
-    % 
-    % ER.mainLine.Color = color_info{n_type};
-    % ER.patch.FaceColor = color_info{n_type};
-    % ER.edge(1).Color = color_info{n_type};
-    % ER.edge(2).Color = color_info{n_type};
+    
 end 
 
 figure(); 
@@ -254,3 +243,51 @@ ylim([0 0.7]);
 legend(taskCuesAll, 'Location', 'Best');
 set(gca, 'FontSize', 12);
 hold off
+
+%% for line plot
+per_bin_yCI95 = [];
+per_bin_tuned_mean = [];
+%sessionToInclude = setdiff(1:numSessions,1);
+
+% code for empty/missing session data
+rowsToKeep = numUnitsPerSession ~= 0;
+numUnitsPerSession = numUnitsPerSession(rowsToKeep);
+sessionToInclude = 1:numel(numUnitsPerSession);
+colsToKeep = true(1,numSessions);
+for n_session = 1:numSessions
+    if all(cellfun('isempty',sum_bin_all(:,n_session)))
+        colsToKeep(n_session) = false;
+    end
+end
+sum_bin_all = sum_bin_all(:,colsToKeep);
+
+
+for n_type = 1:numel(taskCuesAll)
+    dataTmp = cell2mat(sum_bin_all(n_type,sessionToInclude));
+    percentage_tuned = dataTmp./(numUnitsPerSession(sessionToInclude)');
+    yCI95tmp = utile.calculate_CI(percentage_tuned);
+    per_bin_yCI95(n_type,:) = yCI95tmp(2,:);
+    per_bin_tuned_mean(n_type,:) = mean(percentage_tuned,2);
+    figure(); 
+    plot(tunedUnitsPerTypeBin'./sum(numUnitsPerSession));
+    hold on
+    errorbar(per_bin_tuned_mean(n_type,:),per_bin_yCI95(n_type,:));
+    % ER = utile.shadedErrorBar(1:length(dataTmp),mean(dataTmp),yCI95(:,1));
+    % err_bar{n_type} = plot(1:length(dataTmp),mean(dataTmp),'Color', color_info{n_type},'LineWidth',2);
+    % 
+    % ER.mainLine.Color = color_info{n_type};
+    % ER.patch.FaceColor = color_info{n_type};
+    % ER.edge(1).Color = color_info{n_type};
+    % ER.edge(2).Color = color_info{n_type};
+    for n_phase = 1:numPhases
+        xline(phase_changes(n_phase), 'k--', phaseNames{n_phase}, 'LineWidth', 1.5);
+    end
+    title(['Tuned Units Throughout Trial in ' unit_region]);
+    xlabel('Time (ms)');
+    xlim([0 (min_timebin_length + 5)])
+    ylabel('% of Tuned Units');
+    ylim([0 0.7]);
+    legend(taskCuesAll, 'Location', 'Best');
+    set(gca, 'FontSize', 12);
+    hold off
+end

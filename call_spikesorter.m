@@ -59,9 +59,10 @@ good_blocks
 taskfiles(good_blocks)
 %%
  keyboard
+ 
 h = SpikeSorter.GUI(fileparts(taskfiles{1}))
 
-task = hst.Task(taskfiles{1});
+task = hst.Task(tas kfiles{1});
 
 
 
