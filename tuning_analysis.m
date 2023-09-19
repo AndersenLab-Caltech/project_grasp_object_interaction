@@ -4,8 +4,8 @@ close all
 
 
 
-subject_id = 's2';
-unit_region = 'SMG';
+subject_id = 's3';
+unit_region = 'S1';
 
 spike_sorting_type = '_unsorted_aligned_thr_-4.5';
 %taskName = 'GraspObject_4S_Action';
@@ -29,7 +29,7 @@ Go_data = Data.Go_data;
 
 flagGoTrials = true;
 
-flagRegressionTuning = false;
+flagRegressionTuning = true;
 
 flagBinPerBin = true;
 multipleComparePhase = true;
@@ -46,7 +46,7 @@ phase_changes_idx = diff(phase_time_idx);
 phase_changes(1) = 1;
 phase_changes(2:numPhases) = find(phase_changes_idx) + 1;
 phaseNames = {'ITI', 'Cue', 'Delay', 'Action'};
-color_info = {[.8471 .1059 .3765],[.1176 .5333 .8980],[1 .7569 .0275]};
+color_info = {[.1176 .5333 .8980],[.8471 .1059 .3765],[1 .7569 .0275]};
 
 numUnitsPerSession = zeros(numSessions,1);
 for n_session = 1:numSessions
@@ -117,7 +117,7 @@ for n_session = 1:numSessions
             
                 [tunedCombinedChannels, tunedChannelsPhase, tunedChannelsBin, sumPhase, sumBin,numTunedChannelsPerCategory,~,~,p_per_phase] ...
                      = classification.getRegressionTunedChannels_paper(SessionData(trialTypeIdx),sessionLabels(trialTypeIdx), ...
-                 timePhaseLabels, 'multcompare', multipleComparePhase, 'BinperBinTuning', flagBinPerBin);
+                 timePhaseLabels(trialTypeIdx), 'multcompare', multipleComparePhase, 'BinperBinTuning', flagBinPerBin);
 
                 condToTest = arrayfun(@(x) preproc.image2class_simple(x),  unique(sessionLabels), 'UniformOutput', false);
 
@@ -151,7 +151,7 @@ for n_session = 1:numSessions
        
 end 
 
-
+%% bar plot of tuned units w/ 95% CIs (work on getting them all on same plot)
 phase_yCI95 = [];
 phase_tuned_mean = [];
 %sessionToInclude = setdiff(1:numSessions,1);
@@ -168,7 +168,7 @@ for n_session = 1:numSessions
 end
 tuned_channels_per_phase = tuned_channels_per_phase(:,colsToKeep);
 
-
+figure();
 for n_type = 1:numel(taskCuesAll)
     dataTmp = cell2mat(tuned_channels_per_phase(n_type,sessionToInclude)');
     percentage_tuned = dataTmp./numUnitsPerSession(sessionToInclude);
@@ -177,10 +177,13 @@ for n_type = 1:numel(taskCuesAll)
     phase_tuned_mean(n_type,:) = mean(percentage_tuned,1);
     % figure()
     subplot(1,numel(taskCuesAll),n_type)
+
     hold on
-    bar(phase_tuned_mean(n_type,:),'b');
+    bar(phase_tuned_mean(n_type,:),'FaceColor',color_info{n_type});
+
     hold on
-    errorbar(phase_tuned_mean(n_type,:),phase_yCI95(n_type,:),'r');
+    errorbar(phase_tuned_mean(n_type,:),phase_yCI95(n_type,:),'Color',color_info{n_type});
+
     title(taskCuesAll(n_type));
     xticks(1:numel(phaseNames));
     xticklabels(phaseNames);
@@ -188,11 +191,13 @@ for n_type = 1:numel(taskCuesAll)
     ylabel('% of Tuned Units');
     ylim([0 0.7]);
     sgtitle(['Tuned Units in ' unit_region])
-    set(gca, 'FontSize', 11);
+    set(gca, 'FontSize', 12);
 end
 
 
-%% try to add error bars with all 3 on one plot and fix the colors of each
+
+
+%% bar plot w/o CIs
 
 for n_type = 1:numel(unTrialType) 
     if numSessions ~= 1
@@ -203,12 +208,6 @@ for n_type = 1:numel(unTrialType)
 
     end 
 end
-
-% N = size(tunedUnitsPerType, 2);
-% sem = std(tunedUnitsPerType(:,1)) / sqrt(N);  % standard error of the mean
-% CI95 = tinv([0.025 0.975], N-1);  % Calculate 95% Probability Intervals Of t-Distribution
-% yCI95 = bsxfun(@times, sem, CI95(:)); % Calculate 95% Confidence Intervals Of All Experiments At Each Value Of ‘x’
-% err_bar(n_type) = [mean(dataTmp)./sum(numUnitsPerSession) yCI95(2,:)./sum(numUnitsPerSession)];
 
 figure(); 
 bar(tunedUnitsPerType'./sum(numUnitsPerSession));
@@ -222,8 +221,8 @@ legend(taskCuesAll, 'Location', 'Best', 'Interpreter', 'none');
 set(gca, 'FontSize', 12);
 hold off
 
-%%
-% err_bar = {};
+%% line plot w/o CIs
+
 for n_type = 1:numel(unTrialType)
     tunedUnitsPerTypeBin(n_type,:)  = sum(cell2mat(sum_bin_all(n_type,:)),2);
     
@@ -244,7 +243,7 @@ legend(taskCuesAll, 'Location', 'Best');
 set(gca, 'FontSize', 12);
 hold off
 
-%% for line plot
+%% for line plot w/ 95% CI
 per_bin_yCI95 = [];
 per_bin_tuned_mean = [];
 %sessionToInclude = setdiff(1:numSessions,1);
@@ -261,34 +260,37 @@ for n_session = 1:numSessions
 end
 sum_bin_all = sum_bin_all(:,colsToKeep);
 
-% this section needs more work for errorbar to work, sizes are not
-% currently compatable 
+figure();
+err_bar = {};
 for n_type = 1:numel(taskCuesAll)
     dataTmp = cell2mat(sum_bin_all(n_type,sessionToInclude));
     percentage_tuned = dataTmp./(numUnitsPerSession(sessionToInclude)');
-    yCI95tmp = utile.calculate_CI(percentage_tuned);
+    yCI95tmp = utile.calculate_CI(percentage_tuned');
     per_bin_yCI95(n_type,:) = yCI95tmp(2,:);
     per_bin_tuned_mean(n_type,:) = mean(percentage_tuned,2);
-    figure(); 
-    plot(tunedUnitsPerTypeBin'./sum(numUnitsPerSession));
+    
     hold on
-    errorbar(per_bin_tuned_mean(n_type,:),per_bin_yCI95(n_type,:));
-    % ER = utile.shadedErrorBar(1:length(dataTmp),mean(dataTmp),yCI95(:,1));
-    % err_bar{n_type} = plot(1:length(dataTmp),mean(dataTmp),'Color', color_info{n_type},'LineWidth',2);
-    % 
-    % ER.mainLine.Color = color_info{n_type};
-    % ER.patch.FaceColor = color_info{n_type};
-    % ER.edge(1).Color = color_info{n_type};
-    % ER.edge(2).Color = color_info{n_type};
-    for n_phase = 1:numPhases
-        xline(phase_changes(n_phase), 'k--', phaseNames{n_phase}, 'LineWidth', 1.5);
-    end
-    title(['Tuned Units Throughout Trial in ' unit_region]);
-    xlabel('Time (ms)');
-    xlim([0 (min_timebin_length + 5)])
-    ylabel('% of Tuned Units');
-    ylim([0 0.7]);
-    legend(taskCuesAll, 'Location', 'Best');
-    set(gca, 'FontSize', 12);
-    hold off
+    err_bar{n_type} = plot(1:length(dataTmp),per_bin_tuned_mean(n_type,:),'Color', color_info{n_type},'LineWidth',2);
+    
+    ER = utile.shadedErrorBar(1:length(dataTmp),per_bin_tuned_mean(n_type,:),per_bin_yCI95(n_type,:));
+    ER.mainLine.Color = color_info{n_type};
+    ER.patch.FaceColor = color_info{n_type};
+    ER.edge(1).Color = color_info{n_type};
+    ER.edge(2).Color = color_info{n_type};
 end
+
+for n_phase = 1:numPhases
+    xline(phase_changes(n_phase), 'k--', phaseNames{n_phase}, 'LineWidth', 1.5);
+end
+
+title(['Tuned Units Throughout Trial in ' unit_region]);
+xlabel('Time (ms)');
+xlim([0 (min_timebin_length + 5)]) % 5 chosen as a buffer
+ylabel('% of Tuned Units');
+ylim([0 0.7]);
+legend([err_bar{:}], taskCuesAll,'Location', 'Best','Interpreter', 'none');
+set(gca, 'FontSize', 12);
+%%
+blub = percentage_tuned.*numUnitsPerSession';
+blub2= mean(blub');
+figure(); plot(zscore(blub2)); hold on; plot(zscore(per_bin_tuned_mean(n_type,:)))

@@ -4,15 +4,16 @@ clc
 clear all
 close all
 
-%subject_id = 's2';  % s2 or p3 or n1
-subject_id = 's3';  % s2 or p3 or n1
+subject_id = 's2';  % s2 or p3 or n1
+%subject_id = 's3';  % s2 or p3 or n1
 
 subject = hst.Subject(subject_id);
 flag_dPCA = false; 
-flag_4S = true; 
+flag_4S = false; 
 
 if strcmp(subject_id, 's2')
-    session_dates = {'20230831','20230907'};
+    %session_dates = {'20230831','20230907'};
+    session_dates = {'20230810'};
 elseif strcmp(subject_id, 's3')
     session_dates = {'20230830'};
 else 
@@ -393,10 +394,10 @@ keyboard
  
 
 % Combine datasets into one
-subject_id = 's3';  % s2 or p3 or n1
-spike_sorting_type = 'unsorted_aligned_thr_-4.5';
+%subject_id = 's3';  % s2 or p3 or n1
+%spike_sorting_type = 'unsorted_aligned_thr_-4.5';
 %spike_sorting_type = 'unsorted_aligned_noratefilt_4.5';
-TaskCue = 'GraspObject_4S_Action';
+%TaskCue = 'GraspObject_4S_Action';
 %spike_sorting_type = 'sorting_aligned_thr_-4.5';
 %spike_sorting_type = 'sorting_aligned_noratefilt_4.5';
 
