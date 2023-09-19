@@ -4,13 +4,13 @@ close all
 
 
 
-subject_id = 's3';
+subject_id = 's2';
 unit_region = 'S1';
 
 spike_sorting_type = '_unsorted_aligned_thr_-4.5';
-%taskName = 'GraspObject_4S_Action';
-taskName = 'GraspObject';
-flag_4S = false; % true = updated 4S action phase; false = original 2S action phase
+taskName = 'GraspObject_4S_Action';
+%taskName = 'GraspObject';
+flag_4S = true; % true = updated 4S action phase; false = original 2S action phase
 
 if ~flag_4S
     TaskCue = 'GraspObject';
@@ -20,10 +20,10 @@ else
     min_timebin_length = 174; 
 end 
 % 4S data
-%Data = load(['C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\' subject_id '\Data\Table_' subject_id '_GraspObject_4S_Action_unsorted_aligned_thr_-4.5']);
+Data = load(['C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\' subject_id '\Data\Table_' subject_id '_GraspObject_4S_Action_unsorted_aligned_thr_-4.5']);
 
 % original 2S data
-Data = load(['C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\' subject_id '\Data\Table_' subject_id '_GraspObject_unsorted_aligned_thr_-4.5']);
+%Data = load(['C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\' subject_id '\Data\Table_' subject_id '_GraspObject_unsorted_aligned_thr_-4.5']);
 
 Go_data = Data.Go_data;
 

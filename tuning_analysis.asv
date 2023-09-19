@@ -1,11 +1,11 @@
 clc
 clear all
-%close all
+close all
 
 
 
-subject_id = 's2';
-unit_region = 'SMG';
+subject_id = 's3';
+unit_region = 'PMV';
 
 spike_sorting_type = '_unsorted_aligned_thr_-4.5';
 %taskName = 'GraspObject_4S_Action';
@@ -29,7 +29,7 @@ Go_data = Data.Go_data;
 
 flagGoTrials = true;
 
-flagRegressionTuning = false;
+flagRegressionTuning = true;
 
 flagBinPerBin = true;
 multipleComparePhase = true;
@@ -117,7 +117,7 @@ for n_session = 1:numSessions
             
                 [tunedCombinedChannels, tunedChannelsPhase, tunedChannelsBin, sumPhase, sumBin,numTunedChannelsPerCategory,~,~,p_per_phase] ...
                      = classification.getRegressionTunedChannels_paper(SessionData(trialTypeIdx),sessionLabels(trialTypeIdx), ...
-                 timePhaseLabels, 'multcompare', multipleComparePhase, 'BinperBinTuning', flagBinPerBin);
+                 timePhaseLabels(trialTypeIdx), 'multcompare', multipleComparePhase, 'BinperBinTuning', flagBinPerBin);
 
                 condToTest = arrayfun(@(x) preproc.image2class_simple(x),  unique(sessionLabels), 'UniformOutput', false);
 
@@ -151,7 +151,7 @@ for n_session = 1:numSessions
        
 end 
 
-%% bar plot of tuned units w/ 95% CIs (work on getting them all on same plot and fixing colors)
+%% bar plot of tuned units w/ 95% CIs (work on getting them all on same plot)
 phase_yCI95 = [];
 phase_tuned_mean = [];
 %sessionToInclude = setdiff(1:numSessions,1);
@@ -176,23 +176,24 @@ for n_type = 1:numel(taskCuesAll)
     phase_yCI95(n_type,:) = yCI95tmp(2,:);
     phase_tuned_mean(n_type,:) = mean(percentage_tuned,1);
     % figure()
-    %subplot(1,numel(taskCuesAll),n_type)
+    subplot(1,numel(taskCuesAll),n_type)
 
     hold on
     bar(phase_tuned_mean(n_type,:),'FaceColor',color_info{n_type});
 
     hold on
     errorbar(phase_tuned_mean(n_type,:),phase_yCI95(n_type,:),'Color',color_info{n_type});
+
+    title(taskCuesAll(n_type));
+    xticks(1:numel(phaseNames));
+    xticklabels(phaseNames);
+    xtickangle(45);
+    ylabel('% of Tuned Units');
+    ylim([0 0.7]);
+    sgtitle(['Tuned Units in ' unit_region])
+    set(gca, 'FontSize', 12);
 end
 
-title(taskCuesAll(n_type));
-xticks(1:numel(phaseNames));
-xticklabels(phaseNames);
-xtickangle(45);
-ylabel('% of Tuned Units');
-ylim([0 0.7]);
-title(['Tuned Units in ' unit_region])
-set(gca, 'FontSize', 12);
 
 
 
