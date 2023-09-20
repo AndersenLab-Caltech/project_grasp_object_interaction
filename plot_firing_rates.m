@@ -9,7 +9,7 @@ spike_sorting_type = 'unsorted_aligned_thr_-4.5';
 %taskName = 'GraspObject';
 taskName = 'GraspObject_4S_Action';
 subject_id = 's2';
-session_dates = {'20230907'}; 
+session_dates = {'20230831'}; 
 % 
 % DataName = ['Table_' subject_id '_' taskName spike_sorting_type '.mat'];
 % Data = load(fullfile(saveFolder,DataName));
@@ -27,10 +27,10 @@ session_dates = {'20230907'};
 %Data = load('C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\s3\Data\IndividualFiles\GraspObject\unsorted_aligned_thr_-4.5\s2_20230720_unsorted_aligned_thr_-4.5_GraspObject');
 %Data = load('C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\s3\Data\IndividualFiles\GraspObject\unsorted_aligned_thr_-4.5\s2_20230725_unsorted_aligned_thr_-4.5_GraspObject');
 % Data = load('C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\s3\Data\IndividualFiles\GraspObject\unsorted_aligned_thr_-4.5\s2_20230803_unsorted_aligned_thr_-4.5_GraspObject');
-%Data = load('C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\s2\Data\IndividualFiles\GraspObject\unsorted_aligned_thr_-4.5\s2_20230831_unsorted_aligned_thr_-4.5_GraspObject');
+%Data = load('C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\s2\Data\IndividualFiles\GraspObject\unsorted_aligned_thr_-4.5\s2_20230824_unsorted_aligned_thr_-4.5_GraspObject');
 
 % 4S_Action Data
-Data = load('C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\s2\Data\IndividualFiles\GraspObject_4S_Action\unsorted_aligned_thr_-4.5\s2_20230907_unsorted_aligned_thr_-4.5_GraspObject_4S_Action');
+Data = load('C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\s2\Data\IndividualFiles\GraspObject_4S_Action\unsorted_aligned_thr_-4.5\s2_20230831_unsorted_aligned_thr_-4.5_GraspObject_4S_Action');
 Data = Data.Go_data;
 
 brainAreas = Data.frPerChannel{6};
@@ -44,7 +44,7 @@ phaseNames = {'ITI', 'Cue', 'Delay', 'Action'};
 uniqueGraspTypes = unique(Data.GraspType);
 uniqueCueTypes = unique(Data.TrialType);
 
-for n_brain = 1:3 %:length(brainAreas) 1:5 for AN, 1:3 for FG
+for n_brain = 1:length(brainAreas) % 1:5 for AN, 1:3 for FG
     
     frData = Data.frPerChannel{n_brain};
     numChannels = size(frData, 1);

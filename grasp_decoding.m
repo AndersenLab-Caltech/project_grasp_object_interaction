@@ -3,8 +3,8 @@ clear all
 close all % closes all the figures
 
 spike_sorting_type = '_unsorted_aligned_thr_-4.5';
-%taskName = 'GraspObject';
-taskName = 'GraspObject_4S_Action';
+taskName = 'GraspObject';
+%taskName = 'GraspObject_4S_Action';
 subject_id = 's2';
 
 % Data = load('C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\s3\Data\IndividualFiles\GraspObject\unsorted_aligned_thr_-4.5\s3_20230803_unsorted_aligned_thr_-4.5_GraspObject');
