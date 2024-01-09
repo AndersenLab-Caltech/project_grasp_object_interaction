@@ -3,9 +3,9 @@ clear all
 close all % closes all the figures
 
 spike_sorting_type = '_unsorted_aligned_thr_-4.5';
-taskName = 'GraspObject';
 %taskName = 'GraspObject_4S_Action';
-subject_id = 's2';
+taskName = 'GraspObject_Shuffled'; % shuffled images
+subject_id = 's3';
 
 % Data = load('C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\s3\Data\IndividualFiles\GraspObject\unsorted_aligned_thr_-4.5\s3_20230803_unsorted_aligned_thr_-4.5_GraspObject');
 %Data = load('C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\s3\Data\IndividualFiles\GraspObject\unsorted_aligned_thr_-4.5\s3_20230724_unsorted_aligned_thr_-4.5_GraspObject');
@@ -15,7 +15,21 @@ Data = load(['C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\Gras
 
 %%
 Go_data = Data.Go_data;
-unit_region = 'S1';
+
+% remove faulty sessions, if any
+error_session = {};
+if strcmp(subject_id, 's2')
+    error_session = {'20231016'};
+elseif strcmp(subject_id, 's3')
+    error_session = {};
+end 
+
+if ~isempty(error_session)
+    condition = cellfun(@(x) strcmp(x, error_session), Go_data.session_date);
+    Go_data = Go_data(~condition,:);
+end
+
+unit_region = 'SMG';
 brainAreas = Go_data.frPerChannel{6};
 phase_time_idx = Go_data.time_phase_labels{1,1};
 numPhases = numel(unique(phase_time_idx));
@@ -114,6 +128,7 @@ for n_session = 1:numSessions
             errTest(n_phase,n_type) =  (1-mean(errTestTmp))*100;
            
             data_per_phase_per_all = cell2mat(arrayfun(@(x,y) mean(x{1,1}(y{:}== n_phase,:),1),SessionData,time_phase_labels, 'UniformOutput', false));
+            % % confusion matrices
             % if n_phase ~= 1
             %     [errTrain, errTestTmp] = classification.LDA_classification_rep(data_per_phase_per_all,sessionLabels, 'flagErrorMatrix', true, 'PCA_variance', 95, 'flagLeaveOneOut', true);
             % 
@@ -124,7 +139,7 @@ for n_session = 1:numSessions
 
     end 
 
-    subplot(3,2,n_session) % code using var names instead of hard 
+    subplot(4,2,n_session) % code using var names instead of hard 
 
   %  figure();
     bar(errTest)

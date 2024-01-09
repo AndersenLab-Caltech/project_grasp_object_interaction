@@ -29,11 +29,11 @@ session_dates = {'20231212'};
 % Data = load('C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\s3\Data\IndividualFiles\GraspObject\unsorted_aligned_thr_-4.5\s2_20230803_unsorted_aligned_thr_-4.5_GraspObject');
 %Data = load('C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\s2\Data\IndividualFiles\GraspObject\unsorted_aligned_thr_-4.5\s2_20230824_unsorted_aligned_thr_-4.5_GraspObject');
 
-% 4S_Action Data (indiv session)
+% 4S_Action Data
 %Data = load('C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\s2\Data\IndividualFiles\GraspObject_4S_Action\unsorted_aligned_thr_-4.5\s2_20230831_unsorted_aligned_thr_-4.5_GraspObject_4S_Action');
 
 % Shuffled images data
-Data = load('C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\s3\Data\Table_s3_GraspObject_Shuffled_unsorted_aligned_thr_-4.5');
+Data = load('C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\s2\Data\IndividualFiles\GraspObject_4S_Action\unsorted_aligned_thr_-4.5\s2_20230831_unsorted_aligned_thr_-4.5_GraspObject_4S_Action');
 Data = Data.Go_data;
 
 % remove faulty data

@@ -4,18 +4,19 @@ clc
 clear all
 close all
 
-subject_id = 's2';  % s2 or p3 or n1
-%subject_id = 's3';  % s2 or p3 or n1
+%subject_id = 's2';  % s2 or p3 or n1
+subject_id = 's3';  % s2 or p3 or n1
 
 subject = hst.Subject(subject_id);
 flag_dPCA = false; 
-flag_4S = false; 
+flag_4S = true; 
+flag_shuffled = true; % true for shuffled images
 
 if strcmp(subject_id, 's2')
     %session_dates = {'20230831','20230907'};
-    session_dates = {'20230810'};
+    session_dates = {'20231201'};
 elseif strcmp(subject_id, 's3')
-    session_dates = {'20230830'};
+    session_dates = {'20231207'};
 else 
     error('unknown subject')
 end 
@@ -32,8 +33,11 @@ spike_sorting_type = 'unsorted_aligned_thr_-4.5';
 if ~flag_4S
     TaskCue = 'GraspObject';
     min_timebin_length = 134; % NOT VALID FOR 20230831    
-else
+elseif ~flag_shuffled
     TaskCue = 'GraspObject_4S_Action';
+    min_timebin_length = 174;
+else
+    TaskCue = 'GraspObject_Shuffled';
     min_timebin_length = 174; 
 end 
 
@@ -65,6 +69,7 @@ for n_session = session_date_idx
 
     session = hst.Session(session_dates{n_session}, subject);
     taskfiles = session.getTaskFiles('GraspObject');
+    %pwd = 'C:\Users\macthurston\Documents\GitHub\project_grasp_object_interaction'; % location on this computer
 
     %Extract correct datasets from excel files 
     filename = [subject_id '_good_trials_' TaskCue '.xlsx'];

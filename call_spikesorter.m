@@ -4,8 +4,8 @@ clc
 clear all
 close all
 
-%subject_id = 's3';  %AN
-subject_id = 's2'; %FG
+subject_id = 's3';  %AN
+%subject_id = 's2'; %FG
 
 subject = hst.Subject(subject_id);
 
@@ -15,7 +15,7 @@ subject = hst.Subject(subject_id);
 % Blackrock.thresholdSession('20230803', 's3', 'THRESHOLD', -4.5, 'noise_model', 'Blackrock')
 % Blackrock.thresholdSession('20230724', 's3', 'THRESHOLD', -4.5, 'noise_model', 'Blackrock')
 
-Blackrock.thresholdSession('20230907', 's2', 'THRESHOLD', -4.5, 'noise_model', 'Blackrock')
+Blackrock.thresholdSession('20231212', subject_id, 'THRESHOLD', -4.5, 'noise_model', 'Blackrock')
 
 % Blackrock.thresholdSession('20230725', 's2', 'THRESHOLD', -4.5, 'noise_model', 'Blackrock')
 % Blackrock.thresholdSession('20230803', 's2', 'THRESHOLD', -4.5, 'noise_model', 'Blackrock')
@@ -25,7 +25,7 @@ Blackrock.thresholdSession('20230907', 's2', 'THRESHOLD', -4.5, 'noise_model', '
 
 tasktype = {};
 end_comment = {};
-session_dates = {'20230907'};
+session_dates = {'20231212'};
 taskfileTest = 2;
 
 idxToRemove = [];
@@ -43,13 +43,13 @@ for n_session_dates= 1:length(session_dates)
             end_comment{n_session_dates,i} = task.parameterName;
             
             if size(task.trialparams,2) ~= task.numTrials
-                disp('probably aborded trial')
+                disp('probably aborted trial')
                 idxToRemove = [idxToRemove, i];
             end 
         catch
             disp('???')
             idxToRemove = [idxToRemove, i];
-                end 
+        end 
     end
     end_comment;
 end  
@@ -62,7 +62,7 @@ taskfiles(good_blocks)
  
 h = SpikeSorter.GUI(fileparts(taskfiles{1}))
 
-task = hst.Task(tas kfiles{1});
+task = hst.Task(taskfiles{1});
 
 
 
