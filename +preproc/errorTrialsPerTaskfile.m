@@ -167,6 +167,21 @@ if strcmp(subject, 's2')
         wrongTrials = [7,13];
     elseif strcmp(taskfile, '20231201-150129-150147-GraspObject')
         wrongTrials = [2,4,5,8,9,10,15,16];
+
+    % SHUFFLED IMAGES SESSIONS
+    elseif strcmp(taskfile, '20240130-160210-160331-GraspObject')
+        wrongTrials = [];
+    elseif strcmp(taskfile, '20240130-160826-160903-GraspObject')
+        wrongTrials = [18];
+    elseif strcmp(taskfile, '20240130-161349-161358-GraspObject')
+        wrongTrials = [7,8,14,18,19,20,23];
+    elseif strcmp(taskfile, '20240130-161846-161902-GraspObject')
+        wrongTrials = [15,23];
+    elseif strcmp(taskfile, '20240130-162325-162349-GraspObject')
+        wrongTrials = [12,18,19,22,24];
+    elseif strcmp(taskfile, '20240130-162816-162829-GraspObject')
+        wrongTrials = [20];
+
  %  elseif strcmp(taskfile, '')
  %       wrongTrials = [];
 

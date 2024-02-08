@@ -4,8 +4,8 @@ clc
 clear all
 close all
 
-%subject_id = 's2';  % s2 or p3 or n1
-subject_id = 's3';  % s2 or p3 or n1
+subject_id = 's2';  % s2 or p3 or n1
+%subject_id = 's3';  % s2 or p3 or n1
 
 subject = hst.Subject(subject_id);
 flag_dPCA = false; 
@@ -14,7 +14,7 @@ flag_shuffled = true; % true for shuffled images
 
 if strcmp(subject_id, 's2')
     %session_dates = {'20230831','20230907'};
-    session_dates = {'20231201'};
+    session_dates = {'20240130'};
 elseif strcmp(subject_id, 's3')
     session_dates = {'20240119'};
 else 
