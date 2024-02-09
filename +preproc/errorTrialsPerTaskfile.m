@@ -348,6 +348,19 @@ elseif strcmp(subject, 's3')
         wrongTrials = []; 
     elseif strcmp(taskfile,'20240119-102416-102431-GraspObject')
         wrongTrials = [];
+
+    elseif strcmp(taskfile,'20240208-113355-113411-GraspObject')
+        wrongTrials = []; 
+    elseif strcmp(taskfile,'20240208-113830-113856-GraspObject')
+        wrongTrials = []; 
+    elseif strcmp(taskfile,'20240208-114421-114511-GraspObject')
+        wrongTrials = []; 
+    elseif strcmp(taskfile,'20240208-114959-115017-GraspObject')
+        wrongTrials = [];
+    elseif strcmp(taskfile,'20240208-115504-120100-GraspObject')
+        wrongTrials = []; 
+    elseif strcmp(taskfile,'20240208-120553-120611-GraspObject')
+        wrongTrials = [];
         % elseif strcmp(taskfile,'')
     %    wrongTrials = [];   
         

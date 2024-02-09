@@ -31,11 +31,12 @@ error_session = {};
 if strcmp(subject_id, 's2')
     error_session = {'20231016'};
 elseif strcmp(subject_id, 's3')
-    error_session = {};
+    error_session = {'20231207','20231212'}; % tester sessions with varying # of trials
 end 
 
 if ~isempty(error_session)
-    condition = cellfun(@(x) strcmp(x, error_session), Go_data.session_date);
+    %condition = cellfun(@(x) strcmp(x, error_session), Go_data.session_date);
+    condition = ismember(Go_data.session_date, error_session);
     Go_data = Go_data(~condition,:);
 end
 
@@ -244,3 +245,51 @@ ylim([0 70]);
 legend(taskCuesAll, 'Location', 'Best','FontSize',12);
 set(gca, 'FontSize', 12);
 hold off
+
+%% for line plot w/ 95% CI
+% per_bin_yCI95 = [];
+% per_bin_tuned_mean = [];
+% %sessionToInclude = setdiff(1:numSessions,1);
+% 
+% % code for empty/missing session data
+% rowsToKeep = numUnitsPerSession ~= 0;
+% numUnitsPerSession = numUnitsPerSession(rowsToKeep);
+% sessionToInclude = 1:numel(numUnitsPerSession);
+% colsToKeep = true(1,numSessions);
+% for n_session = 1:numSessions
+%     if all(cellfun('isempty',sum_bin_all(:,n_session)))
+%         colsToKeep(n_session) = false;
+%     end
+% end
+% sum_bin_all = sum_bin_all(:,colsToKeep);
+% 
+% figure('units','normalized','outerposition',[0 0 0.65 0.4]);
+% err_bar = {};
+% for n_type = 1:numel(taskCuesAll)
+%     dataTmp = cell2mat(sum_bin_all(n_type,sessionToInclude))*100;
+%     percentage_tuned = dataTmp./(numUnitsPerSession(sessionToInclude)');
+%     yCI95tmp = utile.calculate_CI(percentage_tuned');
+%     per_bin_yCI95(n_type,:) = yCI95tmp(2,:);
+%     per_bin_tuned_mean(n_type,:) = mean(percentage_tuned,2);
+% 
+%     hold on
+%     err_bar{n_type} = plot(1:length(dataTmp),per_bin_tuned_mean(n_type,:),'Color', color_info{n_type},'LineWidth',2);
+% 
+%     ER = utile.shadedErrorBar(1:length(dataTmp),per_bin_tuned_mean(n_type,:),per_bin_yCI95(n_type,:));
+%     ER.mainLine.Color = color_info{n_type};
+%     ER.patch.FaceColor = color_info{n_type};
+%     ER.edge(1).Color = color_info{n_type};
+%     ER.edge(2).Color = color_info{n_type};
+% end
+% 
+% for n_phase = 1:numPhases
+%     xline(phase_changes(n_phase), 'k--', phaseNames{n_phase}, 'LineWidth', 1.5,'FontSize',12);
+% end
+% 
+% title(['Tuned Units Throughout Trial in ' unit_region]);
+% xlabel('Time Bins (50 ms)');
+% xlim([0 (min_timebin_length + 5)]) % 5 chosen as a buffer
+% ylabel('% of Tuned Units');
+% ylim([0 70]);
+% legend([err_bar{:}], taskCuesAll,'Location', 'Best','Interpreter', 'none','FontSize',12);
+% set(gca, 'FontSize', 12);
