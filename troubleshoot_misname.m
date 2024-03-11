@@ -16,21 +16,23 @@ for ii = 1:length(tasks2BeReNamed)
     tempDataFile = load(['\\131.215.27.23\Raid01\Data\S4\20240307\Task\' tasks2BeReNamed{ii} '.mat']);
     hDebug = Debug.Debugger('loadDataFromFramework','screen');
     hArrayMPF = hst.Array('MPF', 'S4');
+    hArrayS1 = hst.Array('S1', 'S4');
     hSubjectS4 = hst.Subject('S4', hDebug);
-    NeuralSource.hArrayMaps = {hArrayMPF.hArrayMap};
-    tempDataFile.NeuralSource.hArrayMaps = {hArrayMPF.hArrayMap};
-    tempDataFile.Options.arrays          = {hArrayMPF};
-    tempDataFile.Options.subject         = {hSubjectS4};
+    tempDataFile.NeuralSource.hArrayMaps{1} = hArrayMPF.hArrayMap;
+    tempDataFile.NeuralSource.hArrayMaps{2} = hArrayS1.hArrayMap;
+    tempDataFile.Options.arrays{1}       = hArrayMPF;
+    tempDataFile.Options.arrays{2}       = hArrayS1;
+    tempDataFile.Options.subject         = hSubjectS4;
     tempDataFile.Options.output          = replace(tempDataFile.Options.output,'S3','S4'); 
-    tempDataFile.NeuralSource.hXIPPMEX.arrayString = {hArrayMPF.ID};
-    tempDataFile.NeuralSource.hXIPPMEX.arrayString = {hArrayMPF.ID};
+    tempDataFile.NeuralSource.hCBMEX.arrayString = {hArrayMPF.ID, hArrayS1.ID};
+
     tempDataFile.NeuralSource.output = replace(tempDataFile.NeuralSource.output,'S3','S4');
     tempDataFile.NeuralSource.hCBMEX.outputPath = replace(tempDataFile.NeuralSource.hCBMEX.outputPath,'S3','S4');
-    tempDataFile.NeuralSource.hXIPPMEX.recordFilenames =  replace(tempDataFile.NeuralSource.hXIPPMEX.recordFilenames,'MPx','MPF');
-    tempDataFile.NeuralSource.hXIPPMEX.recordDirectories = replace(tempDataFile.NeuralSource.hXIPPMEX.recordDirectories,'MPx','MPF');
-    tempDataFile.NeuralSource.hXIPPMEX.recordFilenames =  replace(tempDataFile.NeuralSource.hXIPPMEX.recordFilenames,'S3','S4');
-    tempDataFile.NeuralSource.hXIPPMEX.recordDirectories = replace(tempDataFile.NeuralSource.hXIPPMEX.recordDirectories,'S3','S4');
-    for tr = 1:Task.nTrials
+    tempDataFile.NeuralSource.hCBMEX.recordFilenames =  replace(tempDataFile.NeuralSource.hCBMEX.recordFilenames,'MPx','MPF');
+    tempDataFile.NeuralSource.hCBMEX.recordDirectories = replace(tempDataFile.NeuralSource.hCBMEX.recordDirectories,'MPx','MPF');
+    tempDataFile.NeuralSource.hCBMEX.recordFilenames =  replace(tempDataFile.NeuralSource.hCBMEX.recordFilenames,'S3','S4');
+    tempDataFile.NeuralSource.hCBMEX.recordDirectories = replace(tempDataFile.NeuralSource.hCBMEX.recordDirectories,'S3','S4');
+    for tr = 1:tempDataFile.Task.nTrials
         tempDataFile.Task.TrialData(tr).neu_filenames = replace(tempDataFile.Task.TrialData(tr).neu_filenames,'MPx','MPF');
     end
     % save

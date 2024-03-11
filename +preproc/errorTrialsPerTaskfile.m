@@ -403,6 +403,33 @@ elseif strcmp(subject, 's3')
         % elseif strcmp(taskfile,'')
     %    wrongTrials = [];   
         
+    else
+        
+        disp(task.task.params.user.cue_type)
+        disp(taskfile)
+        keyboard
+        error([' Unknown session day - add to errorTrials'])    
+      
+     end
+
+     
+elseif strcmp(subject, 's4')
+    
+     if strcmp(taskfile,   '20240307-133830-133839-GraspObject')
+        wrongTrials = [];   
+    elseif strcmp(taskfile,'20240307-133830-134703-GraspObject')
+        wrongTrials = [];   
+    elseif strcmp(taskfile,'20240307-135309-135446-GraspObject')
+        wrongTrials = [];   
+    elseif strcmp(taskfile,'20240307-135309-140133-GraspObject')
+        wrongTrials = [];  
+    elseif strcmp(taskfile,'20240307-140857-140906-GraspObject')
+        wrongTrials = [];   
+    elseif strcmp(taskfile,'20240307-140857-141641-GraspObject')
+        wrongTrials = []; 
+        % elseif strcmp(taskfile,'')
+    %    wrongTrials = []; 
+
      else
         keyboard
         error([taskfile ' Unknown session day - add to errorTrials'])    

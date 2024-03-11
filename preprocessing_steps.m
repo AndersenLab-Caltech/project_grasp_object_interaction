@@ -4,19 +4,22 @@ clc
 clear all
 close all
 
-%subject_id = 's2';  % s2 or p3 or n1
-subject_id = 's3';  % s2 or p3 or n1
+%subject_id = 's2';  %FG
+%subject_id = 's3';  %AN
+subject_id = 's4';  %GB
 
 subject = hst.Subject(subject_id);
 flag_dPCA = false; 
 flag_4S = true; 
-flag_shuffled = true; % true for shuffled images task
+flag_shuffled = false; % true for shuffled images task
 
 if strcmp(subject_id, 's2')
     %session_dates = {'20230831','20230907'};
     session_dates = {'20240216'};
 elseif strcmp(subject_id, 's3')
     session_dates = {'20240214'};
+elseif strcmp(subject_id, 's4')
+    session_dates = {'20240307'};
 else 
     error('unknown subject')
 end 
@@ -218,6 +221,7 @@ for n_session = session_date_idx
     S1X_Go = [];
     AIP_Go = [];
     M1_Go  = [];
+    dlPFC_Go = [];
     dPca_data_tmp = [];
 
     for n_dataset = 1:length(good_datablocks) 
@@ -244,6 +248,7 @@ for n_session = session_date_idx
             S1_idx = channel <= 96   & ismember(featdef_ind_sub.nsp_name, 'S1X_S1');
             AIP_idx = dataset_channel < 0; %does not exist for s2
             M1_idx = dataset_channel < 0; %does not exist for s2
+            dlPFC_idx = dataset_channel < 0; %does not exist for s2
 
             %SMG_idx = dataset_channel <= 96 .* ismember(featdef_ind_sub.nsp_name, 'APX');
             %PMV_idx1 = (dataset_channel > 96 & dataset_channel <= 224) .* ismember(featdef_ind_sub.nsp_name, 'APX');
@@ -264,6 +269,16 @@ for n_session = session_date_idx
             S1_idx = ismember(dataset_channel,[(1:128) + 256]);
             AIP_idx =  ismember(dataset_channel, [1:32, 97:128]);
             M1_idx =  ismember(dataset_channel,[33:96]);
+            dlPFC_idx = dataset_channel < 0; %does not exist for s3
+
+        elseif strcmp(subject_id, 's4')
+            %implement dataset channels for s4 for SMG, dlPFC, AIP, M1 and S1
+            SMG_idx =  ismember(dataset_channel,[129:160, 225:256]);
+            AIP_idx =  ismember(dataset_channel,[161:224]);
+            S1_idx = ismember(dataset_channel,[(1:128) + 256]);
+            M1_idx =  ismember(dataset_channel, [1:32, 97:128]);
+            dlPFC_idx =  ismember(dataset_channel,[33:96]);
+            PMV_idx = dataset_channel < 0; %does not exist for s4
         else
             keyboard
             % add participant
@@ -273,14 +288,15 @@ for n_session = session_date_idx
             keyboard
         end
         
-        Brain_idx = [SMG_idx, PMV_idx, S1_idx, AIP_idx, M1_idx];
-        Brain_areas = {'SMG', 'PMV', 'S1', 'AIP', 'M1'};
+        Brain_idx = [SMG_idx, PMV_idx, S1_idx, AIP_idx, M1_idx, dlPFC_idx];
+        Brain_areas = {'SMG', 'PMV', 'S1', 'AIP', 'M1','dlPFC'};
         %separate dataset channels per brain area 
         SMG_Go_ind = arrayfun(@(x) data_ind(:,SMG_idx,x), 1:individual_runs{1, n_dataset}.numTrials,'UniformOutput', false)';
         PMV_Go_ind = arrayfun(@(x) data_ind(:,PMV_idx,x), 1:individual_runs{1, n_dataset}.numTrials,'UniformOutput', false)';
         S1_Go_ind = arrayfun(@(x) data_ind(:,S1_idx,x), 1:individual_runs{1, n_dataset}.numTrials,'UniformOutput', false)';
         AIP_Go_ind = arrayfun(@(x) data_ind(:,AIP_idx,x), 1:individual_runs{1, n_dataset}.numTrials,'UniformOutput', false)';
         M1_Go_ind = arrayfun(@(x) data_ind(:,M1_idx,x), 1:individual_runs{1, n_dataset}.numTrials,'UniformOutput', false)';
+        dlPFC_Go_ind = arrayfun(@(x) data_ind(:,dlPFC_idx,x), 1:individual_runs{1, n_dataset}.numTrials,'UniformOutput', false)';
    
         %concatenate together
         SMG_Go = vertcat(SMG_Go, SMG_Go_ind);
@@ -288,6 +304,7 @@ for n_session = session_date_idx
         S1X_Go = vertcat(S1X_Go, S1_Go_ind);
         AIP_Go = vertcat(AIP_Go, AIP_Go_ind);
         M1_Go  = vertcat(M1_Go, M1_Go_ind);
+        dlPFC_Go  = vertcat(dlPFC_Go, dlPFC_Go_ind);
     end 
      
   
@@ -302,6 +319,11 @@ for n_session = session_date_idx
     elseif strcmp(subject_id, 's3')
         Go_data = [array2table(TrialNumber') cell2table(LabelNames) cell2table(GraspType) cell2table(TrialType) array2table(TrialCue) ...
                     cell2table(cueType)  cell2table(SMG_Go) cell2table(PMV_Go) cell2table(S1X_Go) cell2table(AIP_Go) cell2table(M1_Go) cell2table(GoLabels) ...
+                    cell2table(session_date) cell2table(time_phase_labels) cell2table(time_trial)];
+
+    elseif strcmp(subject_id, 's4')
+        Go_data = [array2table(TrialNumber') cell2table(LabelNames) cell2table(GraspType) cell2table(TrialType) array2table(TrialCue) ...
+                    cell2table(cueType)  cell2table(SMG_Go) cell2table(dlPFC_Go) cell2table(S1X_Go) cell2table(AIP_Go) cell2table(M1_Go) cell2table(GoLabels) ...
                     cell2table(session_date) cell2table(time_phase_labels) cell2table(time_trial)];
     end 
     
@@ -320,6 +342,8 @@ for n_session = session_date_idx
             if strcmp(subject_id, 's2')
                 trialPerWord = 8;
             elseif strcmp(subject_id, 's3')
+                trialPerWord = 16;
+            elseif strcmp(subject_id, 's4')
                 trialPerWord = 16;
             end 
             %format for dPCA analysis
