@@ -37,9 +37,9 @@ if ~isempty(error_session)
     Go_data = Go_data(~condition,:);
 end
 
-flagGoTrials = false; % false = No-Go
+flagGoTrials = true; % false = No-Go
 
-flagRegressionTuning = true;
+flagRegressionTuning = false;
 
 flagBinPerBin = true;
 multipleComparePhase = true;
@@ -59,7 +59,20 @@ phaseNames = {'ITI', 'Cue', 'Delay', 'Action'};
 color_info = {[.1176 .5333 .8980],[.8471 .1059 .3765],[1 .7569 .0275]};
 
 numUnitsPerSession = zeros(numSessions,1);
-for n_session = 1:numSessions
+
+% Initialize cell arrays to store results
+hand_ho_overlap_units_all = cell(numSessions,1);
+% hand_only_units_all = cell(numSessions,1);
+% ho_only_units_h_all = cell(numSessions,1);
+object_ho_overlap_units_all = cell(numSessions,1);
+% object_only_units_all = cell(numSessions,1);
+% ho_only_units_o_all = cell(numSessions,1);
+object_hand_overlap_units_all = cell(numSessions,1);
+% object_only_units_h_all = cell(numSessions,1);
+% hand_only_units_o_all = cell(numSessions,1);
+object_hand_ho_overlap_units_all = cell(numSessions,1);
+
+for n_session = 1:3 %numSessions
 
     disp(['Classification session ' sessions_all{n_session} ]);  
 
@@ -155,11 +168,149 @@ for n_session = 1:numSessions
 
             tuned_channels_per_phase{n_type,n_session} = sumPhase;
             tuned_channels_per_phase_vector{n_type,n_session} = tunedChannelsPhase;
+
+
          
          end
     end 
-       
+    
+    % calculating tuning overlap
+    % H-HO overlap
+    hand_ho_overlap_vector = (tuned_channels_per_phase_vector{1,n_session} == 1) & (tuned_channels_per_phase_vector{2,n_session} == 1); % this tells me the overlap between hand and hand-object units
+    hand_ho_overlap_units = sum(hand_ho_overlap_vector, 1);
+    hand_ho_overlap_units_all{n_session} = hand_ho_overlap_units;
+    
+    % hand_only_units = tuned_channels_per_phase{1,n_session} - hand_ho_overlap_units;
+    % ho_only_units_h = tuned_channels_per_phase{2,n_session} - hand_ho_overlap_units;
+    % hand_only_units_all{n_session} = hand_only_units;
+    % ho_only_units_h_all{n_session} = ho_only_units_h;
+    
+    % O-HO overlap
+    object_ho_overlap_vector = (tuned_channels_per_phase_vector{3,n_session} == 1) & (tuned_channels_per_phase_vector{2,n_session} == 1); % this tells me the overlap between object and hand-object units
+    object_ho_overlap_units = sum(object_ho_overlap_vector, 1);
+    object_ho_overlap_units_all{n_session} = object_ho_overlap_units;
+    
+    % object_only_units = tuned_channels_per_phase{3,n_session} - object_ho_overlap_units;
+    % ho_only_units_o = tuned_channels_per_phase{2,n_session} - object_ho_overlap_units;
+    % object_only_units_all{n_session} = object_only_units;
+    % ho_only_units_o_all{n_session} = ho_only_units_o;
+    
+    % O-H overlap
+    object_hand_overlap_vector = (tuned_channels_per_phase_vector{3,n_session} == 1) & (tuned_channels_per_phase_vector{1,n_session} == 1); % this tells me the overlap between object and hand units
+    object_hand_overlap_units = sum(object_hand_overlap_vector, 1);
+    object_hand_overlap_units_all{n_session} = object_hand_overlap_units;
+
+    % object_only_units_h = tuned_channels_per_phase{3,n_session} - object_hand_overlap_units;
+    % hand_only_units_o = tuned_channels_per_phase{1,n_session} - object_hand_overlap_units;
+    % object_only_units_h_all{n_session} = object_only_units_h;
+    % hand_only_units_o_all{n_session} = hand_only_units_o;
+    
+    % all 3 modalities overlap
+    object_hand_ho_overlap_vector = (tuned_channels_per_phase_vector{3,n_session} == 1) & (tuned_channels_per_phase_vector{1,n_session} == 1) & (tuned_channels_per_phase_vector{2,n_session} == 1); % this tells me the overlap between object and hand units
+    object_hand_ho_overlap_units = sum(object_hand_ho_overlap_vector, 1);
+    object_hand_ho_overlap_units_all{n_session} = object_hand_ho_overlap_units;
 end 
+
+hand_ho_overlap_units_all = sum(cell2mat(hand_ho_overlap_units_all'));
+% hand_only_units_all = cell2mat(hand_only_units_all');
+% ho_only_units_h_all = cell2mat(ho_only_units_h_all');
+object_ho_overlap_units_all = sum(cell2mat(object_ho_overlap_units_all'));
+% object_only_units_all = cell2mat(object_only_units_all');
+% ho_only_units_o_all = cell2mat(ho_only_units_o_all');
+object_hand_overlap_units_all = sum(cell2mat(object_hand_overlap_units_all'));
+% object_only_units_h_all = cell2mat(object_only_units_h_all');
+% hand_only_units_o_all = cell2mat(hand_only_units_o_all');
+object_hand_ho_overlap_units_all = sum(cell2mat(object_hand_ho_overlap_units_all'));
+
+% hand_ho_overlap_units_all = sum(hand_ho_overlap_units_all);
+% % hand_only_units_all = sum(hand_only_units_all);
+% % ho_only_units_h_all = sum(ho_only_units_h_all);
+% object_ho_overlap_units_all = sum(object_ho_overlap_units_all);
+% % object_only_units_all = sum(object_only_units_all);
+% % ho_only_units_o_all = sum(ho_only_units_o_all);
+% object_hand_overlap_units_all = sum(object_hand_overlap_units_all);
+% % object_only_units_h_all = sum(object_only_units_h_all);
+% % hand_only_units_o_all = sum(hand_only_units_o_all);
+% object_hand_ho_overlap_units_all = sum(object_hand_ho_overlap_units_all);
+
+hand_total_units = sum(cell2mat(tuned_channels_per_phase(1,:)'));
+ho_total_units = sum(cell2mat(tuned_channels_per_phase(2,:)'));
+object_total_units = sum(cell2mat(tuned_channels_per_phase(3,:)'));
+
+
+
+%% tuned units overlapping
+
+% tuned_channels_per_phase_vector; % 3 (modality) x 5 (sessions)
+% % I can compare within sessions how much overlap there is and then average
+% % the sessions together to get average overlap
+% 
+% % H-HO overlap
+% hand_ho_overlap_vector = (tuned_channels_per_phase_vector{1,1} == 1) & (tuned_channels_per_phase_vector{2,1} == 1); % this tells me the overlap between hand and hand-object units
+% % I can sum and then substract from the total to get the venn diagram
+% hand_ho_overlap_units = sum(hand_ho_overlap_vector, 1);
+% 
+% tuned_channels_per_phase; % total units for each modality
+% hand_only_units = tuned_channels_per_phase{1,1} - hand_ho_overlap_units;
+% ho_only_units_h = tuned_channels_per_phase{2,1} - hand_ho_overlap_units;
+% 
+% % next find average by iterating through each session and then finding the
+% % mean
+% 
+% % O-HO overlap
+% object_ho_overlap_vector = (tuned_channels_per_phase_vector{3,1} == 1) & (tuned_channels_per_phase_vector{2,1} == 1); % this tells me the overlap between object and hand-object units
+% % I can sum and then substract from the total to get the venn diagram
+% object_ho_overlap_units = sum(object_ho_overlap_vector, 1);
+% 
+% tuned_channels_per_phase; % total units for each modality
+% object_only_units = tuned_channels_per_phase{3,1} - object_ho_overlap_units;
+% ho_only_units_o = tuned_channels_per_phase{2,1} - object_ho_overlap_units;
+% 
+% % next find average by iterating through each session and then finding the
+% % mean
+% 
+% % O-H overlap
+% object_hand_overlap_vector = (tuned_channels_per_phase_vector{3,1} == 1) & (tuned_channels_per_phase_vector{1,1} == 1); % this tells me the overlap between object and hand units
+% % I can sum and then substract from the total to get the venn diagram
+% object_hand_overlap_units = sum(object_hand_overlap_vector, 1);
+% 
+% tuned_channels_per_phase; % total units for each modality
+% object_only_units_h = tuned_channels_per_phase{3,1} - object_hand_overlap_units;
+% hand_only_units_o = tuned_channels_per_phase{1,1} - object_hand_overlap_units;
+% 
+% % next find average by iterating through each session and then finding the
+% % mean
+% 
+% % all 3 modalities overlap
+% object_hand_ho_overlap_vector = (tuned_channels_per_phase_vector{3,1} == 1) & (tuned_channels_per_phase_vector{1,1} == 1) & (tuned_channels_per_phase_vector{2,1} == 1); % this tells me the overlap between object and hand units
+% % I can sum and then substract from the total to get the venn diagram
+% object_hand_ho_overlap_units = sum(object_hand_ho_overlap_vector, 1);
+% 
+% tuned_channels_per_phase; % total units for each modality
+% object_only_units_h = tuned_channels_per_phase{3,1} - object_hand_overlap_units;
+% hand_only_units_o = tuned_channels_per_phase{1,1} - object_hand_overlap_units;
+
+%% example (requires Statistics and Machine Learning Toolbox) => unsure if
+% % can handle 3 inputs
+% % Sample data (replace with your own data)
+% set1 = randi([0, 1], 1, 100); % Binary data for set 1
+% set2 = randi([0, 1], 1, 100); % Binary data for set 2
+% 
+% % Create a logical array for the Venn diagram
+% venn_data = [sum(set1 & ~set2), sum(~set1 & set2), sum(set1 & set2)];
+% 
+% % Create a Venn diagram using vennplot
+% figure;
+% vennplot(venn_data, 'FaceColor', {'r', 'g', 'b'}, 'FaceAlpha', 0.5);
+% 
+% % Add labels
+% vennlabel({'Set 1', 'Set 2'});
+% 
+% % Add a title
+% title('Venn Diagram');
+% 
+% % Adjust the display
+% axis equal;
 
 %% bar plot of tuned units w/ 95% CIs (work on getting them all on same plot)
 %save('C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\Workspaces\LinearRegression\s2\s2_GraspObject_2S_unsorted_aligned_thr_-4.5_SMG_Example.mat','sum_bin_all')
@@ -226,85 +377,93 @@ end
 
 figure('units','normalized','outerposition',[0 0 0.5 0.3]);
 bar((tunedUnitsPerType'./sum(numUnitsPerSession))*100);
+%bar((((tunedUnitsPerType')*8)./sum(numUnitsPerSession))*100);
+%bar(tunedUnitsPerType');
 hold on;
 title(['Tuned Units in ' unit_region]);
 xticks(1:numel(phaseNames));
 xticklabels(phaseNames);
-ylabel('% of Tuned Units');
+ylabel('% of Total Units');
+%ylabel('# of Tuned Units');
 ylim([0 70]);
+%ylim([0 50]);
 legend(taskCuesAll, 'Location', 'Best', 'Interpreter', 'none','FontSize',12);
 set(gca, 'FontSize', 12);
 hold off
 
 %% line plot w/o CIs
-
-for n_type = 1:numel(unTrialType)
-    tunedUnitsPerTypeBin(n_type,:)  = sum(cell2mat(sum_bin_all(n_type,:)),2);
-
-end 
-
-figure('units','normalized','outerposition',[0 0 0.65 0.4]);
-plot((tunedUnitsPerTypeBin'./sum(numUnitsPerSession))*100,'LineWidth',2);
-hold on
-for n_phase = 1:numPhases
-    xline(phase_changes(n_phase), 'k--', phaseNames{n_phase}, 'LineWidth', 1.5,'FontSize',12);
-end
-title(['Tuned Units Throughout Trial in ' unit_region]);
-xlabel('Time Bins (50 ms)');
-xlim([0 (min_timebin_length + 5)])
-ylabel('% of Tuned Units');
-ylim([0 70]);
-legend(taskCuesAll, 'Location', 'Best','FontSize',12);
-set(gca, 'FontSize', 12);
-hold off
-
-%% for line plot w/ 95% CI
-% per_bin_yCI95 = [];
-% per_bin_tuned_mean = [];
-% %sessionToInclude = setdiff(1:numSessions,1);
 % 
-% % code for empty/missing session data
-% rowsToKeep = numUnitsPerSession ~= 0;
-% numUnitsPerSession = numUnitsPerSession(rowsToKeep);
-% sessionToInclude = 1:numel(numUnitsPerSession);
-% colsToKeep = true(1,numSessions);
-% for n_session = 1:numSessions
-%     if all(cellfun('isempty',sum_bin_all(:,n_session)))
-%         colsToKeep(n_session) = false;
-%     end
-% end
-% sum_bin_all = sum_bin_all(:,colsToKeep);
+% for n_type = 1:numel(unTrialType)
+%     tunedUnitsPerTypeBin(n_type,:)  = sum(cell2mat(sum_bin_all(n_type,:)),2);
+% 
+% end 
 % 
 % figure('units','normalized','outerposition',[0 0 0.65 0.4]);
-% err_bar = {};
-% for n_type = 1:numel(taskCuesAll)
-%     dataTmp = cell2mat(sum_bin_all(n_type,sessionToInclude))*100;
-%     percentage_tuned = dataTmp./(numUnitsPerSession(sessionToInclude)');
-%     yCI95tmp = utile.calculate_CI(percentage_tuned');
-%     per_bin_yCI95(n_type,:) = yCI95tmp(2,:);
-%     per_bin_tuned_mean(n_type,:) = mean(percentage_tuned,2);
-% 
-%     hold on
-%     err_bar{n_type} = plot(1:length(dataTmp),per_bin_tuned_mean(n_type,:),'Color', color_info{n_type},'LineWidth',2);
-% 
-%     ER = utile.shadedErrorBar(1:length(dataTmp),per_bin_tuned_mean(n_type,:),per_bin_yCI95(n_type,:));
-%     ER.mainLine.Color = color_info{n_type};
-%     ER.patch.FaceColor = color_info{n_type};
-%     ER.edge(1).Color = color_info{n_type};
-%     ER.edge(2).Color = color_info{n_type};
-% end
-% 
+% plot((tunedUnitsPerTypeBin'./sum(numUnitsPerSession))*100,'LineWidth',2);
+% %plot((((tunedUnitsPerTypeBin')*8)./sum(numUnitsPerSession))*100,'LineWidth',2);
+% %plot(tunedUnitsPerTypeBin','LineWidth',2);
+% hold on
 % for n_phase = 1:numPhases
 %     xline(phase_changes(n_phase), 'k--', phaseNames{n_phase}, 'LineWidth', 1.5,'FontSize',12);
 % end
-% 
 % title(['Tuned Units Throughout Trial in ' unit_region]);
 % xlabel('Time Bins (50 ms)');
-% xlim([0 (min_timebin_length + 5)]) % 5 chosen as a buffer
-% ylabel('% of Tuned Units');
+% xlim([0 (min_timebin_length + 5)])
+% ylabel('% of Total Units');
+% %ylabel('# of Tuned Units');
 % ylim([0 70]);
-% legend([err_bar{:}], taskCuesAll,'Location', 'Best','Interpreter', 'none','FontSize',12);
+% %ylim([0 50]);
+% legend(taskCuesAll, 'Location', 'Best','FontSize',12);
 % set(gca, 'FontSize', 12);
+% hold off
+
+%% for line plot w/ 95% CI
+per_bin_yCI95 = [];
+per_bin_tuned_mean = [];
+%sessionToInclude = setdiff(1:numSessions,1);
+
+% code for empty/missing session data
+rowsToKeep = numUnitsPerSession ~= 0;
+numUnitsPerSession = numUnitsPerSession(rowsToKeep);
+sessionToInclude = 1:numel(numUnitsPerSession);
+colsToKeep = true(1,numSessions);
+for n_session = 1:numSessions
+    if all(cellfun('isempty',sum_bin_all(:,n_session)))
+        colsToKeep(n_session) = false;
+    end
+end
+sum_bin_all = sum_bin_all(:,colsToKeep);
+
+figure('units','normalized','outerposition',[0 0 0.65 0.4]);
+err_bar = {};
+for n_type = 1:numel(taskCuesAll)
+    dataTmp = cell2mat(sum_bin_all(n_type,sessionToInclude))*100;
+    percentage_tuned = dataTmp./(numUnitsPerSession(sessionToInclude)');
+    yCI95tmp = utile.calculate_CI(percentage_tuned');
+    per_bin_yCI95(n_type,:) = yCI95tmp(2,:);
+    per_bin_tuned_mean(n_type,:) = mean(percentage_tuned,2);
+
+    hold on
+    err_bar{n_type} = plot(1:length(dataTmp),per_bin_tuned_mean(n_type,:),'Color', color_info{n_type},'LineWidth',2);
+
+    ER = utile.shadedErrorBar(1:length(dataTmp),per_bin_tuned_mean(n_type,:),per_bin_yCI95(n_type,:));
+    ER.mainLine.Color = color_info{n_type};
+    ER.patch.FaceColor = color_info{n_type};
+    ER.edge(1).Color = color_info{n_type};
+    ER.edge(2).Color = color_info{n_type};
+end
+
+for n_phase = 1:numPhases
+    xline(phase_changes(n_phase), 'k--', phaseNames{n_phase}, 'LineWidth', 1.5,'FontSize',12);
+end
+
+title(['Tuned Units Throughout Trial in ' unit_region]);
+xlabel('Time Bins (50 ms)');
+xlim([0 (min_timebin_length + 5)]) % 5 chosen as a buffer
+ylabel('% of Total Units');
+ylim([0 70]);
+legend([err_bar{:}], taskCuesAll,'Location', 'Best','Interpreter', 'none','FontSize',12);
+set(gca, 'FontSize', 12);
 %%
 % blub = percentage_tuned.*numUnitsPerSession';
 % blub2= mean(blub');

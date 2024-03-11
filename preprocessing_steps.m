@@ -14,9 +14,9 @@ flag_shuffled = true; % true for shuffled images task
 
 if strcmp(subject_id, 's2')
     %session_dates = {'20230831','20230907'};
-    session_dates = {'20240130'};
+    session_dates = {'20240216'};
 elseif strcmp(subject_id, 's3')
-    session_dates = {'20240208'};
+    session_dates = {'20240214'};
 else 
     error('unknown subject')
 end 

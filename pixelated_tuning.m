@@ -40,9 +40,9 @@ if ~isempty(error_session)
     Go_data = Go_data(~condition,:);
 end
 
-flag_Shuffled = true; % true = analyze pixelated images
+flag_Shuffled = false; % true = analyze pixelated images
 
-flagRegressionTuning = false;
+flagRegressionTuning = true;
 
 flagBinPerBin = true;
 multipleComparePhase = true;
@@ -59,7 +59,8 @@ shuffled(Shuffled_idx) = true;
 Go_data.Shuffled = shuffled;
 
 % chose cue type:
-taskCuesAll = {'Regular Images', 'Pixelated Images'}; %{'Hand', 'Hand-Object', 'Object'};
+% taskCuesAll = {'Regular Images', 'Pixelated Images'}; 
+taskCuesAll = {'Hand', 'Hand-Object', 'Object'};
 sessions_all = unique(Go_data.session_date);
 numSessions = numel(sessions_all);
 phase_time_idx = Go_data.time_phase_labels{1,1};
@@ -71,7 +72,7 @@ phaseNames = {'ITI', 'Cue', 'Delay', 'Action'};
 color_info = {[.1176 .5333 .8980],[.8471 .1059 .3765],[1 .7569 .0275]};
 
 numUnitsPerSession = zeros(numSessions,1);
-for n_session = 1:numSessions
+for n_session = 1 %:numSessions
 
     disp(['Classification session ' sessions_all{n_session} ]);  
 
@@ -106,22 +107,25 @@ for n_session = 1:numSessions
     %trialType
     trialTypeSession = Go_data.TrialType(idxThisSession,:);
 
-    %get idx for Go or NoGo trials => CHANGE FOR SHUFFLED
-    imageType = Go_data.Shuffled(idxThisSession,:);
+    %get idx for shuffled or unshuffled trials
+    ShuffledImage_idx = Go_data.Shuffled(idxThisSession,:);
 
     timePhaseLabels = Go_data.time_phase_labels(idxThisSession);
 
-    % if flag_Shuffled
-    %     SessionData = SessionData(Shuffled_idx);
-    %     sessionLabels = sessionLabels(Shuffled_idx);
-    %     timePhaseLabels = timePhaseLabels(Shuffled_idx);
-    %     trialTypeSession = trialTypeSession(Shuffled_idx);
-    % else
-    %     SessionData = SessionData(~Shuffled_idx);
-    %     sessionLabels = sessionLabels(~Shuffled_idx);
-    %     timePhaseLabels = timePhaseLabels(~Shuffled_idx);
-    %     trialTypeSession = trialTypeSession(~Shuffled_idx);
-    % end
+
+    if flag_Shuffled
+        SessionData = SessionData(ShuffledImage_idx);
+        sessionLabels = sessionLabels(ShuffledImage_idx);
+        timePhaseLabels = timePhaseLabels(ShuffledImage_idx);
+        trialTypeSession = trialTypeSession(ShuffledImage_idx);
+        taskImageType = {'Pixelated Images'};
+    else
+        SessionData = SessionData(~ShuffledImage_idx);
+        sessionLabels = sessionLabels(~ShuffledImage_idx);
+        timePhaseLabels = timePhaseLabels(~ShuffledImage_idx);
+        trialTypeSession = trialTypeSession(~ShuffledImage_idx);
+        taskImageType = 'Regular Images';
+    end
      
     %seperate data according to cue modality => Shuffled vs not
 
@@ -129,11 +133,12 @@ for n_session = 1:numSessions
     unType = unique(Go_data.Shuffled);
     numUnitsPerSession(n_session) = size(SessionData{1},2);
     % loop through cue modalities 
-    for n_type = 1:numel(unType)
+    for n_type = 1:numel(unTrialType) % unType for Shuffled vs Regular; unTrialType for H,H+O,H
 
         % find idx of trial type 
         trialTypeIdx = ismember(trialTypeSession, unTrialType(n_type));
-        imageTypeIdx = ismember(imageType, unType(n_type));
+        %imageTypeIdx = ismember(imageType, unType(n_type)); % if
+        %separating data by only shuffled v reg
 
          if flagTunedChannels
             %Compute index of units that are tuned
@@ -153,15 +158,15 @@ for n_session = 1:numSessions
                 tuned_channels_per_type{n_type,n_session} = numTunedChannelsPerCategory;
             else
 
-                % tuned_channels_per_graps{n_type,n_session} = [];
-                % [tunedCombinedChannels, tunedChannelsPhase, tunedChannelsBin, sumPhase, sumBin]= classification.getTunedChannels(SessionData(trialTypeIdx),sessionLabels(trialTypeIdx), ...
-                % timePhaseLabels(trialTypeIdx), 'multcompare', multipleComparePhase,'removeITItuning', 'false', 'BinperBinTuning', flagBinPerBin);
-                % sumBin = sumBin';
-
-                tuned_channels_per_type{n_type,n_session} = [];
-                [tunedCombinedChannels, tunedChannelsPhase, tunedChannelsBin, sumPhase, sumBin]= classification.getTunedChannels(SessionData(imageTypeIdx),sessionLabels(imageTypeIdx), ...
-                timePhaseLabels(imageTypeIdx), 'multcompare', multipleComparePhase,'removeITItuning', 'false', 'BinperBinTuning', flagBinPerBin);
+                tuned_channels_per_graps{n_type,n_session} = [];
+                [tunedCombinedChannels, tunedChannelsPhase, tunedChannelsBin, sumPhase, sumBin]= classification.getTunedChannels(SessionData(trialTypeIdx),sessionLabels(trialTypeIdx), ...
+                timePhaseLabels(trialTypeIdx), 'multcompare', multipleComparePhase,'removeITItuning', 'false', 'BinperBinTuning', flagBinPerBin);
                 sumBin = sumBin';
+
+                % tuned_channels_per_type{n_type,n_session} = [];
+                % [tunedCombinedChannels, tunedChannelsPhase, tunedChannelsBin, sumPhase, sumBin]= classification.getTunedChannels(SessionData(imageTypeIdx),sessionLabels(imageTypeIdx), ...
+                % timePhaseLabels(imageTypeIdx), 'multcompare', multipleComparePhase,'removeITItuning', 'false', 'BinperBinTuning', flagBinPerBin);
+                % sumBin = sumBin';
             end
 
                 if nnz(sumBin) > 0
@@ -188,18 +193,18 @@ phase_tuned_mean = [];
 %sessionToInclude = setdiff(1:numSessions,1);
 
 % code for empty/missing session data
-rowsToKeep = numUnitsPerSession ~= 0;
-numUnitsPerSession = numUnitsPerSession(rowsToKeep);
+% rowsToKeep = numUnitsPerSession ~= 0;
+% numUnitsPerSession = numUnitsPerSession(rowsToKeep);
 sessionToInclude = 1:numel(numUnitsPerSession);
-colsToKeep = true(1,numSessions);
-for n_session = 1:numSessions
-    if all(cellfun('isempty',tuned_channels_per_phase(:,n_session)))
-        colsToKeep(n_session) = false;
-    end
-end
-tuned_channels_per_phase = tuned_channels_per_phase(:,colsToKeep);
+%colsToKeep = true(1,numSessions);
+% for n_session = 1:numSessions
+%     if all(cellfun('isempty',tuned_channels_per_phase(:,n_session)))
+%         colsToKeep(n_session) = false;
+%     end
+% end
+% tuned_channels_per_phase = tuned_channels_per_phase(:,colsToKeep);
 
-figure('units','normalized','outerposition',[0 0 .85 0.3]);
+figure('units','normalized','outerposition',[0 0 .3 0.45]);
 for n_type = 1:numel(taskCuesAll)
     dataTmp = cell2mat(tuned_channels_per_phase(n_type,sessionToInclude)')*100;
     percentage_tuned = dataTmp./numUnitsPerSession(sessionToInclude);
@@ -220,76 +225,76 @@ for n_type = 1:numel(taskCuesAll)
     xticklabels(phaseNames);
     xtickangle(45);
     ylabel('% of Tuned Units');
-    ylim([0 100]);
-    sgtitle(['Tuned Units in ' unit_region])
+    ylim([0 70]);
+    sgtitle(['Tuned Units in ' unit_region ' -- ' taskImageType])
     set(gca, 'FontSize', 12);
 end
 
 % line plot w/o CIs bc little data rn => update when we have more data
-for n_type = 1:numel(unType)
-    tunedUnitsPerTypeBin(n_type,:)  = sum(cell2mat(sum_bin_all(n_type,:)),2);
-
-end 
-
-figure('units','normalized','outerposition',[0 0 0.65 0.4]);
-plot((tunedUnitsPerTypeBin'./sum(numUnitsPerSession))*100,'LineWidth',2);
-hold on
-for n_phase = 1:numPhases
-    xline(phase_changes(n_phase), 'k--', phaseNames{n_phase}, 'LineWidth', 1.5,'FontSize',12);
-end
-title(['Tuned Units Throughout Trial in ' unit_region]);
-xlabel('Time Bins (50 ms)');
-xlim([0 (min_timebin_length + 5)])
-ylabel('% of Tuned Units');
-ylim([0 70]);
-legend(taskCuesAll, 'Location', 'Best','FontSize',12);
-set(gca, 'FontSize', 12);
-hold off
-
-%% for line plot w/ 95% CI
-% per_bin_yCI95 = [];
-% per_bin_tuned_mean = [];
-% %sessionToInclude = setdiff(1:numSessions,1);
+% for n_type = 1:numel(unTrialType) % unType for Shuffled v reg; unTrialType for modality
+%     tunedUnitsPerTypeBin(n_type,:)  = sum(cell2mat(sum_bin_all(n_type,:)),2);
 % 
-% % code for empty/missing session data
-% rowsToKeep = numUnitsPerSession ~= 0;
-% numUnitsPerSession = numUnitsPerSession(rowsToKeep);
-% sessionToInclude = 1:numel(numUnitsPerSession);
-% colsToKeep = true(1,numSessions);
-% for n_session = 1:numSessions
-%     if all(cellfun('isempty',sum_bin_all(:,n_session)))
-%         colsToKeep(n_session) = false;
-%     end
-% end
-% sum_bin_all = sum_bin_all(:,colsToKeep);
+% end 
 % 
-% figure('units','normalized','outerposition',[0 0 0.65 0.4]);
-% err_bar = {};
-% for n_type = 1:numel(taskCuesAll)
-%     dataTmp = cell2mat(sum_bin_all(n_type,sessionToInclude))*100;
-%     percentage_tuned = dataTmp./(numUnitsPerSession(sessionToInclude)');
-%     yCI95tmp = utile.calculate_CI(percentage_tuned');
-%     per_bin_yCI95(n_type,:) = yCI95tmp(2,:);
-%     per_bin_tuned_mean(n_type,:) = mean(percentage_tuned,2);
-% 
-%     hold on
-%     err_bar{n_type} = plot(1:length(dataTmp),per_bin_tuned_mean(n_type,:),'Color', color_info{n_type},'LineWidth',2);
-% 
-%     ER = utile.shadedErrorBar(1:length(dataTmp),per_bin_tuned_mean(n_type,:),per_bin_yCI95(n_type,:));
-%     ER.mainLine.Color = color_info{n_type};
-%     ER.patch.FaceColor = color_info{n_type};
-%     ER.edge(1).Color = color_info{n_type};
-%     ER.edge(2).Color = color_info{n_type};
-% end
-% 
+% figure('units','normalized','outerposition',[0 0 0.3 0.45]);
+% plot((tunedUnitsPerTypeBin'./sum(numUnitsPerSession))*100,'LineWidth',2);
+% hold on
 % for n_phase = 1:numPhases
 %     xline(phase_changes(n_phase), 'k--', phaseNames{n_phase}, 'LineWidth', 1.5,'FontSize',12);
 % end
-% 
-% title(['Tuned Units Throughout Trial in ' unit_region]);
+% title(['Tuned Units Throughout Trial in ' unit_region ' -- ' taskImageType]);
 % xlabel('Time Bins (50 ms)');
-% xlim([0 (min_timebin_length + 5)]) % 5 chosen as a buffer
-% ylabel('% of Tuned Units');
-% ylim([0 70]);
-% legend([err_bar{:}], taskCuesAll,'Location', 'Best','Interpreter', 'none','FontSize',12);
+% xlim([0 (min_timebin_length + 5)])
+% ylabel('% of Total Units');
+% ylim([0 100]);
+% legend(taskCuesAll, 'Location', 'Best','FontSize',12);
 % set(gca, 'FontSize', 12);
+% hold off
+
+%% for line plot w/ 95% CI
+per_bin_yCI95 = [];
+per_bin_tuned_mean = [];
+%sessionToInclude = setdiff(1:numSessions,1);
+
+% code for empty/missing session data
+rowsToKeep = numUnitsPerSession ~= 0;
+numUnitsPerSession = numUnitsPerSession(rowsToKeep);
+sessionToInclude = 1:numel(numUnitsPerSession);
+colsToKeep = true(1,numSessions);
+for n_session = 1:numSessions
+    if all(cellfun('isempty',sum_bin_all(:,n_session)))
+        colsToKeep(n_session) = false;
+    end
+end
+sum_bin_all = sum_bin_all(:,colsToKeep);
+
+figure('units','normalized','outerposition',[0 0 0.65 0.4]);
+err_bar = {};
+for n_type = 1:numel(taskCuesAll)
+    dataTmp = cell2mat(sum_bin_all(n_type,sessionToInclude))*100;
+    percentage_tuned = dataTmp./(numUnitsPerSession(sessionToInclude)');
+    yCI95tmp = utile.calculate_CI(percentage_tuned');
+    per_bin_yCI95(n_type,:) = yCI95tmp(2,:);
+    per_bin_tuned_mean(n_type,:) = mean(percentage_tuned,2);
+
+    hold on
+    err_bar{n_type} = plot(1:length(dataTmp),per_bin_tuned_mean(n_type,:),'Color', color_info{n_type},'LineWidth',2);
+
+    ER = utile.shadedErrorBar(1:length(dataTmp),per_bin_tuned_mean(n_type,:),per_bin_yCI95(n_type,:));
+    ER.mainLine.Color = color_info{n_type};
+    ER.patch.FaceColor = color_info{n_type};
+    ER.edge(1).Color = color_info{n_type};
+    ER.edge(2).Color = color_info{n_type};
+end
+
+for n_phase = 1:numPhases
+    xline(phase_changes(n_phase), 'k--', phaseNames{n_phase}, 'LineWidth', 1.5,'FontSize',12);
+end
+
+title(['Tuned Units Throughout Trial in ' unit_region]);
+xlabel('Time Bins (50 ms)');
+xlim([0 (min_timebin_length + 5)]) % 5 chosen as a buffer
+ylabel('% of Total Units');
+ylim([0 70]);
+legend([err_bar{:}], taskCuesAll,'Location', 'Best','Interpreter', 'none','FontSize',12);
+set(gca, 'FontSize', 12);
