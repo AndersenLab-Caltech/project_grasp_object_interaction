@@ -2,8 +2,8 @@ clc
 clear all
 close all
 
-subject_id = 's4';
-unit_region = 'SMG';
+subject_id = 's3';
+unit_region = 'M1';
 
 spike_sorting_type = '_unsorted_aligned_thr_-4.5';
 flag_4S = true; % true = updated 4S action phase; false = original 2S action phase
@@ -41,7 +41,7 @@ end
 
 flagGoTrials = true; % false = No-Go
 
-flagRegressionTuning = false;
+flagRegressionTuning = true;
 
 flagBinPerBin = true;
 multipleComparePhase = true;
@@ -51,7 +51,8 @@ flagSaveData = true;
 %chose cue type:
 taskCuesAll = {'Hand', 'Hand-Object', 'Object'};
 sessions_all = unique(Go_data.session_date);
-numSessions = numel(sessions_all);
+%numSessions = numel(sessions_all);
+numSessions = 1;
 phase_time_idx = Go_data.time_phase_labels{1,1};
 numPhases = numel(unique(phase_time_idx));
 phase_changes_idx = diff(phase_time_idx);
@@ -74,7 +75,7 @@ object_hand_overlap_units_all = cell(numSessions,1);
 % hand_only_units_o_all = cell(numSessions,1);
 object_hand_ho_overlap_units_all = cell(numSessions,1);
 
-for n_session = 1:numSessions
+for n_session = 2 %1:numSessions
 
     disp(['Classification session ' sessions_all{n_session} ]);  
 
@@ -369,29 +370,55 @@ object_total_units = sum(cell2mat(tuned_channels_per_phase(3,:)'));
 
 %% bar plot w/o CIs
 
-for n_type = 1:numel(unTrialType) 
-    if numSessions ~= 1
-        tunedUnitsPerType(n_type,:) = sum(cell2mat(tuned_channels_per_phase(n_type,:)'));
+% for n_type = 1:numel(unTrialType) 
+%     if numSessions ~= 1
+%         tunedUnitsPerType(n_type,:) = sum(cell2mat(tuned_channels_per_phase(n_type,:)'));
+% 
+%     else
+%         tunedUnitsPerType(n_type,:) = cell2mat(tuned_channels_per_phase(n_type,:)');
+% 
+%     end 
+% end
 
-    else
-        tunedUnitsPerType(n_type,:) = cell2mat(tuned_channels_per_phase(n_type,:)');
+% figure('units','normalized','outerposition',[0 0 0.5 0.3]);
+% bar((tunedUnitsPerType'./sum(numUnitsPerSession))*100);
+% %bar((((tunedUnitsPerType')*8)./sum(numUnitsPerSession))*100);
+% %bar(tunedUnitsPerType');
+% hold on;
+% title(['Tuned Units in ' unit_region]);
+% xticks(1:numel(phaseNames));
+% xticklabels(phaseNames);
+% ylabel('% of Total Units');
+% %ylabel('# of Tuned Units');
+% ylim([0 100]);
+% %ylim([0 50]);
+% legend(taskCuesAll, 'Location', 'Best', 'Interpreter', 'none','FontSize',12);
+% set(gca, 'FontSize', 12);
+% hold off
 
-    end 
-end
+phaseNames = {'Action'};
+taskCuesAll = {'G', 'G+O'};
+%tuned_channels_per_phase = [23 36; 38 47]; % pulling out cue and action of H & H+O, specific session for proposal
+%tuned_channels_per_phase = [50; 55]; % pulling out action of H & H+O, specific session for proposal
 
-figure('units','normalized','outerposition',[0 0 0.5 0.3]);
-bar((tunedUnitsPerType'./sum(numUnitsPerSession))*100);
+tunedUnitsPerType = tuned_channels_per_phase;
+figure('Position',[500 500 400 300]);
+h = bar((tunedUnitsPerType'./sum(numUnitsPerSession))*100, 'FaceColor','flat');
+h.CData(1,:) = [0.1176, 0.5333, 0.8980];
+h.CData(2,:) = [0.8471, 0.1059, 0.3765];
 %bar((((tunedUnitsPerType')*8)./sum(numUnitsPerSession))*100);
 %bar(tunedUnitsPerType');
 hold on;
-title(['Tuned Units in ' unit_region]);
-xticks(1:numel(phaseNames));
-xticklabels(phaseNames);
+title(unit_region);
+xticks(1:numel(taskCuesAll));
+xticklabels(taskCuesAll);
+xlim([0.5, 2.5]);
 ylabel('% of Total Units');
 %ylabel('# of Tuned Units');
-ylim([0 70]);
+ylim([0 100]);
+yticks([0 50 100]);
 %ylim([0 50]);
-legend(taskCuesAll, 'Location', 'Best', 'Interpreter', 'none','FontSize',12);
+%legend(taskCuesAll, 'Location', 'Best', 'Interpreter', 'none','FontSize',12);
 set(gca, 'FontSize', 12);
 hold off
 
@@ -413,9 +440,11 @@ end
 title(['Tuned Units Throughout Trial in ' unit_region]);
 xlabel('Time Bins (50 ms)');
 xlim([0 (min_timebin_length + 5)])
+%xticks([0 50 100 150]);
 ylabel('% of Total Units');
 %ylabel('# of Tuned Units');
 ylim([0 70]);
+%yticks([0 20 40 60]);
 %ylim([0 50]);
 legend(taskCuesAll, 'Location', 'Best','FontSize',12);
 set(gca, 'FontSize', 12);

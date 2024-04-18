@@ -7,9 +7,9 @@ close all %- closes all the figures
 % 
 spike_sorting_type = 'unsorted_aligned_thr_-4.5';
 taskName = 'GraspObject_4S_Action';
-taskName = 'GraspObject_Shuffled'; % shuffled images
-subject_id = 's2';
-session_dates = {'20231212'}; 
+%taskName = 'GraspObject_Shuffled'; % shuffled images
+subject_id = 's3';
+session_dates = {'20230921'}; 
 % 
 % DataName = ['Table_' subject_id '_' taskName spike_sorting_type '.mat'];
 % Data = load(fullfile(saveFolder,DataName));
@@ -30,10 +30,10 @@ session_dates = {'20231212'};
 %Data = load('C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\s2\Data\IndividualFiles\GraspObject\unsorted_aligned_thr_-4.5\s2_20230824_unsorted_aligned_thr_-4.5_GraspObject');
 
 % 4S_Action Data (indiv session)
-%Data = load('C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\s2\Data\IndividualFiles\GraspObject_4S_Action\unsorted_aligned_thr_-4.5\s2_20230831_unsorted_aligned_thr_-4.5_GraspObject_4S_Action');
+Data = load('C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\s3\Data\IndividualFiles\GraspObject_4S_Action\unsorted_aligned_thr_-4.5\s3_20230921_unsorted_aligned_thr_-4.5_GraspObject_4S_Action');
 
 % Shuffled images data
-Data = load('C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\s3\Data\Table_s3_GraspObject_Shuffled_unsorted_aligned_thr_-4.5');
+%Data = load('C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\s3\Data\Table_s3_GraspObject_Shuffled_unsorted_aligned_thr_-4.5');
 Data = Data.Go_data;
 
 % remove faulty data
@@ -60,7 +60,7 @@ phaseNames = {'ITI', 'Cue', 'Delay', 'Action'};
 uniqueGraspTypes = unique(Data.GraspType);
 uniqueCueTypes = unique(Data.TrialType);
 
-for n_brain = 1:length(brainAreas) % 1:5 for AN, 1:3 for FG
+for n_brain = [1, 5] %1:length(brainAreas) % 1:5 for AN, 1:3 for FG
     
     frData = Data.frPerChannel{n_brain};
     numChannels = size(frData, 1);
@@ -76,7 +76,7 @@ for n_brain = 1:length(brainAreas) % 1:5 for AN, 1:3 for FG
             go_ind = cell2mat(Data.TrialCue) == 1;
             grasp_go_idx = logical(grasp_ind .* go_ind);
             
-            fr_grasp = squeeze(frData(n_channel,:,grasp_go_idx));
+            fr_grasp = squeeze(frData(n_channel,:,grasp_go_idx)); 
             cueType_name = Data.TrialType(grasp_go_idx);
             fr_sep_cue_type_mean = cell2mat(cellfun(@(x) mean(fr_grasp(:,ismember(cueType_name, x)), 2), uniqueCueTypes, 'UniformOutput', false)');
             fr_sep_cue_type_trial = cellfun(@(x) fr_grasp(:,ismember(cueType_name, x)), uniqueCueTypes, 'UniformOutput', false);

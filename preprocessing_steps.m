@@ -19,7 +19,7 @@ if strcmp(subject_id, 's2')
 elseif strcmp(subject_id, 's3')
     session_dates = {'20240214'};
 elseif strcmp(subject_id, 's4')
-    session_dates = {'20240307'};
+    session_dates = {'20240415'};
 else 
     error('unknown subject')
 end 
