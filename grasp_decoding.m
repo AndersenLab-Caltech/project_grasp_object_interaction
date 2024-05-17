@@ -5,7 +5,7 @@ close all % closes all the figures
 spike_sorting_type = '_unsorted_aligned_thr_-4.5';
 taskName = 'GraspObject_4S_Action';
 %taskName = 'GraspObject_Shuffled'; % shuffled images
-subject_id = 's3';
+subject_id = 's4';
 
 % Data = load('C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\s3\Data\IndividualFiles\GraspObject\unsorted_aligned_thr_-4.5\s3_20230803_unsorted_aligned_thr_-4.5_GraspObject');
 %Data = load('C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\s3\Data\IndividualFiles\GraspObject\unsorted_aligned_thr_-4.5\s3_20230724_unsorted_aligned_thr_-4.5_GraspObject');
@@ -29,7 +29,7 @@ if ~isempty(error_session)
     Go_data = Go_data(~condition,:);
 end
 
-unit_region = 'SMG';
+unit_region = 'AIP';
 brainAreas = Go_data.frPerChannel{6};
 phase_time_idx = Go_data.time_phase_labels{1,1};
 numPhases = numel(unique(phase_time_idx));
@@ -57,7 +57,7 @@ numSessions = numel(sessions_all);
 flagGoTrials = true; %if true, extract Go trials, if false, extract NoGo trials
 figure(); 
 
-for n_session = 2 %1:numSessions
+for n_session = 1:numSessions
 
     disp(['Classification session ' sessions_all{n_session} ]);  
 
@@ -77,6 +77,8 @@ for n_session = 2 %1:numSessions
             SessionData = Go_data.M1_Go(idxThisSession,:);
         elseif strcmp('AIP', unit_region)
             SessionData = Go_data.AIP_Go(idxThisSession,:);
+        elseif strcmp('dlPFC', unit_region)
+            SessionData = Go_data.dlPFC_Go(idxThisSession,:);
         else
             error([unit_region ' does not exist '])
      end
@@ -134,14 +136,16 @@ for n_session = 2 %1:numSessions
             % 
             %     title([ sessions_all{n_session} ' - ' unit_region ' - ' phaseNames{n_phase} ])
             % end
-            % confusion matrices for F30
-            object_labels = sessionLabels(129:192,:); 
-            object_data = data_per_phase_per_all(129:192,:);
-            if n_phase ~= 1
-                [errTrain, errTestTmp] = classification.LDA_classification_rep(object_data,object_labels, 'flagErrorMatrix', true, 'PCA_variance', 95, 'flagLeaveOneOut', true);
 
-                title([unit_region ' - ' phaseNames{n_phase}])
-            end
+
+            % % confusion matrices for F30
+            % object_labels = sessionLabels(129:192,:); 
+            % object_data = data_per_phase_per_all(129:192,:);
+            % if n_phase ~= 1
+            %     [errTrain, errTestTmp] = classification.LDA_classification_rep(object_data,object_labels, 'flagErrorMatrix', true, 'PCA_variance', 95, 'flagLeaveOneOut', true);
+            % 
+            %     title([unit_region ' - ' phaseNames{n_phase}])
+            % end
             
             set(gca, 'FontSize', 12);
 
@@ -168,18 +172,18 @@ end
 
 sgtitle(unit_region)
 
-%%
-figure('Position',[500 500 400 300]);
-region_cue = errTest(4,1:2);
-h = bar(region_cue,'FaceColor','flat');
-h.CData(1,:) = [0.1176, 0.5333, 0.8980];
-h.CData(2,:) = [0.8471, 0.1059, 0.3765];
-%h.CData(3,:) = [1 .7569 .0275];
-yline(1/numel(unique(sessionLabels(trialTypeIdx)))*100,'LineStyle','--','LineWidth',2)
-ylim([0 100])
-xticklabels({'G','G+O'})
-xlim([0.5, 2.5]);
-ylabel('Classification percentage [%]')
-yticks([0 50 100])
-title(unit_region)
-set(gca, 'FontSize', 15);
+%% F30 plot
+% figure('Position',[500 500 400 300]);
+% region_cue = errTest(4,1:2);
+% h = bar(region_cue,'FaceColor','flat');
+% h.CData(1,:) = [0.1176, 0.5333, 0.8980];
+% h.CData(2,:) = [0.8471, 0.1059, 0.3765];
+% h.CData(3,:) = [1 .7569 .0275];
+% yline(1/numel(unique(sessionLabels(trialTypeIdx)))*100,'LineStyle','--','LineWidth',2)
+% ylim([0 100])
+% xticklabels({'G','G+O'})
+% xlim([0.5, 2.5]);
+% ylabel('Classification percentage [%]')
+% yticks([0 50 100])
+% title(unit_region)
+% set(gca, 'FontSize', 15);

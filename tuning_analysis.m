@@ -2,7 +2,7 @@ clc
 clear all
 close all
 
-subject_id = 's3';
+subject_id = 's4';
 unit_region = 'M1';
 
 spike_sorting_type = '_unsorted_aligned_thr_-4.5';
@@ -41,7 +41,7 @@ end
 
 flagGoTrials = true; % false = No-Go
 
-flagRegressionTuning = true;
+flagRegressionTuning = false;
 
 flagBinPerBin = true;
 multipleComparePhase = true;
@@ -51,8 +51,7 @@ flagSaveData = true;
 %chose cue type:
 taskCuesAll = {'Hand', 'Hand-Object', 'Object'};
 sessions_all = unique(Go_data.session_date);
-%numSessions = numel(sessions_all);
-numSessions = 1;
+numSessions = numel(sessions_all);
 phase_time_idx = Go_data.time_phase_labels{1,1};
 numPhases = numel(unique(phase_time_idx));
 phase_changes_idx = diff(phase_time_idx);
@@ -75,7 +74,7 @@ object_hand_overlap_units_all = cell(numSessions,1);
 % hand_only_units_o_all = cell(numSessions,1);
 object_hand_ho_overlap_units_all = cell(numSessions,1);
 
-for n_session = 2 %1:numSessions
+for n_session = 1:numSessions
 
     disp(['Classification session ' sessions_all{n_session} ]);  
 
@@ -323,104 +322,104 @@ object_total_units = sum(cell2mat(tuned_channels_per_phase(3,:)'));
 % upload linear regression analysis
 %load('C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\Workspaces\LinearRegression\s2\s2_GraspObject_2S_unsorted_aligned_thr_-4.5_PMV.mat');
 
-% phase_yCI95 = [];
-% phase_tuned_mean = [];
-% %sessionToInclude = setdiff(1:numSessions,1);
-% 
-% % code for empty/missing session data
-% rowsToKeep = numUnitsPerSession ~= 0;
-% numUnitsPerSession = numUnitsPerSession(rowsToKeep);
-% sessionToInclude = 1:numel(numUnitsPerSession);
-% colsToKeep = true(1,numSessions);
-% for n_session = 1:numSessions
-%     if all(cellfun('isempty',tuned_channels_per_phase(:,n_session)))
-%         colsToKeep(n_session) = false;
-%     end
-% end
-% tuned_channels_per_phase = tuned_channels_per_phase(:,colsToKeep);
-% 
-% figure('units','normalized','outerposition',[0 0 .85 0.3]);
-% for n_type = 1:numel(taskCuesAll)
-%     dataTmp = cell2mat(tuned_channels_per_phase(n_type,sessionToInclude)')*100;
-%     percentage_tuned = dataTmp./numUnitsPerSession(sessionToInclude);
-%     yCI95tmp = utile.calculate_CI(percentage_tuned);
-%     phase_yCI95(n_type,:) = yCI95tmp(2,:);
-%     phase_tuned_mean(n_type,:) = mean(percentage_tuned,1);
-%     % figure()
-%     subplot(1,numel(taskCuesAll),n_type)
-% 
-%     hold on
-%     bar(phase_tuned_mean(n_type,:),'FaceColor',color_info{n_type});
-% 
-%     hold on
-%     errorbar(phase_tuned_mean(n_type,:),phase_yCI95(n_type,:),'Color','k');
-% 
-%     title(taskCuesAll(n_type));
-%     xticks(1:numel(phaseNames));
-%     xticklabels(phaseNames);
-%     xtickangle(45);
-%     ylabel('% of Tuned Units');
-%     ylim([0 70]);
-%     sgtitle(['Tuned Units in ' unit_region])
-%     set(gca, 'FontSize', 12);
-% end
+phase_yCI95 = [];
+phase_tuned_mean = [];
+%sessionToInclude = setdiff(1:numSessions,1);
+
+% code for empty/missing session data
+rowsToKeep = numUnitsPerSession ~= 0;
+numUnitsPerSession = numUnitsPerSession(rowsToKeep);
+sessionToInclude = 1:numel(numUnitsPerSession);
+colsToKeep = true(1,numSessions);
+for n_session = 1:numSessions
+    if all(cellfun('isempty',tuned_channels_per_phase(:,n_session)))
+        colsToKeep(n_session) = false;
+    end
+end
+tuned_channels_per_phase = tuned_channels_per_phase(:,colsToKeep);
+
+figure('units','normalized','outerposition',[0 0 .38 0.38]);
+for n_type = 1:numel(taskCuesAll)
+    dataTmp = cell2mat(tuned_channels_per_phase(n_type,sessionToInclude)')*100;
+    percentage_tuned = dataTmp./numUnitsPerSession(sessionToInclude);
+    yCI95tmp = utile.calculate_CI(percentage_tuned);
+    phase_yCI95(n_type,:) = yCI95tmp(2,:);
+    phase_tuned_mean(n_type,:) = mean(percentage_tuned,1);
+    % figure()
+    subplot(1,numel(taskCuesAll),n_type)
+
+    hold on
+    bar(phase_tuned_mean(n_type,:),'FaceColor',color_info{n_type});
+
+    hold on
+    errorbar(phase_tuned_mean(n_type,:),phase_yCI95(n_type,:),'Color','k');
+
+    title(taskCuesAll(n_type));
+    xticks(1:numel(phaseNames));
+    xticklabels(phaseNames);
+    xtickangle(45);
+    ylabel('% of Total Units');
+    ylim([0 70]);
+    sgtitle(['Tuned Units in ' unit_region])
+    set(gca, 'FontSize', 12);
+end
 
 
 
 
 %% bar plot w/o CIs
 
-% for n_type = 1:numel(unTrialType) 
-%     if numSessions ~= 1
-%         tunedUnitsPerType(n_type,:) = sum(cell2mat(tuned_channels_per_phase(n_type,:)'));
-% 
-%     else
-%         tunedUnitsPerType(n_type,:) = cell2mat(tuned_channels_per_phase(n_type,:)');
-% 
-%     end 
-% end
+for n_type = 1:numel(unTrialType) 
+    if numSessions ~= 1
+        tunedUnitsPerType(n_type,:) = sum(cell2mat(tuned_channels_per_phase(n_type,:)'));
 
-% figure('units','normalized','outerposition',[0 0 0.5 0.3]);
-% bar((tunedUnitsPerType'./sum(numUnitsPerSession))*100);
-% %bar((((tunedUnitsPerType')*8)./sum(numUnitsPerSession))*100);
-% %bar(tunedUnitsPerType');
-% hold on;
-% title(['Tuned Units in ' unit_region]);
-% xticks(1:numel(phaseNames));
-% xticklabels(phaseNames);
-% ylabel('% of Total Units');
-% %ylabel('# of Tuned Units');
-% ylim([0 100]);
-% %ylim([0 50]);
-% legend(taskCuesAll, 'Location', 'Best', 'Interpreter', 'none','FontSize',12);
-% set(gca, 'FontSize', 12);
-% hold off
+    else
+        tunedUnitsPerType(n_type,:) = cell2mat(tuned_channels_per_phase(n_type,:)');
 
-phaseNames = {'Action'};
-taskCuesAll = {'G', 'G+O'};
-%tuned_channels_per_phase = [23 36; 38 47]; % pulling out cue and action of H & H+O, specific session for proposal
-%tuned_channels_per_phase = [50; 55]; % pulling out action of H & H+O, specific session for proposal
+    end 
+end
 
-tunedUnitsPerType = tuned_channels_per_phase;
-figure('Position',[500 500 400 300]);
-h = bar((tunedUnitsPerType'./sum(numUnitsPerSession))*100, 'FaceColor','flat');
-h.CData(1,:) = [0.1176, 0.5333, 0.8980];
-h.CData(2,:) = [0.8471, 0.1059, 0.3765];
+figure('units','normalized','outerposition',[0 0 0.2 0.35]);
+bar((tunedUnitsPerType'./sum(numUnitsPerSession))*100);
 %bar((((tunedUnitsPerType')*8)./sum(numUnitsPerSession))*100);
 %bar(tunedUnitsPerType');
 hold on;
-title(unit_region);
-xticks(1:numel(taskCuesAll));
-xticklabels(taskCuesAll);
-xlim([0.5, 2.5]);
+title(['Tuned Units in ' unit_region]);
+xticks(1:numel(phaseNames));
+xticklabels(phaseNames);
 ylabel('% of Total Units');
 %ylabel('# of Tuned Units');
-ylim([0 100]);
-yticks([0 50 100]);
+ylim([0 70]);
 %ylim([0 50]);
-%legend(taskCuesAll, 'Location', 'Best', 'Interpreter', 'none','FontSize',12);
+legend(taskCuesAll, 'Location', 'Best', 'Interpreter', 'none','FontSize',12);
 set(gca, 'FontSize', 12);
 hold off
+
+% phaseNames = {'Action'};
+% taskCuesAll = {'G', 'G+O'};
+% %tuned_channels_per_phase = [23 36; 38 47]; % pulling out cue and action of H & H+O, specific session for proposal
+% %tuned_channels_per_phase = [50; 55]; % pulling out action of H & H+O, specific session for proposal
+% 
+% tunedUnitsPerType = tuned_channels_per_phase;
+% figure('Position',[500 500 400 300]);
+% h = bar((tunedUnitsPerType'./sum(numUnitsPerSession))*100, 'FaceColor','flat');
+% h.CData(1,:) = [0.1176, 0.5333, 0.8980];
+% h.CData(2,:) = [0.8471, 0.1059, 0.3765];
+% %bar((((tunedUnitsPerType')*8)./sum(numUnitsPerSession))*100);
+% %bar(tunedUnitsPerType');
+% hold on;
+% title(unit_region);
+% xticks(1:numel(taskCuesAll));
+% xticklabels(taskCuesAll);
+% xlim([0.5, 2.5]);
+% ylabel('% of Total Units');
+% %ylabel('# of Tuned Units');
+% ylim([0 100]);
+% yticks([0 50 100]);
+% %ylim([0 50]);
+% %legend(taskCuesAll, 'Location', 'Best', 'Interpreter', 'none','FontSize',12);
+% set(gca, 'FontSize', 12);
+% hold off
 
 %% line plot w/o CIs
 
@@ -429,7 +428,7 @@ for n_type = 1:numel(unTrialType)
 
 end 
 
-figure('units','normalized','outerposition',[0 0 0.65 0.4]);
+figure('units','normalized','outerposition',[0 0 0.3 0.45]);
 plot((tunedUnitsPerTypeBin'./sum(numUnitsPerSession))*100,'LineWidth',2);
 %plot((((tunedUnitsPerTypeBin')*8)./sum(numUnitsPerSession))*100,'LineWidth',2);
 %plot(tunedUnitsPerTypeBin','LineWidth',2);
@@ -451,52 +450,52 @@ set(gca, 'FontSize', 12);
 hold off
 
 %% for line plot w/ 95% CI
-% per_bin_yCI95 = [];
-% per_bin_tuned_mean = [];
-% %sessionToInclude = setdiff(1:numSessions,1);
-% 
-% % code for empty/missing session data
-% rowsToKeep = numUnitsPerSession ~= 0;
-% numUnitsPerSession = numUnitsPerSession(rowsToKeep);
-% sessionToInclude = 1:numel(numUnitsPerSession);
-% colsToKeep = true(1,numSessions);
-% for n_session = 1:numSessions
-%     if all(cellfun('isempty',sum_bin_all(:,n_session)))
-%         colsToKeep(n_session) = false;
-%     end
-% end
-% sum_bin_all = sum_bin_all(:,colsToKeep);
-% 
-% figure('units','normalized','outerposition',[0 0 0.65 0.4]);
-% err_bar = {};
-% for n_type = 1:numel(taskCuesAll)
-%     dataTmp = cell2mat(sum_bin_all(n_type,sessionToInclude))*100;
-%     percentage_tuned = dataTmp./(numUnitsPerSession(sessionToInclude)');
-%     yCI95tmp = utile.calculate_CI(percentage_tuned');
-%     per_bin_yCI95(n_type,:) = yCI95tmp(2,:);
-%     per_bin_tuned_mean(n_type,:) = mean(percentage_tuned,2);
-% 
-%     hold on
-%     err_bar{n_type} = plot(1:length(dataTmp),per_bin_tuned_mean(n_type,:),'Color', color_info{n_type},'LineWidth',2);
-% 
-%     ER = utile.shadedErrorBar(1:length(dataTmp),per_bin_tuned_mean(n_type,:),per_bin_yCI95(n_type,:));
-%     ER.mainLine.Color = color_info{n_type};
-%     ER.patch.FaceColor = color_info{n_type};
-%     ER.edge(1).Color = color_info{n_type};
-%     ER.edge(2).Color = color_info{n_type};
-% end
-% 
-% for n_phase = 1:numPhases
-%     xline(phase_changes(n_phase), 'k--', phaseNames{n_phase}, 'LineWidth', 1.5,'FontSize',12);
-% end
-% 
-% title(['Tuned Units Throughout Trial in ' unit_region]);
-% xlabel('Time Bins (50 ms)');
-% xlim([0 (min_timebin_length + 5)]) % 5 chosen as a buffer
-% ylabel('% of Total Units');
-% ylim([0 70]);
-% legend([err_bar{:}], taskCuesAll,'Location', 'Best','Interpreter', 'none','FontSize',12);
-% set(gca, 'FontSize', 12);
+per_bin_yCI95 = [];
+per_bin_tuned_mean = [];
+%sessionToInclude = setdiff(1:numSessions,1);
+
+% code for empty/missing session data
+rowsToKeep = numUnitsPerSession ~= 0;
+numUnitsPerSession = numUnitsPerSession(rowsToKeep);
+sessionToInclude = 1:numel(numUnitsPerSession);
+colsToKeep = true(1,numSessions);
+for n_session = 1:numSessions
+    if all(cellfun('isempty',sum_bin_all(:,n_session)))
+        colsToKeep(n_session) = false;
+    end
+end
+sum_bin_all = sum_bin_all(:,colsToKeep);
+
+figure('units','normalized','outerposition',[0 0 0.3 0.45]);
+err_bar = {};
+for n_type = 1:numel(taskCuesAll)
+    dataTmp = cell2mat(sum_bin_all(n_type,sessionToInclude))*100;
+    percentage_tuned = dataTmp./(numUnitsPerSession(sessionToInclude)');
+    yCI95tmp = utile.calculate_CI(percentage_tuned');
+    per_bin_yCI95(n_type,:) = yCI95tmp(2,:);
+    per_bin_tuned_mean(n_type,:) = mean(percentage_tuned,2);
+
+    hold on
+    err_bar{n_type} = plot(1:length(dataTmp),per_bin_tuned_mean(n_type,:),'Color', color_info{n_type},'LineWidth',2);
+
+    ER = utile.shadedErrorBar(1:length(dataTmp),per_bin_tuned_mean(n_type,:),per_bin_yCI95(n_type,:));
+    ER.mainLine.Color = color_info{n_type};
+    ER.patch.FaceColor = color_info{n_type};
+    ER.edge(1).Color = color_info{n_type};
+    ER.edge(2).Color = color_info{n_type};
+end
+
+for n_phase = 1:numPhases
+    xline(phase_changes(n_phase), 'k--', phaseNames{n_phase}, 'LineWidth', 1.5,'FontSize',12);
+end
+
+title(['Tuned Units Throughout Trial in ' unit_region]);
+xlabel('Time Bins (50 ms)');
+xlim([0 (min_timebin_length + 5)]) % 5 chosen as a buffer
+ylabel('% of Total Units');
+ylim([0 70]);
+legend([err_bar{:}], taskCuesAll,'Location', 'Best','Interpreter', 'none','FontSize',12);
+set(gca, 'FontSize', 12);
 %%
 % blub = percentage_tuned.*numUnitsPerSession';
 % blub2= mean(blub');
