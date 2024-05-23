@@ -400,6 +400,21 @@ elseif strcmp(subject, 's3')
         wrongTrials = []; 
     elseif strcmp(taskfile,'20240229-103417-103438-GraspObject')
         wrongTrials = [14,15];
+
+    % VARIED_SIZE SESSIONS
+
+    elseif strcmp(taskfile,'20240521-110839-110853-GraspObject')
+        wrongTrials = []; 
+    elseif strcmp(taskfile,'20240521-110839-111606-GraspObject')
+        wrongTrials = []; 
+    elseif strcmp(taskfile,'20240521-112503-112651-GraspObject')
+        wrongTrials = []; 
+    elseif strcmp(taskfile,'20240521-113734-114016-GraspObject')
+        wrongTrials = [18,26,27,28,32];
+    elseif strcmp(taskfile,'20240521-114722-114746-GraspObject')
+        wrongTrials = []; 
+    elseif strcmp(taskfile,'20240521-115446-115456-GraspObject')
+        wrongTrials = [14,15];
         % elseif strcmp(taskfile,'')
     %    wrongTrials = [];   
         
@@ -465,6 +480,19 @@ elseif strcmp(subject, 's4')
     elseif strcmp(taskfile,'20240429-151129-151339-GraspObject')
         wrongTrials = [];   
     elseif strcmp(taskfile,'20240429-151935-151948-GraspObject')
+        wrongTrials = [];
+
+    elseif strcmp(taskfile,'20240509-145935-150256-GraspObject')
+        wrongTrials = [];   
+    elseif strcmp(taskfile,'20240509-151005-151059-GraspObject')
+        wrongTrials = [];   
+    elseif strcmp(taskfile,'20240509-152331-152436-GraspObject')
+        wrongTrials = [];   
+    elseif strcmp(taskfile,'20240509-153249-153259-GraspObject')
+        wrongTrials = [];  
+    elseif strcmp(taskfile,'20240509-153939-154059-GraspObject')
+        wrongTrials = [];   
+    elseif strcmp(taskfile,'20240509-154650-154704-GraspObject')
         wrongTrials = [];
         % elseif strcmp(taskfile,'')
     %    wrongTrials = []; 

@@ -3,18 +3,33 @@ clear all
 close all % closes all the figures
 
 spike_sorting_type = '_unsorted_aligned_thr_-4.5';
-taskName = 'GraspObject_4S_Action';
+%taskName = 'GraspObject_4S_Action';
 %taskName = 'GraspObject_Shuffled'; % shuffled images
-subject_id = 's4';
+taskName = 'GraspObject_Varied_Size'; % varied object/aperature sizes 
+subject_id = 's3';
 
 % Data = load('C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\s3\Data\IndividualFiles\GraspObject\unsorted_aligned_thr_-4.5\s3_20230803_unsorted_aligned_thr_-4.5_GraspObject');
 %Data = load('C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\s3\Data\IndividualFiles\GraspObject\unsorted_aligned_thr_-4.5\s3_20230724_unsorted_aligned_thr_-4.5_GraspObject');
 % Data = load('C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\s3\Data\IndividualFiles\GraspObject\unsorted_aligned_thr_-4.5\s3_20230721_unsorted_aligned_thr_-4.5_GraspObject');
 
-Data = load(['C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\' subject_id '\Data\Table_' subject_id '_' taskName '_unsorted_aligned_thr_-4.5']);
+Data = load(['C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\' subject_id '\Data\Table_' subject_id '_' taskName spike_sorting_type]);
 
 %%
 Go_data = Data.Go_data;
+
+% add Aperature Size column
+sizeKeywords = ['Small', 'Medium', 'Large'];
+Go_data.Aperature_Size = cell(height(Go_data),1);
+% Loop through each label and extract the size information
+for i = 1:height(Go_data)
+    % Use regular expression to find the size keyword after the last underscore
+    tokens = regexp(Go_data.LabelNames{i}, '_(Small|Medium|Large)$', 'tokens');
+    
+    if ~isempty(tokens)
+        % tokens is a cell array; extract the size keyword from it
+        Go_data.Aperature_Size{i} = tokens{1}{1};
+    end
+end
 
 % remove faulty sessions, if any
 error_session = {};
@@ -40,6 +55,7 @@ phaseNames = {'ITI', 'Cue', 'Delay', 'Action'};
 
 uniqueGraspTypes = unique(Go_data.GraspType);
 uniqueCueTypes = unique(Go_data.TrialType);
+uniqueAperatureSize = unique(Data.Aperature_Size);
 
 %define brain region. 
 % loop to session days 

@@ -40,9 +40,9 @@ if ~isempty(error_session)
     Go_data = Go_data(~condition,:);
 end
 
-flag_Shuffled = false; % true = analyze pixelated images
+flag_Shuffled = true; % true = analyze pixelated images
 
-flagRegressionTuning = true;
+flagRegressionTuning = false;
 
 flagBinPerBin = true;
 multipleComparePhase = true;

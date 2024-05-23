@@ -93,6 +93,114 @@ for n_words = 1:image_n
         elseif strcmp('Sphere3Finger_Object_Shuffled', imagename)
                 class =24;
 
+        elseif strcmp('Sphere3Finger_Object_Large', imagename)
+                class =25;
+        
+        elseif strcmp('Sphere3Finger_Object_Medium', imagename)
+                class =26;
+        
+        elseif strcmp('Sphere3Finger_Object_Small', imagename)
+                class =27;
+        
+        elseif strcmp('Sphere3Finger_Hand_Object_Large', imagename)
+                class =28;
+        
+        elseif strcmp('Sphere3Finger_Hand_Object_Medium', imagename)
+                class =29;
+        
+        elseif strcmp('Sphere3Finger_Hand_Object_Small', imagename)
+                class =30;
+
+        elseif strcmp('Sphere3Finger_Hand_Large', imagename)
+                class =31;
+        
+        elseif strcmp('Sphere3Finger_Hand_Medium', imagename)
+                class =32;
+        
+        elseif strcmp('Sphere3Finger_Hand_Small', imagename)
+                class =33;
+
+        elseif strcmp('PalmarPinch_Object_Large', imagename)
+                class =34;
+        
+        elseif strcmp('PalmarPinch_Object_Medium', imagename)
+                class =35;
+        
+        elseif strcmp('PalmarPinch_Object_Small', imagename)
+                class =36;
+        
+        elseif strcmp('PalmarPinch_Hand_Object_Large', imagename)
+                class =37;
+        
+        elseif strcmp('PalmarPinch_Hand_Object_Medium', imagename)
+                class =38;
+        
+        elseif strcmp('PalmarPinch_Hand_Object_Small', imagename)
+                class =39;
+
+        elseif strcmp('PalmarPinch_Hand_Large', imagename)
+                class =40;
+        
+        elseif strcmp('PalmarPinch_Hand_Medium', imagename)
+                class =41;
+        
+        elseif strcmp('PalmarPinch_Hand_Small', imagename)
+                class =42;
+
+        elseif strcmp('MediumWrap_Object_Large', imagename)
+                class =43;
+        
+        elseif strcmp('MediumWrap_Object_Medium', imagename)
+                class =44;
+        
+        elseif strcmp('MediumWrap_Object_Small', imagename)
+                class =45;
+        
+        elseif strcmp('MediumWrap_Hand_Object_Large', imagename)
+                class =46;
+        
+        elseif strcmp('MediumWrap_Hand_Object_Medium', imagename)
+                class =47;
+        
+        elseif strcmp('MediumWrap_Hand_Object_Small', imagename)
+                class =48;
+
+        elseif strcmp('MediumWrap_Hand_Large', imagename)
+                class =49;
+        
+        elseif strcmp('MediumWrap_Hand_Medium', imagename)
+                class =50;
+        
+        elseif strcmp('MediumWrap_Hand_Small', imagename)
+                class =51;
+
+        elseif strcmp('Lateral_Object_Large', imagename)
+                class =52;
+        
+        elseif strcmp('Lateral_Object_Medium', imagename)
+                class =53;
+        
+        elseif strcmp('Lateral_Object_Small', imagename)
+                class =54;
+        
+        elseif strcmp('Lateral_Hand_Object_Large', imagename)
+                class =55;
+        
+        elseif strcmp('Lateral_Hand_Object_Medium', imagename)
+                class =56;
+        
+        elseif strcmp('Lateral_Hand_Object_Small', imagename)
+                class =57;
+
+        elseif strcmp('Lateral_Hand_Large', imagename)
+                class =58;
+        
+        elseif strcmp('Lateral_Hand_Medium', imagename)
+                class =59;
+        
+        elseif strcmp('Lateral_Hand_Small', imagename)
+                class =60;
+
         else
 
             error([ imagename ' - Unknown label, add it to list']);
