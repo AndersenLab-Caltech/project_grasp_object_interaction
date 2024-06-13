@@ -3,10 +3,10 @@ clear all
 close all % closes all the figures
 
 spike_sorting_type = '_unsorted_aligned_thr_-4.5';
-%taskName = 'GraspObject_4S_Action';
+taskName = 'GraspObject_4S_Action';
 %taskName = 'GraspObject_Shuffled'; % shuffled images
-taskName = 'GraspObject_Varied_Size'; % varied object/aperature sizes 
-subject_id = 's3';
+%taskName = 'GraspObject_Varied_Size'; % varied object/aperature sizes 
+subject_id = 's4';
 
 % Data = load('C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\s3\Data\IndividualFiles\GraspObject\unsorted_aligned_thr_-4.5\s3_20230803_unsorted_aligned_thr_-4.5_GraspObject');
 %Data = load('C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\s3\Data\IndividualFiles\GraspObject\unsorted_aligned_thr_-4.5\s3_20230724_unsorted_aligned_thr_-4.5_GraspObject');
@@ -44,7 +44,7 @@ if ~isempty(error_session)
     Go_data = Go_data(~condition,:);
 end
 
-unit_region = 'AIP';
+unit_region = 'dlPFC';
 brainAreas = Go_data.frPerChannel{6};
 phase_time_idx = Go_data.time_phase_labels{1,1};
 numPhases = numel(unique(phase_time_idx));
@@ -55,7 +55,7 @@ phaseNames = {'ITI', 'Cue', 'Delay', 'Action'};
 
 uniqueGraspTypes = unique(Go_data.GraspType);
 uniqueCueTypes = unique(Go_data.TrialType);
-uniqueAperatureSize = unique(Data.Aperature_Size);
+%uniqueAperatureSize = unique(Data.Aperature_Size); % comment out when not varied sizes
 
 %define brain region. 
 % loop to session days 

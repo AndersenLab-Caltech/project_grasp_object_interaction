@@ -5,23 +5,23 @@ clear all
 close all
 
 %subject_id = 's2';  %FG
-subject_id = 's3';  %AN
-%subject_id = 's4';  %GB
+%subject_id = 's3';  %AN
+subject_id = 's4';  %GB
 
 % session details
 subject = hst.Subject(subject_id);
 flag_dPCA = false; 
 flag_4S = true; % updated Action to 4S, should ALWAYS be true
 flag_shuffled = false; % true for shuffled images task
-flag_varied_size = true; % true for varied object/aperature size
+flag_varied_size = false; % true for varied object/aperature size
 
 if strcmp(subject_id, 's2')
     %session_dates = {'20230831','20230907'};
     session_dates = {'20240216'};
 elseif strcmp(subject_id, 's3')
-    session_dates = {'20240521'};
+    session_dates = {'20240523'};
 elseif strcmp(subject_id, 's4')
-    session_dates = {'20240509'};
+    session_dates = {'20240610'};
 else 
     error('unknown subject')
 end 
