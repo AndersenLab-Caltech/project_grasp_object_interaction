@@ -241,14 +241,14 @@ end
 %% SfN plots - all grasps on 1 plot
 
 % Analyzing fr for each grasp, ignoring cue modality and plotting on a single plot
-for n_brain = 5%:length(brainAreas) % 1:5 for AN, 1:3 for FG, [1, 3:6] for GB
+for n_brain = 4%:length(brainAreas) % 1:5 for AN, 1:3 for FG, [1, 3:6] for GB
     
     frData = Data.frPerChannel{n_brain};
     numChannels = size(frData, 1);
     
-    for n_channel = 1:numChannels
+    for n_channel = 13%1:numChannels
         figure('units','normalized','outerposition',[0 0 0.15 0.2])
-        sgtitle([brainAreas{n_brain} ' - Channel ' num2str(n_channel)],'FontWeight','bold');
+        %sgtitle([brainAreas{n_brain} ' - Channel ' num2str(n_channel)],'FontWeight','bold');
         
         hold on; % Hold the plot for multiple grasps
 
@@ -298,8 +298,8 @@ for n_brain = 5%:length(brainAreas) % 1:5 for AN, 1:3 for FG, [1, 3:6] for GB
         xlim([30 134]) % 174 (# timebins) + 5 (buffer)
         xticks([0]); % corresponds to phases and end of trial
         %ylabel('Average Firing Rate (Hz)');
-        %ylim([10 35]);
-        %yticks([15 25 35]);
+        ylim([17 40]);
+        yticks([20 30 40]);
         %legend(plotHandles, {'L', 'MW', 'PP', 'S3F'}, 'Interpreter', 'none', 'Location', 'best');
         set(gca, 'FontSize', 12);
         
@@ -354,16 +354,16 @@ disp(['% Significant channels in ' brainAreas{n_brain} ' for Grasp Types: ' num2
 %% SfN - separating out modality for one grasp
 
 % analyzing fr for each grasp separated by modality
-for n_brain = 1%:length(brainAreas) % 1:5 for AN, 1:3 for FG, [1, 3:6] for GB
+for n_brain = 5%:length(brainAreas) % 1:5 for AN, 1:3 for FG, [1, 3:6] for GB
     
     frData = Data.frPerChannel{n_brain};
     numChannels = size(frData, 1);
     
-    for n_channel = 22%1:numChannels
+    for n_channel = 41%1:numChannels
         % figure('units','normalized','outerposition',[0 0 0.25 0.3])
         % sgtitle([brainAreas{n_brain} ' - Channel ' num2str(n_channel)]);
         
-        for n_grasp = 4%1:numel(uniqueGraspTypes)
+        for n_grasp = 1%1:numel(uniqueGraspTypes)
             
             grasp_ind = ismember(Data.GraspType, uniqueGraspTypes{n_grasp});
             
@@ -425,8 +425,8 @@ for n_brain = 1%:length(brainAreas) % 1:5 for AN, 1:3 for FG, [1, 3:6] for GB
             xlim([30 134]) % 174 (# timebins) + 5 (buffer)
             xticks([0]); % corresponds to phases and end of trial
             %ylabel('Average Firing Rate (Hz)');
-            ylim([10 38]);
-            yticks([15 25 35]);
+            ylim([5 38]);
+            yticks([5 20 35]);
             %legend([err_bar{:}], {'H','H+O','O'}, 'Interpreter', 'none', 'Location', 'best');
             set(gca, 'FontSize', 12);
 
@@ -438,14 +438,14 @@ end
 %% SfN plots - ignore separation of grasps and just look at separation of cue
 
 % Analyzing fr for all grasps combined, separated by cue modality
-for n_brain = 5%:length(brainAreas) % 1:5 for AN, 1:3 for FG, [1, 3:6] for GB
+for n_brain = 4%:length(brainAreas) % 1:5 for AN, 1:3 for FG, [1, 3:6] for GB
     
     frData = Data.frPerChannel{n_brain};
     numChannels = size(frData, 1);
     
-    for n_channel = 62%1:numChannels
+    for n_channel = 13%1:numChannels
         figure('units', 'normalized', 'outerposition', [0 0 0.15 0.2])
-        sgtitle([brainAreas{n_brain} ' - Channel ' num2str(n_channel) ' - All Grasps '], 'FontWeight', 'bold');
+        %sgtitle([brainAreas{n_brain} ' - Channel ' num2str(n_channel) ' - All Grasps '], 'FontWeight', 'bold');
         hold on;
         
         % Combine activity for all grasps
@@ -495,8 +495,8 @@ for n_brain = 5%:length(brainAreas) % 1:5 for AN, 1:3 for FG, [1, 3:6] for GB
         xlim([30 134]) % 174 (# timebins) + 5 (buffer)
         xticks([0]); % corresponds to phases and end of trial
         %ylabel('Average Firing Rate (Hz)');
-        %ylim([11 35]);
-        %yticks([15 25 35]);
+        ylim([17 40]);
+        yticks([20 30 40]);
         %legend([err_bar{:}], uniqueCueTypes, 'Interpreter', 'none', 'Location', 'best');
         set(gca, 'FontSize', 12);
 

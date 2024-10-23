@@ -3,7 +3,7 @@ clear all
 close all
 
 subject_id = 's3';
-unit_region = 'SMG';
+unit_region = 'M1';
 
 spike_sorting_type = '_unsorted_aligned_thr_-4.5';
 flag_4S = true; % true = updated 4S action phase; false = original 2S action phase
@@ -566,7 +566,7 @@ for n_session = 1:numSessions
 end
 sum_bin_all = sum_bin_all(:,colsToKeep);
 
-figure('units','normalized','outerposition',[0 0 0.19 0.17]);
+figure('units','normalized','outerposition',[0 0 0.35 0.25]);
 err_bar = {};
 for n_type = 1:numel(taskCuesAll)
     dataTmp = cell2mat(sum_bin_all(n_type,sessionToInclude))*100;
@@ -595,10 +595,10 @@ end
 xlim([30 134]); %(min_timebin_length + 5)]) % 5 chosen as a buffer
 xticks([0]);
 %ylabel('% of Total Units');
-ylim([0 70]);
-yticks([0 35 70]);
+ylim([0 85]);
+yticks([0 45 85]);
 %legend([err_bar{:}], taskCuesAll,'Location', 'Best','Interpreter', 'none','FontSize',12);
-set(gca, 'FontSize', 10);
+set(gca, 'FontSize', 12);
 
 %% ANOVA for percentage tuned across first half of Cue
 % I need to take the average percent of units across that 1st

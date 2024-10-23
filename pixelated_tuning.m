@@ -42,7 +42,7 @@ end
 
 flag_Shuffled = true; % true = analyze pixelated images
 
-flagRegressionTuning = false;
+flagRegressionTuning = true;
 
 flagBinPerBin = true;
 multipleComparePhase = true;
@@ -72,7 +72,7 @@ phaseNames = {'ITI', 'Cue', 'Delay', 'Action'};
 color_info = {[.1176 .5333 .8980],[.8471 .1059 .3765],[1 .7569 .0275]};
 
 numUnitsPerSession = zeros(numSessions,1);
-for n_session = 1 %:numSessions
+for n_session = 1:numSessions
 
     disp(['Classification session ' sessions_all{n_session} ]);  
 
@@ -268,7 +268,7 @@ for n_session = 1:numSessions
 end
 sum_bin_all = sum_bin_all(:,colsToKeep);
 
-figure('units','normalized','outerposition',[0 0 0.65 0.4]);
+figure('units','normalized','outerposition',[0 0 0.3 0.5]);
 err_bar = {};
 for n_type = 1:numel(taskCuesAll)
     dataTmp = cell2mat(sum_bin_all(n_type,sessionToInclude))*100;
@@ -291,7 +291,7 @@ for n_phase = 1:numPhases
     xline(phase_changes(n_phase), 'k--', phaseNames{n_phase}, 'LineWidth', 1.5,'FontSize',12);
 end
 
-title(['Tuned Units Throughout Trial in ' unit_region]);
+title(append('Tuned Units Throughout Trial in ', unit_region,' - ',taskImageType));
 xlabel('Time Bins (50 ms)');
 xlim([0 (min_timebin_length + 5)]) % 5 chosen as a buffer
 ylabel('% of Total Units');

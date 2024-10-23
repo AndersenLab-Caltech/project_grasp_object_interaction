@@ -201,6 +201,9 @@ for n_words = 1:image_n
         elseif strcmp('Lateral_Hand_Small', imagename)
                 class =60;
 
+        elseif strcmp('PalmarPinch_Hnad_Object', imagename) % misspelled 'Hand' and unsure how to correct it at this stage
+                class = 61;
+
         else
 
             error([ imagename ' - Unknown label, add it to list']);
@@ -283,8 +286,119 @@ for n_words = 1:image_n
         elseif imagename == 24
                 class ='Sphere3Finger_Object_Shuffled';
 
+        elseif imagename == 25
+                class ='Sphere3Finger_Object_Large';
+
+        elseif imagename == 26
+                class ='Sphere3Finger_Object_Medium';
+
+        elseif imagename == 27
+                class ='Sphere3Finger_Object_Small';
+
+        elseif imagename == 28
+                class ='Sphere3Finger_Hand_Object_Large';
+
+        elseif imagename == 29
+                class ='Sphere3Finger_Hand_Object_Medium';
+
+        elseif imagename == 30
+                class ='Sphere3Finger_Hand_Object_Small';
+
+        elseif imagename == 31
+                class ='Sphere3Finger_Hand_Large';
+
+        elseif imagename == 32
+                class ='Sphere3Finger_Hand_Medium';
+
+        elseif imagename == 33
+                class ='Sphere3Finger_Hand_Small';
+
+        elseif imagename == 34
+                class ='PalmarPinch_Object_Large';
+
+        elseif imagename == 35
+                class ='PalmarPinch_Object_Medium';
+
+        elseif imagename == 36
+                class ='PalmarPinch_Object_Small';
+
+        elseif imagename == 37
+                class ='PalmarPinch_Hand_Object_Large';
+
+        elseif imagename == 38
+                class ='PalmarPinch_Hand_Object_Medium';
+
+        elseif imagename == 39
+                class ='PalmarPinch_Hand_Object_Small';
+
+        elseif imagename == 40
+                class ='PalmarPinch_Hand_Large';
+
+        elseif imagename == 41
+                class ='PalmarPinch_Hand_Medium';
+
+        elseif imagename == 42
+                class ='PalmarPinch_Hand_Small';
+
+        elseif imagename == 43
+                class ='MediumWrap_Object_Large';
+
+        elseif imagename == 44
+                class ='MediumWrap_Object_Medium';
+
+        elseif imagename == 45
+                class ='MediumWrap_Object_Small';
+
+        elseif imagename == 46
+                class ='MediumWrap_Hand_Object_Large';
+
+        elseif imagename == 47
+                class ='MediumWrap_Hand_Object_Medium';
+
+        elseif imagename == 48
+                class ='MediumWrap_Hand_Object_Small';
+
+        elseif imagename == 49
+                class ='MediumWrap_Hand_Large';
+
+        elseif imagename == 50
+                class ='MediumWrap_Hand_Medium';
+
+        elseif imagename == 51
+                class ='MediumWrap_Hand_Small';
+
+        elseif imagename == 52
+                class ='Lateral_Object_Large';
+
+        elseif imagename == 53
+                class ='Lateral_Object_Medium';
+
+        elseif imagename == 54
+                class ='Lateral_Object_Small';
+
+        elseif imagename == 55
+                class ='Lateral_Hand_Object_Large';
+
+        elseif imagename == 56
+                class ='Lateral_Hand_Object_Medium';
+
+        elseif imagename == 57
+                class ='Lateral_Hand_Object_Small';
+
+        elseif imagename == 58
+                class ='Lateral_Hand_Large';
+
+        elseif imagename == 59
+                class ='Lateral_Hand_Medium';
+
+        elseif imagename == 60
+                class ='Lateral_Hand_Small';
+
+        elseif imagename == 61
+                class ='PalmarPinch_Hnad_Object'; % misspelled 'Hand' and unsure how to correct it at this stage
+
         else
-            error([ imagename 'Unknown grasp, add it to list']);
+            error([ imagename 'Unknown grasp, add it to list pls']);
         end
         class_all{n_words} = class; 
 

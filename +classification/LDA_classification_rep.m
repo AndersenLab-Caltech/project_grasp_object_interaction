@@ -1,4 +1,4 @@
-function [errTrain,errTest, labelsTestAll,predictedTestAll] = LDA_classification_rep(data,labels, varargin)
+function [errTrain,errTest, labelsTestAll,predictedTestAll,cm] = LDA_classification_rep(data,labels, varargin)
 
 %perform cross validation LDA classification based on 'data' [trials  x features]
 % and 'labels' [trials x 1]
@@ -159,9 +159,11 @@ if flagErrorMatrix
     
      
     [cm,gn] = confusionmat(labelsTestAll, predictedTestAll);
-    class_names = preproc.image2class_simple(gn);
+    class_names = preproc.image2class_simple(gn); %unique(labels); (use when looking at just grasps/modalities)
 
     confusionchart(cm,class_names)
+else
+    cm = [];
 end
 
 
