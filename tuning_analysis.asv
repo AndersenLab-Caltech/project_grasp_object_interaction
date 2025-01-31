@@ -2,13 +2,14 @@ clc
 clear all
 close all
 
-subject_id = 's3';
-unit_region = 'M1';
+subject_id = 's2';
+unit_region = 'SMG';
 
 spike_sorting_type = '_unsorted_aligned_thr_-4.5';
 flag_4S = true; % true = updated 4S action phase; false = original 2S action phase
 flag_shuffled = false; % true = shuffled images task
 flag_GB_images = false; % true for task using images of GB's own hands and real objects
+flag_5050 = false; % true for 50% Go 50% NoGo trials
 
 if ~flag_4S
     TaskCue = 'GraspObject';
@@ -23,6 +24,11 @@ end
 
 if flag_GB_images
     TaskCue = 'GraspObject_GB_Images';
+    min_timebin_length = 174;
+end
+
+if flag_5050
+    TaskCue = 'GraspObject_5050';
     min_timebin_length = 174;
 end
 
@@ -75,17 +81,17 @@ color_info = {[.1176 .5333 .8980],[.8471 .1059 .3765],[1 .7569 .0275]};
 
 numUnitsPerSession = zeros(numSessions,1);
 
-% % Initialize cell arrays to store results
-% hand_ho_overlap_units_all = cell(numSessions,1);
-% % hand_only_units_all = cell(numSessions,1);
-% % ho_only_units_h_all = cell(numSessions,1);
-% object_ho_overlap_units_all = cell(numSessions,1);
-% % object_only_units_all = cell(numSessions,1);
-% % ho_only_units_o_all = cell(numSessions,1);
-% object_hand_overlap_units_all = cell(numSessions,1);
-% % object_only_units_h_all = cell(numSessions,1);
-% % hand_only_units_o_all = cell(numSessions,1);
-% object_hand_ho_overlap_units_all = cell(numSessions,1);
+% Initialize cell arrays to store results
+hand_ho_overlap_units_all = cell(numSessions,1);
+% hand_only_units_all = cell(numSessions,1);
+% ho_only_units_h_all = cell(numSessions,1);
+object_ho_overlap_units_all = cell(numSessions,1);
+% object_only_units_all = cell(numSessions,1);
+% ho_only_units_o_all = cell(numSessions,1);
+object_hand_overlap_units_all = cell(numSessions,1);
+% object_only_units_h_all = cell(numSessions,1);
+% hand_only_units_o_all = cell(numSessions,1);
+object_hand_ho_overlap_units_all = cell(numSessions,1);
 
 
 %% Analysis
@@ -194,82 +200,87 @@ for n_session = 1:numSessions
     end 
 
     
-    % % calculating tuning overlap
-    % % H-HO overlap
-    % hand_ho_overlap_vector = (tuned_channels_per_phase_vector{1,n_session} == 1) & (tuned_channels_per_phase_vector{2,n_session} == 1); % this tells me the overlap between hand and hand-object units
-    % hand_ho_overlap_units = sum(hand_ho_overlap_vector, 1);
-    % hand_ho_overlap_units_all{n_session} = hand_ho_overlap_units;
-    % 
-    % % hand_only_units = tuned_channels_per_phase{1,n_session} - hand_ho_overlap_units;
-    % % ho_only_units_h = tuned_channels_per_phase{2,n_session} - hand_ho_overlap_units;
-    % % hand_only_units_all{n_session} = hand_only_units;
-    % % ho_only_units_h_all{n_session} = ho_only_units_h;
-    % 
-    % % O-HO overlap
-    % object_ho_overlap_vector = (tuned_channels_per_phase_vector{3,n_session} == 1) & (tuned_channels_per_phase_vector{2,n_session} == 1); % this tells me the overlap between object and hand-object units
-    % object_ho_overlap_units = sum(object_ho_overlap_vector, 1);
-    % object_ho_overlap_units_all{n_session} = object_ho_overlap_units;
-    % 
-    % % object_only_units = tuned_channels_per_phase{3,n_session} - object_ho_overlap_units;
-    % % ho_only_units_o = tuned_channels_per_phase{2,n_session} - object_ho_overlap_units;
-    % % object_only_units_all{n_session} = object_only_units;
-    % % ho_only_units_o_all{n_session} = ho_only_units_o;
-    % 
-    % % O-H overlap
-    % object_hand_overlap_vector = (tuned_channels_per_phase_vector{3,n_session} == 1) & (tuned_channels_per_phase_vector{1,n_session} == 1); % this tells me the overlap between object and hand units
-    % object_hand_overlap_units = sum(object_hand_overlap_vector, 1);
-    % object_hand_overlap_units_all{n_session} = object_hand_overlap_units;
-    % 
-    % % object_only_units_h = tuned_channels_per_phase{3,n_session} - object_hand_overlap_units;
-    % % hand_only_units_o = tuned_channels_per_phase{1,n_session} - object_hand_overlap_units;
-    % % object_only_units_h_all{n_session} = object_only_units_h;
-    % % hand_only_units_o_all{n_session} = hand_only_units_o;
-    % 
-    % % all 3 modalities overlap
-    % object_hand_ho_overlap_vector = (tuned_channels_per_phase_vector{3,n_session} == 1) & (tuned_channels_per_phase_vector{1,n_session} == 1) & (tuned_channels_per_phase_vector{2,n_session} == 1); % this tells me the overlap between object and hand units
-    % object_hand_ho_overlap_units = sum(object_hand_ho_overlap_vector, 1);
-    % object_hand_ho_overlap_units_all{n_session} = object_hand_ho_overlap_units;
+    % calculating tuning overlap
+    % H-HO overlap
+    hand_ho_overlap_vector = (tuned_channels_per_phase_vector{1,n_session} == 1) & (tuned_channels_per_phase_vector{2,n_session} == 1); % this tells me the overlap between hand and hand-object units
+    hand_ho_overlap_units = sum(hand_ho_overlap_vector, 1);
+    hand_ho_overlap_units_all{n_session} = hand_ho_overlap_units;
+
+    % hand_only_units = tuned_channels_per_phase{1,n_session} - hand_ho_overlap_units;
+    % ho_only_units_h = tuned_channels_per_phase{2,n_session} - hand_ho_overlap_units;
+    % hand_only_units_all{n_session} = hand_only_units;
+    % ho_only_units_h_all{n_session} = ho_only_units_h;
+
+    % O-HO overlap
+    object_ho_overlap_vector = (tuned_channels_per_phase_vector{3,n_session} == 1) & (tuned_channels_per_phase_vector{2,n_session} == 1); % this tells me the overlap between object and hand-object units
+    object_ho_overlap_units = sum(object_ho_overlap_vector, 1);
+    object_ho_overlap_units_all{n_session} = object_ho_overlap_units;
+
+    % object_only_units = tuned_channels_per_phase{3,n_session} - object_ho_overlap_units;
+    % ho_only_units_o = tuned_channels_per_phase{2,n_session} - object_ho_overlap_units;
+    % object_only_units_all{n_session} = object_only_units;
+    % ho_only_units_o_all{n_session} = ho_only_units_o;
+
+    % O-H overlap
+    object_hand_overlap_vector = (tuned_channels_per_phase_vector{3,n_session} == 1) & (tuned_channels_per_phase_vector{1,n_session} == 1); % this tells me the overlap between object and hand units
+    object_hand_overlap_units = sum(object_hand_overlap_vector, 1);
+    object_hand_overlap_units_all{n_session} = object_hand_overlap_units;
+
+    % object_only_units_h = tuned_channels_per_phase{3,n_session} - object_hand_overlap_units;
+    % hand_only_units_o = tuned_channels_per_phase{1,n_session} - object_hand_overlap_units;
+    % object_only_units_h_all{n_session} = object_only_units_h;
+    % hand_only_units_o_all{n_session} = hand_only_units_o;
+
+    % all 3 modalities overlap
+    object_hand_ho_overlap_vector = (tuned_channels_per_phase_vector{3,n_session} == 1) & (tuned_channels_per_phase_vector{1,n_session} == 1) & (tuned_channels_per_phase_vector{2,n_session} == 1); % this tells me the overlap between object, HO, and hand units
+    object_hand_ho_overlap_units = sum(object_hand_ho_overlap_vector, 1);
+    object_hand_ho_overlap_units_all{n_session} = object_hand_ho_overlap_units;
 end 
 
-% Create the filename using the brain region and analysis type
-filename = ['tuned_channels_' unit_region '_' analysis_type '.mat'];
+hand_ho_overlap_units_all_sessions = sum(cell2mat(hand_ho_overlap_units_all));
+% hand_only_units_all = cell2mat(hand_only_units_all');
+% ho_only_units_h_all = cell2mat(ho_only_units_h_all');
+object_ho_overlap_units_all_sessions = sum(cell2mat(object_ho_overlap_units_all));
+% object_only_units_all = cell2mat(object_only_units_all');
+% ho_only_units_o_all = cell2mat(ho_only_units_o_all');
+object_hand_overlap_units_all_sessions = sum(cell2mat(object_hand_overlap_units_all));
+% object_only_units_h_all = cell2mat(object_only_units_h_all');
+% hand_only_units_o_all = cell2mat(hand_only_units_o_all');
+object_hand_ho_overlap_units_all_sessions = sum(cell2mat(object_hand_ho_overlap_units_all));
 
-directory = 'C:\Users\macthurston\Documents\GitHub\project_grasp_object_interaction\analyzedData';
+% hand_ho_overlap_units_all = sum(hand_ho_overlap_units_all);
+% % hand_only_units_all = sum(hand_only_units_all);
+% % ho_only_units_h_all = sum(ho_only_units_h_all);
+% object_ho_overlap_units_all = sum(object_ho_overlap_units_all);
+% % object_only_units_all = sum(object_only_units_all);
+% % ho_only_units_o_all = sum(ho_only_units_o_all);
+% object_hand_overlap_units_all = sum(object_hand_overlap_units_all);
+% % object_only_units_h_all = sum(object_only_units_h_all);
+% % hand_only_units_o_all = sum(hand_only_units_o_all);
+% object_hand_ho_overlap_units_all = sum(object_hand_ho_overlap_units_all);
+
+hand_total_units = sum(cell2mat(tuned_channels_per_phase(1,:)'));
+ho_total_units = sum(cell2mat(tuned_channels_per_phase(2,:)'));
+object_total_units = sum(cell2mat(tuned_channels_per_phase(3,:)'));
+
+%% saving variables
+goLabel = ["NoGo", "Go"];
+goLabel = goLabel(flagGoTrials + 1);
+
+% Create the filename using the brain region and analysis type
+%filename = ['tuned_channels_' unit_region '_' TaskCue '_' analysis_type '_' goLabel '.mat']; % goLabel determines Go, NoGo label
+filename = "tuned_channels_" + TaskCue + '_' + unit_region + "_" + analysis_type + "_" + goLabel + ".mat";
+
+directory = ['C:\Users\macthurston\Documents\GitHub\project_grasp_object_interaction\analyzedData\' subject_id];
 full_path = fullfile(directory, filename);
 
 % Save the relevant variables with the dynamic filename
-save(full_path, 'sum_bin_all', 'tuned_channels_per_phase', 'tuned_channels_per_phase_vector','numUnitsPerSession');
+save(full_path, 'sum_bin_all', 'tuned_channels_per_phase', 'tuned_channels_per_phase_vector','numUnitsPerSession',...
+    'hand_ho_overlap_units_all','object_ho_overlap_units_all','object_hand_overlap_units_all','object_hand_ho_overlap_units_all',...
+    'hand_ho_overlap_units_all_sessions','object_ho_overlap_units_all_sessions','object_hand_overlap_units_all_sessions','object_hand_ho_overlap_units_all_sessions',...
+    'hand_total_units','ho_total_units','object_total_units');
 
-
-% hand_ho_overlap_units_all = sum(cell2mat(hand_ho_overlap_units_all'));
-% % hand_only_units_all = cell2mat(hand_only_units_all');
-% % ho_only_units_h_all = cell2mat(ho_only_units_h_all');
-% object_ho_overlap_units_all = sum(cell2mat(object_ho_overlap_units_all'));
-% % object_only_units_all = cell2mat(object_only_units_all');
-% % ho_only_units_o_all = cell2mat(ho_only_units_o_all');
-% object_hand_overlap_units_all = sum(cell2mat(object_hand_overlap_units_all'));
-% % object_only_units_h_all = cell2mat(object_only_units_h_all');
-% % hand_only_units_o_all = cell2mat(hand_only_units_o_all');
-% object_hand_ho_overlap_units_all = sum(cell2mat(object_hand_ho_overlap_units_all'));
-% 
-% % hand_ho_overlap_units_all = sum(hand_ho_overlap_units_all);
-% % % hand_only_units_all = sum(hand_only_units_all);
-% % % ho_only_units_h_all = sum(ho_only_units_h_all);
-% % object_ho_overlap_units_all = sum(object_ho_overlap_units_all);
-% % % object_only_units_all = sum(object_only_units_all);
-% % % ho_only_units_o_all = sum(ho_only_units_o_all);
-% % object_hand_overlap_units_all = sum(object_hand_overlap_units_all);
-% % % object_only_units_h_all = sum(object_only_units_h_all);
-% % % hand_only_units_o_all = sum(hand_only_units_o_all);
-% % object_hand_ho_overlap_units_all = sum(object_hand_ho_overlap_units_all);
-% 
-% hand_total_units = sum(cell2mat(tuned_channels_per_phase(1,:)'));
-% ho_total_units = sum(cell2mat(tuned_channels_per_phase(2,:)'));
-% object_total_units = sum(cell2mat(tuned_channels_per_phase(3,:)'));
-
-
-
-%% tuned units overlapping
+%% across sessions tuned units overlapping 
 
 % tuned_channels_per_phase_vector; % 3 (modality) x 5 (sessions)
 % % I can compare within sessions how much overlap there is and then average
@@ -343,11 +354,106 @@ save(full_path, 'sum_bin_all', 'tuned_channels_per_phase', 'tuned_channels_per_p
 % axis equal;
 
 %% load Data
-directory = 'C:\Users\macthurston\Documents\GitHub\project_grasp_object_interaction\analyzedData';
+goLabel = ["NoGo", "Go"];
+goLabel = goLabel(flagGoTrials + 1);
+directory = ['C:\Users\macthurston\Documents\GitHub\project_grasp_object_interaction\analyzedData\' subject_id];
 analysis_type = 'LinearRegression'; % 'LinearRegression' or 'KW'
-filename = ['tuned_channels_' unit_region '_' analysis_type '.mat'];
+filename = "tuned_channels_" + TaskCue + '_' + unit_region + "_" + analysis_type + "_" + goLabel + ".mat";
 full_path = fullfile(directory, filename);
 load(full_path);
+
+%% Overlap values
+% Cue
+all_overlap_cue = object_hand_ho_overlap_units_all_sessions(2);
+h_o_overlap_cue = object_hand_overlap_units_all_sessions(2) - all_overlap_cue;
+h_ho_overlap_cue = hand_ho_overlap_units_all_sessions(2) - all_overlap_cue;
+h_only_units_cue = hand_total_units(2) - (all_overlap_cue + h_o_overlap_cue + h_ho_overlap_cue);
+
+o_ho_overlap_cue = object_ho_overlap_units_all_sessions(2) - all_overlap_cue;
+o_only_units_cue = object_total_units(2) - (all_overlap_cue + h_o_overlap_cue + o_ho_overlap_cue);
+
+ho_only_units_cue = ho_total_units(2) - (all_overlap_cue + h_ho_overlap_cue + o_ho_overlap_cue);
+
+cue_total_units = all_overlap_cue + h_only_units_cue + o_only_units_cue + ho_only_units_cue + h_ho_overlap_cue + h_o_overlap_cue + o_ho_overlap_cue;
+
+% Action
+all_overlap_action = object_hand_ho_overlap_units_all_sessions(4);
+h_o_overlap_action = object_hand_overlap_units_all_sessions(4) - all_overlap_action;
+h_ho_overlap_action = hand_ho_overlap_units_all_sessions(4) - all_overlap_action;
+h_only_units_action = hand_total_units(4) - (all_overlap_action + h_o_overlap_action + h_ho_overlap_action);
+
+o_ho_overlap_action = object_ho_overlap_units_all_sessions(4) - all_overlap_action;
+o_only_units_action = object_total_units(4) - (all_overlap_action + h_o_overlap_action + o_ho_overlap_action);
+
+ho_only_units_action = ho_total_units(4) - (all_overlap_action + h_ho_overlap_action + o_ho_overlap_action);
+
+action_total_units = all_overlap_action + h_only_units_action + o_only_units_action + ho_only_units_action + h_ho_overlap_action + h_o_overlap_action + o_ho_overlap_action;
+
+% Percentages
+% Cue
+all_overlap_cue_perc = (all_overlap_cue/cue_total_units)*100;
+h_o_overlap_cue_perc = (h_o_overlap_cue/cue_total_units)*100;
+h_ho_overlap_cue_perc = (h_ho_overlap_cue/cue_total_units)*100;
+h_only_units_cue_perc = (h_only_units_cue/cue_total_units)*100;
+o_ho_overlap_cue_perc = (o_ho_overlap_cue/cue_total_units)*100;
+o_only_units_cue_perc = (o_only_units_cue/cue_total_units)*100;
+ho_only_units_cue_perc = (ho_only_units_cue/cue_total_units)*100;
+
+% Action
+all_overlap_action_perc = (all_overlap_action/action_total_units)*100;
+h_o_overlap_action_perc = (h_o_overlap_action/action_total_units)*100;
+h_ho_overlap_action_perc = (h_ho_overlap_action/action_total_units)*100;
+h_only_units_action_perc = (h_only_units_action/action_total_units)*100;
+o_ho_overlap_action_perc = (o_ho_overlap_action/action_total_units)*100;
+o_only_units_action_perc = (o_only_units_action/action_total_units)*100;
+ho_only_units_action_perc = (ho_only_units_action/action_total_units)*100;
+
+%% creating bar plots of overlap
+% look at all conditions
+conditionLabels = categorical({'H','H&HO','HO','H&HO&O','HO&O','O','O&H'});
+conditionLabels = reordercats(conditionLabels,{'H','H&HO','HO','H&HO&O','HO&O','O','O&H'});
+cueOverlap = [h_only_units_cue_perc h_ho_overlap_cue_perc ho_only_units_cue_perc all_overlap_cue_perc o_ho_overlap_cue_perc o_only_units_cue_perc h_o_overlap_cue_perc]; % Cue
+actionOverlap = [h_only_units_action_perc h_ho_overlap_action_perc ho_only_units_action_perc all_overlap_action_perc o_ho_overlap_action_perc o_only_units_action_perc h_o_overlap_action_perc]; % Action
+
+% Create the first bar chart
+b1 = bar(conditionLabels, cueOverlap, 'FaceColor', 'b', 'FaceAlpha', 0.5); % Blue bars with transparency
+hold on;
+
+% Create the second bar chart
+b2 = bar(conditionLabels, actionOverlap, 'FaceColor', 'r', 'FaceAlpha', 0.5); % Red bars with transparency
+
+% Add labels and legend
+xlabel('Condition');
+ylabel('% of Tuned Units');
+legend({'Cue', 'Action'});
+title(['Overlapping Units Throughout Trial - ' unit_region]);
+
+hold off;
+%%
+% look at overlap of all 3 conditions with SDs
+% okay so hand_total_units gives the total number of tuned units during the
+% H blocks across all sessions, same for the others (can also look at
+% tuned_units_per_phase if needed). we also have the values of tuned units
+% for the overlap of all 3 for each individual session stored in
+% object_hand_ho_overlap_all. I want to look at the percentage of tuned
+% units contained in the all overlapping condition, so I think I need to add the
+% tuned units that were present in each condition and use that as the
+% denomiator
+
+allOverlap = cell2mat(object_hand_ho_overlap_units_all);
+percentageOverlap = cell(numSessions);
+
+for n_session = 1:numSessions
+    overlap_cue = allOverlap(n_session,2);
+    overlap_action = allOverlap(n_session,4);
+
+    tmpData = cell2mat(tuned_channels_per_phase(:,n_session));
+    total_units_cue = sum(tmpData(:,2));
+    total_units_action = sum(tmpData(:,4));
+    percentageOverlap{n_session} = [overlap_cue/total_units_cue overlap_action/total_units_action];
+end
+
+
 %% bar plot of tuned units w/ 95% CIs (work on getting them all on same plot)
 %save('C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\Workspaces\LinearRegression\s2\s2_GraspObject_2S_unsorted_aligned_thr_-4.5_SMG_Example.mat','sum_bin_all')
 %ExampleSMG = load('C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\Workspaces\LinearRegression\s2\s2_GraspObject_2S_unsorted_aligned_thr_-4.5_SMG_Example.mat');
@@ -396,7 +502,7 @@ for n_type = 1:numel(taskCuesAll)
     xticklabels(phaseNames);
     xtickangle(45);
     ylabel('% of Total Units');
-    ylim([0 100]);
+    ylim([0 70]);
     sgtitle(['Tuned Units in ' unit_region])
     set(gca, 'FontSize', 12);
 end
@@ -486,31 +592,37 @@ xticks(1:numel(phaseNames));
 xticklabels(phaseNames);
 ylabel('% of Total Units');
 %ylabel('# of Tuned Units');
-ylim([0 100]);
-yticks([0 50 100]);
+ylim([0 70]);
+yticks([0 35 70]);
 %ylim([0 50]);
 %legend(taskCuesAll, 'Location', 'Best', 'Interpreter', 'none','FontSize',12);
 set(gca, 'FontSize', 12);
 hold off
 
+% % for F30
 % phaseNames = {'Action'};
 % taskCuesAll = {'G', 'G+O'};
 % %tuned_channels_per_phase = [23 36; 38 47]; % pulling out cue and action of H & H+O, specific session for proposal
-% %tuned_channels_per_phase = [50; 55]; % pulling out action of H & H+O, specific session for proposal
+% tuned_channels_per_phase = [50; 56]; % pulling out action of H & H+O, specific session for proposal
+% %tuned_channels_per_phase = [20 39; 30 46]; % SMG - pulling out cue and
+% %action of H & H+O, specific session for proposal, OVERLAPPING UNITS found
+% %in hand_ho_overlap_units for each phase
+% %tuned_channels_per_phase = [5 24; 16 26]; % AIP - cue and action for H & HO
+% %tuned_channels_per_phase = [34 50; 38 56]; % M1 - cue and action for H & HO
 % 
 % tunedUnitsPerType = tuned_channels_per_phase;
-% figure('Position',[500 500 400 300]);
+% figure('Position',[500 500 200 300]);
 % h = bar((tunedUnitsPerType'./sum(numUnitsPerSession))*100, 'FaceColor','flat');
 % h.CData(1,:) = [0.1176, 0.5333, 0.8980];
 % h.CData(2,:) = [0.8471, 0.1059, 0.3765];
 % %bar((((tunedUnitsPerType')*8)./sum(numUnitsPerSession))*100);
 % %bar(tunedUnitsPerType');
 % hold on;
-% title(unit_region);
+% %title([unit_region ' - ' phaseNames]);
 % xticks(1:numel(taskCuesAll));
 % xticklabels(taskCuesAll);
 % xlim([0.5, 2.5]);
-% ylabel('% of Total Units');
+% %ylabel('% of Total Units');
 % %ylabel('# of Tuned Units');
 % ylim([0 100]);
 % yticks([0 50 100]);
@@ -534,7 +646,7 @@ hold on
 for n_phase = 1:numPhases
     xline(phase_changes(n_phase), 'k--', phaseNames{n_phase}, 'LineWidth', 1.5,'FontSize',12);
 end
-title(['Tuned Units Throughout Trial in ' unit_region ' - ' sessions_all{n_session}]);
+title(['Tuned Units Throughout Trial in ' unit_region]) % ' - ' sessions_all{n_session}]);
 xlabel('Time Bins (50 ms)');
 xlim([0 (min_timebin_length + 5)])
 %xticks([0 50 100 150]);
@@ -566,7 +678,7 @@ for n_session = 1:numSessions
 end
 sum_bin_all = sum_bin_all(:,colsToKeep);
 
-figure('units','normalized','outerposition',[0 0 0.35 0.25]);
+figure('units','normalized','outerposition',[0 0 0.5 0.4]);
 err_bar = {};
 for n_type = 1:numel(taskCuesAll)
     dataTmp = cell2mat(sum_bin_all(n_type,sessionToInclude))*100;
@@ -590,14 +702,16 @@ for n_phase = 1:numPhases
     xline(phase_changes(n_phase), 'k--', 'LineWidth', 1.5,'FontSize',12); %phaseNames{n_phase}
 end
 
-%title(['Tuned Units Throughout Trial in ' unit_region]);
-%xlabel('Time Bins (50 ms)');
-xlim([30 134]); %(min_timebin_length + 5)]) % 5 chosen as a buffer
-xticks([0]);
-%ylabel('% of Total Units');
-ylim([0 85]);
-yticks([0 45 85]);
-%legend([err_bar{:}], taskCuesAll,'Location', 'Best','Interpreter', 'none','FontSize',12);
+title(['Tuned Units Throughout Trial in ' unit_region]);
+xlabel('Time Bins (50 ms)');
+xlim([0 (min_timebin_length + 5)]);    %([30 134]); %shortened %(min_timebin_length + 5)]) % 5 chosen as a buffer
+xticks(phase_changes);
+xticklabels(phaseNames);
+xtickangle(45);
+ylabel('% of Total Units');
+ylim([0 70]);
+yticks([0 35 70]);
+legend([err_bar{:}], taskCuesAll,'Location', 'Best','Interpreter', 'none','FontSize',12);
 set(gca, 'FontSize', 12);
 
 %% ANOVA for percentage tuned across first half of Cue

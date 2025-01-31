@@ -16,8 +16,8 @@ subject = hst.Subject(subject_id);
 % Blackrock.thresholdSession('20230803', 's3', 'THRESHOLD', -4.5, 'noise_model', 'Blackrock')
 % Blackrock.thresholdSession('20230724', 's3', 'THRESHOLD', -4.5, 'noise_model', 'Blackrock')
 
-Blackrock.thresholdSession('20240808', subject_id, 'THRESHOLD', -4.5, 'noise_model', 'Blackrock')
-Blackrock.thresholdSession('20240809', subject_id, 'THRESHOLD', -4.5, 'noise_model', 'Blackrock')
+Blackrock.thresholdSession('20250123', subject_id, 'THRESHOLD', -4.5, 'noise_model', 'Blackrock')
+Blackrock.thresholdSession('20241121', subject_id, 'THRESHOLD', -4.5, 'noise_model', 'Blackrock')
 
 % Blackrock.thresholdSession('20230725', 's2', 'THRESHOLD', -4.5, 'noise_model', 'Blackrock')
 % Blackrock.thresholdSession('20230803', 's2', 'THRESHOLD', -4.5, 'noise_model', 'Blackrock')
@@ -27,7 +27,7 @@ Blackrock.thresholdSession('20240809', subject_id, 'THRESHOLD', -4.5, 'noise_mod
 
 tasktype = {};
 end_comment = {};
-session_dates = {'20240808'};
+session_dates = {'20241121','20250123'};
 taskfileTest = 2;
 
 idxToRemove = [];

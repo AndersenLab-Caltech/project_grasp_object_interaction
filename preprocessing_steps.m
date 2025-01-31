@@ -13,17 +13,17 @@ subject = hst.Subject(subject_id);
 flag_dPCA = false; 
 flag_4S = true; % updated Action to 4S, should ALWAYS be true
 
-% task variations
+% task variations - only 1 should be true
 flag_shuffled = false; % true for shuffled images task
-flag_varied_size = true; % true for varied object/aperature size
+flag_varied_size = false; % true for varied object/aperature size
 flag_GB_images = false; % true for task using images of GB's own hands and real objects
-flag_5050 = false; % true for 50/50 Go/NoGo task
+flag_5050 = true; % true for 50/50 Go/NoGo task
 
 if strcmp(subject_id, 's2')
     %session_dates = {'20230831','20230907'};
-    session_dates = {'20240716'};
+    session_dates = {'20250120'};
 elseif strcmp(subject_id, 's3')
-    session_dates = {'20240808','20240809'};
+    session_dates = {'20241121','20250123'};
 elseif strcmp(subject_id, 's4')
     session_dates = {'20240822'};
 else 

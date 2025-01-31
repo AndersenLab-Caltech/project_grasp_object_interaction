@@ -2,8 +2,8 @@ clc
 clear all
 close all
 
-subject_id = 's2';
-unit_region = 'S1';
+subject_id = 's3';
+unit_region = 'AIP';
 
 spike_sorting_type = '_unsorted_aligned_thr_-4.5';
 %taskName = 'GraspObject_4S_Action';
@@ -198,17 +198,14 @@ shufLabel = shufLabel(flag_Shuffled + 1);
 % Create the filename using the brain region and analysis type
 filename = "tuned_channels_" + TaskCue + '_' + unit_region + "_" + analysis_type + "_" + shufLabel + ".mat";
 
-directory = ['C:\Users\macthurston\Documents\GitHub\project_grasp_object_interaction\analyzedData\' subject_id];
+directory = 'C:\Users\macthurston\Documents\GitHub\project_grasp_object_interaction\analyzedData';
 full_path = fullfile(directory, filename);
 
 % Save the relevant variables with the dynamic filename
 save(full_path, 'sum_bin_all', 'tuned_channels_per_phase', 'tuned_channels_per_phase_vector','numUnitsPerSession');
 
 %% load analyzed data
-shufLabel = ["Regular", "Pixelated"];
-shufLabel = shufLabel(flag_Shuffled + 1);
-
-directory = ['C:\Users\macthurston\Documents\GitHub\project_grasp_object_interaction\analyzedData\' subject_id];
+directory = 'C:\Users\macthurston\Documents\GitHub\project_grasp_object_interaction\analyzedData';
 analysis_type = 'LinearRegression'; % 'LinearRegression' or 'KW'
 filename = "tuned_channels_" + TaskCue + '_' + unit_region + "_" + analysis_type + "_" + shufLabel + ".mat";
 full_path = fullfile(directory, filename);

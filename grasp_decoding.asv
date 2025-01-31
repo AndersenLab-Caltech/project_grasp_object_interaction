@@ -7,7 +7,7 @@ taskName = 'GraspObject_4S_Action';
 %taskName = 'GraspObject_Shuffled'; % shuffled images
 %taskName = 'GraspObject_Varied_Size'; % varied object/aperature sizes
 %taskName = 'GraspObject_GB_Images'; % for GB
-subject_id = 's2';
+subject_id = 's3';
 
 % Data = load('C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\s3\Data\IndividualFiles\GraspObject\unsorted_aligned_thr_-4.5\s3_20230803_unsorted_aligned_thr_-4.5_GraspObject');
 %Data = load('C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\s3\Data\IndividualFiles\GraspObject\unsorted_aligned_thr_-4.5\s3_20230724_unsorted_aligned_thr_-4.5_GraspObject');
@@ -33,7 +33,7 @@ if ~strcmp(taskName, 'GraspObject_Varied_Size')
         Go_data = Go_data(~condition,:);
     end
     
-    unit_region = 'SMG';
+    unit_region = 'M1';
     brainAreas = Go_data.frPerChannel{6};
     phase_time_idx = Go_data.time_phase_labels{1,1};
     numPhases = numel(unique(phase_time_idx));
@@ -104,7 +104,6 @@ if ~strcmp(taskName, 'GraspObject_Varied_Size')
 
         % grasp labels
         graspTypeSession = Go_data.GraspType(idxThisSession,:);
-        
     
         %get idx for Go or NoGo trials
         GoNoGoidx =  logical(cell2mat(Go_data.TrialCue(idxThisSession,:)));
@@ -127,10 +126,6 @@ if ~strcmp(taskName, 'GraspObject_Varied_Size')
         %seperate data according to cue modality 
     
         unTrialType = unique(Go_data.TrialType);
-
-        % separate data according to grasp
-
-        unGraspType = unique(Go_data.GraspType);
     
         % loop through cue modalities/sizes
         for n_type = 1:numel(unTrialType) 
@@ -176,21 +171,14 @@ if ~strcmp(taskName, 'GraspObject_Varied_Size')
                 data_per_phase_per_all = cell2mat(arrayfun(@(x,y) mean(x{1,1}(y{:}== n_phase,:),1),SessionData,time_phase_labels, 'UniformOutput', false));
                 
                 % confusion matrices
-                % if n_phase ~= 1
-                %     %[errTrain, errTestTmp] = classification.LDA_classification_rep(data_per_phase_per_all,sessionLabels, 'flagErrorMatrix', true, 'PCA_variance', 95, 'flagLeaveOneOut', true); % original
-                %     [errTrain, errTestTmp,ConfMat] = classification.LDA_classification_rep(data_per_phase_per_all,sessionLabels_grasp_num,'flagErrorMatrix', false, 'PCA_variance', 95,'flagLeaveOneOut', true); % CM for grasps/modalities separately (can switch out sessionLabels_grasp/modality)
-                % 
-                %     % Store the confusion matrix
-                %     confMatAllSessions{n_session, n_phase} = ConfMat;
-                %     title([ sessions_all{n_session} ' - ' unit_region ' - ' phaseNames{n_phase} ])
-                % end
-                
-                [errTrain, errTestTmp,ConfMat] = classification.LDA_classification_rep(data_per_phase_per_all,sessionLabels_grasp_num,'flagErrorMatrix', false, 'PCA_variance', 95,'flagLeaveOneOut', true); % CM for grasps/modalities separately (can switch out sessionLabels_grasp/modality)
+                if n_phase ~= 1
+                    %[errTrain, errTestTmp] = classification.LDA_classification_rep(data_per_phase_per_all,sessionLabels, 'flagErrorMatrix', true, 'PCA_variance', 95, 'flagLeaveOneOut', true); % original
+                    [errTrain, errTestTmp,~,~,cm] = classification.LDA_classification_rep(data_per_phase_per_all,sessionLabels_grasp_num,'flagErrorMatrix', false, 'PCA_variance', 95,'flagLeaveOneOut', true); % CM for grasps/modalities separately (can switch out sessionLabels_grasp/modality)
 
-                % Store the confusion matrix
-                confMatAllSessions{n_session, n_phase} = ConfMat;
-                
-                
+                    % Store the confusion matrix
+                    confMatAllSessions{n_session, n_phase} = cm;
+                    title([ sessions_all{n_session} ' - ' unit_region ' - ' phaseNames{n_phase} ])
+                end
     
     
                 % % confusion matrices for F30 (Object decoding in one session)
@@ -633,8 +621,8 @@ for n_type = 1:numel(unTrialType) %(unGraspType) %(unTrialType)
 end
 
 % Customize plot appearance
-chance = 1/(numel(unGraspType))*100;
-%chance = 1/(numel(uniqueAperatureSize))*100;
+%chance = 1/(numel(uniqueGraspTypes))*100;
+chance = 1/(numel(uniqueAperatureSize))*100;
 yline(chance,'--k','LineWidth',1.5);
 ylim([0 100]);
 xticks(1:numPhases);

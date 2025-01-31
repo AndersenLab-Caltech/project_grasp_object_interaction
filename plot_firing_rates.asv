@@ -6,11 +6,12 @@ close all
 % saveFolder = 'C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\s3\Data';
 % 
 spike_sorting_type = 'unsorted_aligned_thr_-4.5';
-taskName = 'GraspObject_4S_Action';
-%taskName = 'GraspObject_Shuffled'; % shuffled images
+%taskName = 'GraspObject_4S_Action';
+taskName = 'GraspObject_Shuffled'; % shuffled images
 %taskName = 'GraspObject_Varied_Size'; % varied object/aperature sizes 
+%taskName = 'GraspObject_5050'; % 50% Go, 50% No-Go task
 subject_id = 's3';
-session_date = {'20231030'}; % 0830, 0921, 0929, 1005, 1030
+session_date = {'20240112'}; % 0830, 0921, 0929, 1005, 1030
 % 
 % DataName = ['Table_' subject_id '_' taskName spike_sorting_type '.mat'];
 % Data = load(fullfile(saveFolder,DataName));
@@ -84,16 +85,17 @@ keyboard
 
 %%
 % analyzing fr for each grasp separated by modality
-for n_brain = 4%1:length(brainAreas) % 1:5 for AN, 1:3 for FG, [1, 3:6] for GB
+for n_brain = 1%:length(brainAreas) % 1:5 for AN, 1:3 for FG, [1, 3:6] for GB
     
     frData = Data.frPerChannel{n_brain};
     numChannels = size(frData, 1);
-    
+    allTrials = cell(1,numChannels);
+
     for n_channel = 1:numChannels
-        figure('units','normalized','outerposition',[0 0 0.5 1])
-        sgtitle([brainAreas{n_brain} ' - Channel ' num2str(n_channel)]);
+        % figure('units','normalized','outerposition',[0 0 0.5 1])
+        % sgtitle([brainAreas{n_brain} ' - Channel ' num2str(n_channel)]);
         
-        for n_grasp = 1:numel(uniqueGraspTypes)
+        for n_grasp = 4%1:numel(uniqueGraspTypes)
             
             grasp_ind = ismember(Data.GraspType, uniqueGraspTypes{n_grasp});
             
@@ -107,19 +109,32 @@ for n_brain = 4%1:length(brainAreas) % 1:5 for AN, 1:3 for FG, [1, 3:6] for GB
 
             % max_fr = cellfun(max(fr_sep_cue_type_trial);
             % ylim([0 max_fr]);
-
-            subplot(numel(uniqueGraspTypes), 1, n_grasp);
-            hold on;
-            for n_phase = 1:numPhases
-                xline(phase_changes(n_phase), 'k--', phaseNames{n_phase}, 'LineWidth', 1.5);
-            end
+            
+            % UNCOMMENT HERE
+            % subplot(numel(uniqueGraspTypes), 1, n_grasp);
+            % hold on;
+            % for n_phase = 1:numPhases
+            %     xline(phase_changes(n_phase), 'k--', phaseNames{n_phase}, 'LineWidth', 1.5);
+            % end
             
             %chan_fr = cell2mat(cellfun(@(x) x(n_channel,:), fr_sep_cue_type_mean, 'UniformOutput',false));
             err_bar = {};
             color_info = {[.1176 .5333 .8980],[.8471 .1059 .3765],[1 .7569 .0275]};
 
-            for n_cueType = 1:numel(uniqueCueTypes) % analyzing modalities (HO, H, O)
+            for n_cueType = 1%:numel(uniqueCueTypes) % analyzing modalities (H, HO, O)
                 dataTmp = fr_sep_cue_type_trial{n_cueType}';
+
+                allTrials{n_channel} = dataTmp;
+                
+                % figure;
+                % for i = 1:12
+                %     subplot(4, 3, i); % 4 rows, 3 columns layout
+                %     plot(1:174, dataTmp(i, :));
+                %     title(['Channel - ' num2str(n_channel) 'Trial - ' num2str(i)]);
+                %     xlabel('Timebins');
+                %     ylabel('Value');
+                % end
+
 
                 ci = bootci(1000, {@mean,dataTmp});
                 Mean_FR = squeeze(mean(dataTmp));
@@ -135,30 +150,38 @@ for n_brain = 4%1:length(brainAreas) % 1:5 for AN, 1:3 for FG, [1, 3:6] for GB
                 % yCI95 = bsxfun(@times, sem, CI95(:)); % Calculate 95% Confidence Intervals Of All Experiments At Each Value Of ‘x’
 
                 % ER = utile.shadedErrorBar(1:length(dataTmp),mean(dataTmp),err_ci,'lineprops',color_info{n_cueType},'transparent',true);
-                ER = utile.shadedErrorBar(1:length(dataTmp),mean(dataTmp),err_ci);
-
-                hold on
-                err_bar{n_cueType} = plot(1:length(dataTmp),mean(dataTmp),'Color', color_info{n_cueType},'LineWidth',2);
-
-                ER.mainLine.Color = color_info{n_cueType};
-                ER.patch.FaceColor = color_info{n_cueType};
-                ER.edge(1).Color = color_info{n_cueType};
-                ER.edge(2).Color = color_info{n_cueType};
+                % UNCOMMENT FROM HERE
+                % ER = utile.shadedErrorBar(1:length(dataTmp),mean(dataTmp),err_ci);
+                % 
+                % hold on
+                % err_bar{n_cueType} = plot(1:length(dataTmp),mean(dataTmp),'Color', color_info{n_cueType},'LineWidth',2);
+                % 
+                % ER.mainLine.Color = color_info{n_cueType};
+                % ER.patch.FaceColor = color_info{n_cueType};
+                % ER.edge(1).Color = color_info{n_cueType};
+                % ER.edge(2).Color = color_info{n_cueType};
 
             end 
-            title([uniqueGraspTypes{n_grasp} ' Grasp']);
-            %legend(plotHandles, uniqueCueTypes);
-            legend([err_bar{:}], uniqueCueTypes','Interpreter', 'none');
-             set(gca, 'FontSize', 12)
-
-            hold off;
+            % title([uniqueGraspTypes{n_grasp} ' Grasp']);
+            % %legend(plotHandles, uniqueCueTypes);
+            % legend([err_bar{:}], uniqueCueTypes','Interpreter', 'none');
+            %  set(gca, 'FontSize', 12)
+            % 
+            % hold off;
         end
-        xlabel('Time');
-        ylabel('Average Firing Rate');
-        set(gca, 'FontSize', 12);
+        % xlabel('Time');
+        % ylabel('Average Firing Rate');
+        % set(gca, 'FontSize', 12);
         
     end
 end
+
+%% Finding artifact
+% Convert cell array to a 3D matrix (12x174x63)
+data3D = cat(3, allTrials{:});
+
+% Compute the mean along the third dimension
+meanTrials = mean(data3D, 3);
 
 %%
 % analyzing fr for each grasp separated by aperature size
@@ -241,12 +264,12 @@ end
 %% SfN plots - all grasps on 1 plot
 
 % Analyzing fr for each grasp, ignoring cue modality and plotting on a single plot
-for n_brain = 4%:length(brainAreas) % 1:5 for AN, 1:3 for FG, [1, 3:6] for GB
+for n_brain = 1%:length(brainAreas) % 1:5 for AN, 1:3 for FG, [1, 3:6] for GB
     
     frData = Data.frPerChannel{n_brain};
     numChannels = size(frData, 1);
     
-    for n_channel = 13%1:numChannels
+    for n_channel = 2%1:numChannels
         figure('units','normalized','outerposition',[0 0 0.15 0.2])
         %sgtitle([brainAreas{n_brain} ' - Channel ' num2str(n_channel)],'FontWeight','bold');
         
@@ -298,8 +321,8 @@ for n_brain = 4%:length(brainAreas) % 1:5 for AN, 1:3 for FG, [1, 3:6] for GB
         xlim([30 134]) % 174 (# timebins) + 5 (buffer)
         xticks([0]); % corresponds to phases and end of trial
         %ylabel('Average Firing Rate (Hz)');
-        ylim([17 40]);
-        yticks([20 30 40]);
+        ylim([8 32]);
+        yticks([10 20 30]);
         %legend(plotHandles, {'L', 'MW', 'PP', 'S3F'}, 'Interpreter', 'none', 'Location', 'best');
         set(gca, 'FontSize', 12);
         
@@ -354,16 +377,16 @@ disp(['% Significant channels in ' brainAreas{n_brain} ' for Grasp Types: ' num2
 %% SfN - separating out modality for one grasp
 
 % analyzing fr for each grasp separated by modality
-for n_brain = 5%:length(brainAreas) % 1:5 for AN, 1:3 for FG, [1, 3:6] for GB
+for n_brain = 1%:length(brainAreas) % 1:5 for AN, 1:3 for FG, [1, 3:6] for GB
     
     frData = Data.frPerChannel{n_brain};
     numChannels = size(frData, 1);
     
-    for n_channel = 41%1:numChannels
+    for n_channel = 22%1:numChannels
         % figure('units','normalized','outerposition',[0 0 0.25 0.3])
         % sgtitle([brainAreas{n_brain} ' - Channel ' num2str(n_channel)]);
         
-        for n_grasp = 1%1:numel(uniqueGraspTypes)
+        for n_grasp = 4%1:numel(uniqueGraspTypes)
             
             grasp_ind = ismember(Data.GraspType, uniqueGraspTypes{n_grasp});
             
@@ -425,8 +448,8 @@ for n_brain = 5%:length(brainAreas) % 1:5 for AN, 1:3 for FG, [1, 3:6] for GB
             xlim([30 134]) % 174 (# timebins) + 5 (buffer)
             xticks([0]); % corresponds to phases and end of trial
             %ylabel('Average Firing Rate (Hz)');
-            ylim([5 38]);
-            yticks([5 20 35]);
+            ylim([10 38]);
+            yticks([15 25 35]);
             %legend([err_bar{:}], {'H','H+O','O'}, 'Interpreter', 'none', 'Location', 'best');
             set(gca, 'FontSize', 12);
 
@@ -438,12 +461,12 @@ end
 %% SfN plots - ignore separation of grasps and just look at separation of cue
 
 % Analyzing fr for all grasps combined, separated by cue modality
-for n_brain = 4%:length(brainAreas) % 1:5 for AN, 1:3 for FG, [1, 3:6] for GB
+for n_brain = 5%:length(brainAreas) % 1:5 for AN, 1:3 for FG, [1, 3:6] for GB
     
     frData = Data.frPerChannel{n_brain};
     numChannels = size(frData, 1);
     
-    for n_channel = 13%1:numChannels
+    for n_channel = 2%1:numChannels
         figure('units', 'normalized', 'outerposition', [0 0 0.15 0.2])
         %sgtitle([brainAreas{n_brain} ' - Channel ' num2str(n_channel) ' - All Grasps '], 'FontWeight', 'bold');
         hold on;
@@ -462,7 +485,7 @@ for n_brain = 4%:length(brainAreas) % 1:5 for AN, 1:3 for FG, [1, 3:6] for GB
         color_info = {[.1176 .5333 .8980], [0.8471 0.1059 0.3765], [1 0.7569 0.0275]};
         err_bar = {}; % Initialize error bar handles for legend
 
-        for n_cueType = 1:numel(uniqueCueTypes) % Loop through cue modalities (e.g., HO, H, O)
+        for n_cueType = 1:2%numel(uniqueCueTypes) % Loop through cue modalities (e.g., HO, H, O)
             dataTmp = fr_sep_cue_type_trial{n_cueType}';
             
             % Compute confidence intervals using bootstrapping
@@ -495,9 +518,9 @@ for n_brain = 4%:length(brainAreas) % 1:5 for AN, 1:3 for FG, [1, 3:6] for GB
         xlim([30 134]) % 174 (# timebins) + 5 (buffer)
         xticks([0]); % corresponds to phases and end of trial
         %ylabel('Average Firing Rate (Hz)');
-        ylim([17 40]);
-        yticks([20 30 40]);
-        %legend([err_bar{:}], uniqueCueTypes, 'Interpreter', 'none', 'Location', 'best');
+        ylim([8 32]);
+        yticks([10 20 30]);
+        legend([err_bar{:}], {'G','G+O'}, 'Interpreter', 'none', 'Location', 'best'); %uniqueCueTypes
         set(gca, 'FontSize', 12);
 
         hold off; % Release the plot hold for this figure
