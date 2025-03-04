@@ -2,14 +2,15 @@ clc
 clear all
 close all
 
-subject_id = 's2';
-unit_region = 'SMG';
+subject_id = 's3';
+unit_region = 'S1';
 
 spike_sorting_type = '_unsorted_aligned_thr_-4.5';
 flag_4S = true; % true = updated 4S action phase; false = original 2S action phase
 flag_shuffled = false; % true = shuffled images task
 flag_GB_images = false; % true for task using images of GB's own hands and real objects
 flag_5050 = false; % true for 50% Go 50% NoGo trials
+flag_combined = true; % true for combinations task
 
 if ~flag_4S
     TaskCue = 'GraspObject';
@@ -32,10 +33,32 @@ if flag_5050
     min_timebin_length = 174;
 end
 
+if flag_combined
+    TaskCue = 'GraspObject_Combined';
+    min_timebin_length = 174;
+end
+
 % Task Variables
 % 4S data
 Data = load(['C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\' subject_id '\Data\Table_' subject_id '_' TaskCue spike_sorting_type]);
 Go_data = Data.Go_data;
+
+if flag_combined
+    Go_data.TrialType(strcmp(Go_data.TrialType, 'Unknown')) = {'Combined'}; % adds in Combined as Trial type
+    % add in column with Object Type for Combined trials and original trial types (H, HO, O with Associated)
+    % Loop through each label and extract the object information
+    for i = 1:height(Go_data)
+        % Use regular expression to find the size keyword after the last underscore
+        tokens = regexp(Go_data.LabelNames{i}, '_(deck|block|rod|ball)$', 'tokens');
+        
+        if ~isempty(tokens)
+            % tokens is a cell array; extract the size keyword from it
+            Go_data.ObjectType{i} = tokens{1}{1};
+        else 
+            Go_data.ObjectType{i} = 'Associated';
+        end
+    end
+end
 
 % remove faulty sessions, if any
 error_session = {};
@@ -69,6 +92,9 @@ flagSaveData = true;
 
 %chose cue type:
 taskCuesAll = {'Hand', 'Hand-Object', 'Object'};
+if flag_combined
+    taskCuesAll = {'Combined','Hand', 'Hand-Object', 'Object'};
+end
 sessions_all = unique(Go_data.session_date);
 numSessions = numel(sessions_all);
 phase_time_idx = Go_data.time_phase_labels{1,1};
@@ -78,6 +104,9 @@ phase_changes(1) = 1;
 phase_changes(2:numPhases) = find(phase_changes_idx) + 1;
 phaseNames = {'ITI', 'Cue', 'Delay', 'Action'};
 color_info = {[.1176 .5333 .8980],[.8471 .1059 .3765],[1 .7569 .0275]};
+if flag_combined
+    color_info = {[.3632 .2266 .6055],[.1176 .5333 .8980],[.8471 .1059 .3765],[1 .7569 .0275]};
+end
 
 numUnitsPerSession = zeros(numSessions,1);
 
@@ -247,17 +276,6 @@ object_hand_overlap_units_all_sessions = sum(cell2mat(object_hand_overlap_units_
 % object_only_units_h_all = cell2mat(object_only_units_h_all');
 % hand_only_units_o_all = cell2mat(hand_only_units_o_all');
 object_hand_ho_overlap_units_all_sessions = sum(cell2mat(object_hand_ho_overlap_units_all));
-
-% hand_ho_overlap_units_all = sum(hand_ho_overlap_units_all);
-% % hand_only_units_all = sum(hand_only_units_all);
-% % ho_only_units_h_all = sum(ho_only_units_h_all);
-% object_ho_overlap_units_all = sum(object_ho_overlap_units_all);
-% % object_only_units_all = sum(object_only_units_all);
-% % ho_only_units_o_all = sum(ho_only_units_o_all);
-% object_hand_overlap_units_all = sum(object_hand_overlap_units_all);
-% % object_only_units_h_all = sum(object_only_units_h_all);
-% % hand_only_units_o_all = sum(hand_only_units_o_all);
-% object_hand_ho_overlap_units_all = sum(object_hand_ho_overlap_units_all);
 
 hand_total_units = sum(cell2mat(tuned_channels_per_phase(1,:)'));
 ho_total_units = sum(cell2mat(tuned_channels_per_phase(2,:)'));
@@ -585,10 +603,13 @@ for n_type = 1:numel(unTrialType)
 end
 
 figure('units','normalized','outerposition',[0 0 0.2 0.35]);
-bar((tunedUnitsPerType'./sum(numUnitsPerSession))*100);
+b = bar((tunedUnitsPerType'./sum(numUnitsPerSession))*100);
 %bar((((tunedUnitsPerType')*8)./sum(numUnitsPerSession))*100);
 %bar(tunedUnitsPerType');
 hold on;
+for k = 1:numel(b)
+    b(k).FaceColor = color_info{k}; % Assign colors from cell array
+end
 title(['Tuned Units in ' unit_region]);
 xticks(1:numel(phaseNames));
 xticklabels(phaseNames);
@@ -597,7 +618,7 @@ ylabel('% of Total Units');
 ylim([0 70]);
 yticks([0 35 70]);
 %ylim([0 50]);
-%legend(taskCuesAll, 'Location', 'Best', 'Interpreter', 'none','FontSize',12);
+legend(taskCuesAll, 'Location', 'Best', 'Interpreter', 'none','FontSize',12);
 set(gca, 'FontSize', 12);
 hold off
 
@@ -641,12 +662,15 @@ for n_type = 1:numel(unTrialType)
 end 
 
 figure('units','normalized','outerposition',[0 0 0.3 0.45]);
-plot((tunedUnitsPerTypeBin'./sum(numUnitsPerSession))*100,'LineWidth',2);
+lp = plot((tunedUnitsPerTypeBin'./sum(numUnitsPerSession))*100,'LineWidth',2);
 %plot((((tunedUnitsPerTypeBin')*8)./sum(numUnitsPerSession))*100,'LineWidth',2);
 %plot(tunedUnitsPerTypeBin','LineWidth',2);
 hold on
 for n_phase = 1:numPhases
     xline(phase_changes(n_phase), 'k--', phaseNames{n_phase}, 'LineWidth', 1.5,'FontSize',12);
+end
+for k = 1:numel(lp)
+    lp(k).Color = color_info{k}; % Assign colors manually
 end
 title(['Tuned Units Throughout Trial in ' unit_region]) % ' - ' sessions_all{n_session}]);
 xlabel('Time Bins (50 ms)');
@@ -654,7 +678,7 @@ xlim([0 (min_timebin_length + 5)])
 %xticks([0 50 100 150]);
 ylabel('% of Total Units');
 %ylabel('# of Tuned Units');
-ylim([0 100]);
+ylim([0 70]);
 %yticks([0 20 40 60]);
 %ylim([0 50]);
 legend(taskCuesAll, 'Location', 'Best','FontSize',12);

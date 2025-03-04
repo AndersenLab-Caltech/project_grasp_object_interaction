@@ -7,11 +7,12 @@ close all
 % 
 spike_sorting_type = 'unsorted_aligned_thr_-4.5';
 %taskName = 'GraspObject_4S_Action';
-taskName = 'GraspObject_Shuffled'; % shuffled images
+%taskName = 'GraspObject_Shuffled'; % shuffled images
 %taskName = 'GraspObject_Varied_Size'; % varied object/aperature sizes 
 %taskName = 'GraspObject_5050'; % 50% Go, 50% No-Go task
+taskName = 'GraspObject_Combined'; % all grasp/object combinations task
 subject_id = 's3';
-session_date = {'20240112'}; % 0830, 0921, 0929, 1005, 1030
+session_date = {'20250211'}; % 0830, 0921, 0929, 1005, 1030
 % 
 % DataName = ['Table_' subject_id '_' taskName spike_sorting_type '.mat'];
 % Data = load(fullfile(saveFolder,DataName));
@@ -39,6 +40,23 @@ session_date = {'20240112'}; % 0830, 0921, 0929, 1005, 1030
 % LOAD DATA
 Data = load(['C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\' subject_id '\Data\Table_' subject_id '_' taskName '_' spike_sorting_type]);
 Data = Data.Go_data;
+% add in Combined information
+if strcmp(taskName, 'GraspObject_Combined')
+    Data.TrialType(strcmp(Data.TrialType, 'Unknown')) = {'Combined'}; % adds in Combined as Trial type
+    % add in column with Object Type for Combined trials and original trial types (H, HO, O with Associated)
+    % Loop through each label and extract the object information
+    for i = 1:height(Data)
+        % Use regular expression to find the size keyword after the last underscore
+        tokens = regexp(Data.LabelNames{i}, '_(deck|block|rod|ball)$', 'tokens');
+        
+        if ~isempty(tokens)
+            % tokens is a cell array; extract the size keyword from it
+            Data.ObjectType{i} = tokens{1}{1};
+        else 
+            Data.ObjectType{i} = 'Associated';
+        end
+    end
+end
 Data = Data(strcmp(Data.session_date, session_date), :); % pull desired session
 
 % % add Aperature Size column
@@ -68,7 +86,7 @@ if ~isempty(error_session)
     Data = Data(~condition,:);
 end
 
-brainAreas = Data.frPerChannel{6}; % 6 for original task, 7 for varied sizes?
+brainAreas = Data.frPerChannel{7}; % 6 for original task, 7 for varied sizes?
 phase_time_idx = Data.time_phase_labels{1,1};
 numPhases = numel(unique(phase_time_idx));
 phase_changes_idx = diff(phase_time_idx);
@@ -85,17 +103,17 @@ keyboard
 
 %%
 % analyzing fr for each grasp separated by modality
-for n_brain = 1%:length(brainAreas) % 1:5 for AN, 1:3 for FG, [1, 3:6] for GB
+for n_brain = 3%:5 %:length(brainAreas) % 1:5 for AN, 1:3 for FG, [1, 3:6] for GB
     
     frData = Data.frPerChannel{n_brain};
     numChannels = size(frData, 1);
     allTrials = cell(1,numChannels);
 
     for n_channel = 1:numChannels
-        % figure('units','normalized','outerposition',[0 0 0.5 1])
-        % sgtitle([brainAreas{n_brain} ' - Channel ' num2str(n_channel)]);
+        figure('units','normalized','outerposition',[0 0 0.5 1])
+        sgtitle([brainAreas{n_brain} ' - Channel ' num2str(n_channel)]);
         
-        for n_grasp = 3%1:numel(uniqueGraspTypes)
+        for n_grasp = 1:numel(uniqueGraspTypes)
             
             grasp_ind = ismember(Data.GraspType, uniqueGraspTypes{n_grasp});
             
@@ -111,20 +129,23 @@ for n_brain = 1%:length(brainAreas) % 1:5 for AN, 1:3 for FG, [1, 3:6] for GB
             % ylim([0 max_fr]);
             
             % UNCOMMENT HERE
-            % subplot(numel(uniqueGraspTypes), 1, n_grasp);
-            % hold on;
-            % for n_phase = 1:numPhases
-            %     xline(phase_changes(n_phase), 'k--', phaseNames{n_phase}, 'LineWidth', 1.5);
-            % end
+            subplot(numel(uniqueGraspTypes), 1, n_grasp);
+            hold on;
+            for n_phase = 1:numPhases
+                xline(phase_changes(n_phase), 'k--', phaseNames{n_phase}, 'LineWidth', 1.5);
+            end
             
             %chan_fr = cell2mat(cellfun(@(x) x(n_channel,:), fr_sep_cue_type_mean, 'UniformOutput',false));
             err_bar = {};
             color_info = {[.1176 .5333 .8980],[.8471 .1059 .3765],[1 .7569 .0275]};
+            if strcmp(taskName, 'GraspObject_Combined')
+                color_info = {[.3632 .2266 .6055],[.1176 .5333 .8980],[.8471 .1059 .3765],[1 .7569 .0275]};
+            end
 
-            for n_cueType = 1%:numel(uniqueCueTypes) % analyzing modalities (H, HO, O)
+            for n_cueType = 1:numel(uniqueCueTypes) % analyzing modalities (H, HO, O)
                 dataTmp = fr_sep_cue_type_trial{n_cueType}';
 
-                allTrials{n_channel} = dataTmp;
+                %allTrials{n_channel} = dataTmp; % finding artifact
                 
                 % figure;
                 % for i = 1:12
@@ -151,27 +172,27 @@ for n_brain = 1%:length(brainAreas) % 1:5 for AN, 1:3 for FG, [1, 3:6] for GB
 
                 % ER = utile.shadedErrorBar(1:length(dataTmp),mean(dataTmp),err_ci,'lineprops',color_info{n_cueType},'transparent',true);
                 % UNCOMMENT FROM HERE
-                % ER = utile.shadedErrorBar(1:length(dataTmp),mean(dataTmp),err_ci);
-                % 
-                % hold on
-                % err_bar{n_cueType} = plot(1:length(dataTmp),mean(dataTmp),'Color', color_info{n_cueType},'LineWidth',2);
-                % 
-                % ER.mainLine.Color = color_info{n_cueType};
-                % ER.patch.FaceColor = color_info{n_cueType};
-                % ER.edge(1).Color = color_info{n_cueType};
-                % ER.edge(2).Color = color_info{n_cueType};
+                ER = utile.shadedErrorBar(1:length(dataTmp),mean(dataTmp),err_ci);
+
+                hold on
+                err_bar{n_cueType} = plot(1:length(dataTmp),mean(dataTmp),'Color', color_info{n_cueType},'LineWidth',2);
+
+                ER.mainLine.Color = color_info{n_cueType};
+                ER.patch.FaceColor = color_info{n_cueType};
+                ER.edge(1).Color = color_info{n_cueType};
+                ER.edge(2).Color = color_info{n_cueType};
 
             end 
-            % title([uniqueGraspTypes{n_grasp} ' Grasp']);
-            % %legend(plotHandles, uniqueCueTypes);
-            % legend([err_bar{:}], uniqueCueTypes','Interpreter', 'none');
-            %  set(gca, 'FontSize', 12)
-            % 
-            % hold off;
+            title([uniqueGraspTypes{n_grasp} ' Grasp']);
+            %legend(plotHandles, uniqueCueTypes);
+            legend([err_bar{:}], uniqueCueTypes','Interpreter', 'none');
+             set(gca, 'FontSize', 12)
+
+            hold off;
         end
-        % xlabel('Time');
-        % ylabel('Average Firing Rate');
-        % set(gca, 'FontSize', 12);
+        xlabel('Time');
+        ylabel('Average Firing Rate');
+        set(gca, 'FontSize', 12);
         
     end
 end

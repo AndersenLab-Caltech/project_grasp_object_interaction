@@ -204,6 +204,54 @@ for n_words = 1:image_n
         elseif strcmp('PalmarPinch_Hnad_Object', imagename) % misspelled 'Hand' and unsure how to correct it at this stage
                 class = 61;
 
+        elseif strcmp('Sphere3Finger_Combination_deck', imagename)
+                class =62;
+
+        elseif strcmp('Sphere3Finger_Combination_block', imagename)
+                class =63;
+
+        elseif strcmp('Sphere3Finger_Combination_rod', imagename)
+                class =64;
+
+        elseif strcmp('Sphere3Finger_Combination_ball', imagename)
+                class =65;
+
+        elseif strcmp('Lateral_Combination_deck', imagename)
+                class =66;
+
+        elseif strcmp('Lateral_Combination_block', imagename)
+                class =67;
+
+        elseif strcmp('Lateral_Combination_rod', imagename)
+                class =68;
+
+        elseif strcmp('Lateral_Combination_ball', imagename)
+                class =69;
+
+        elseif strcmp('MediumWrap_Combination_deck', imagename)
+                class =70;
+
+        elseif strcmp('MediumWrap_Combination_block', imagename)
+                class =71;
+
+        elseif strcmp('MediumWrap_Combination_rod', imagename)
+                class =72;
+               
+        elseif strcmp('MediumWrap_Combination_ball', imagename)
+                class =73;
+
+        elseif strcmp('PalmarPinch_Combination_deck', imagename)
+                class =74;
+
+        elseif strcmp('PalmarPinch_Combination_block', imagename)
+                class =75;
+
+        elseif strcmp('PalmarPinch_Combination_rod', imagename)
+                class =76;
+
+        elseif strcmp('PalmarPinch_Combination_ball', imagename)
+                class =77;
+
         else
 
             error([ imagename ' - Unknown label, add it to list']);
@@ -396,6 +444,54 @@ for n_words = 1:image_n
 
         elseif imagename == 61
                 class ='PalmarPinch_Hnad_Object'; % misspelled 'Hand' and unsure how to correct it at this stage
+
+        elseif imagename == 62
+                class ='Sphere3Finger_Combination_deck';
+
+        elseif imagename == 63
+                class ='Sphere3Finger_Combination_block';
+
+        elseif imagename == 64
+                class ='Sphere3Finger_Combination_rod';
+
+        elseif imagename == 65
+                class ='Sphere3Finger_Combination_ball';
+
+        elseif imagename == 66
+                class ='Lateral_Combination_deck';
+
+        elseif imagename == 67
+                class ='Lateral_Combination_block';
+
+        elseif imagename == 68
+                class ='Lateral_Combination_rod';
+
+        elseif imagename == 69
+                class ='Lateral_Combination_ball';
+
+        elseif imagename == 70
+                class ='MediumWrap_Combination_deck';
+
+        elseif imagename == 71
+                class ='MediumWrap_Combination_block';
+
+        elseif imagename == 72
+                class ='MediumWrap_Combination_rod';
+
+        elseif imagename == 73
+                class ='MediumWrap_Combination_ball';
+
+        elseif imagename == 74
+                class ='PalmarPinch_Combination_deck';
+
+        elseif imagename == 75
+                class ='PalmarPinch_Combination_block';
+
+        elseif imagename == 76
+                class ='PalmarPinch_Combination_rod';
+
+        elseif imagename == 77
+                class ='PalmarPinch_Combination_ball';
 
         else
             error([ imagename 'Unknown grasp, add it to list pls']);

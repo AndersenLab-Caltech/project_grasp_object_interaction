@@ -17,13 +17,14 @@ flag_4S = true; % updated Action to 4S, should ALWAYS be true
 flag_shuffled = false; % true for shuffled images task
 flag_varied_size = false; % true for varied object/aperature size
 flag_GB_images = false; % true for task using images of GB's own hands and real objects
-flag_5050 = true; % true for 50/50 Go/NoGo task
+flag_5050 = false; % true for 50/50 Go/NoGo task
+flag_combined = true; % true for combinations task
 
 if strcmp(subject_id, 's2')
     %session_dates = {'20230831','20230907'};
     session_dates = {'20250120'};
 elseif strcmp(subject_id, 's3')
-    session_dates = {'20241121','20250123'};
+    session_dates = {'20250211','20250212'};
 elseif strcmp(subject_id, 's4')
     session_dates = {'20240822'};
 else 
@@ -64,6 +65,11 @@ end
 
 if flag_5050
     TaskCue = 'GraspObject_5050';
+    min_timebin_length = 174;
+end
+
+if flag_combined
+    TaskCue = 'GraspObject_Combined';
     min_timebin_length = 174;
 end
 
