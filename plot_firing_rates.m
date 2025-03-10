@@ -12,7 +12,7 @@ spike_sorting_type = 'unsorted_aligned_thr_-4.5';
 %taskName = 'GraspObject_5050'; % 50% Go, 50% No-Go task
 taskName = 'GraspObject_Combined'; % all grasp/object combinations task
 subject_id = 's3';
-session_date = {'20250211'}; % 0830, 0921, 0929, 1005, 1030
+session_date = {'20250212'}; % 0830, 0921, 0929, 1005, 1030
 % 
 % DataName = ['Table_' subject_id '_' taskName spike_sorting_type '.mat'];
 % Data = load(fullfile(saveFolder,DataName));
@@ -99,6 +99,7 @@ uniqueCueTypes = unique(Data.TrialType);
 %uniqueAperatureSize = unique(Data.Aperature_Size);
 
 %%
+
 keyboard
 
 %%

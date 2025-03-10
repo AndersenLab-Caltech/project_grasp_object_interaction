@@ -300,6 +300,22 @@ if strcmp(subject, 's2')
     elseif strcmp(taskfile, '20250120-163402-163411-GraspObject')
         wrongTrials = [];
 
+    % VARIED SIZES SESSIONS %
+
+    elseif strcmp(taskfile, '20250305-155049-155103-GraspObject')
+        wrongTrials = [];
+    elseif strcmp(taskfile, '20250305-160306-160316-GraspObject')
+        wrongTrials = [];
+    elseif strcmp(taskfile, '20250305-160833-160851-GraspObject')
+        wrongTrials = [];
+    elseif strcmp(taskfile, '20250305-161353-161529-GraspObject')
+        wrongTrials = [];
+    elseif strcmp(taskfile, '20250305-162100-162109-GraspObject')
+        wrongTrials = [];
+    elseif strcmp(taskfile, '20250305-162601-162609-GraspObject')
+        wrongTrials = [];
+
+
 
  %  elseif strcmp(taskfile, '')
  %       wrongTrials = [];

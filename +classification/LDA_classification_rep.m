@@ -159,7 +159,7 @@ if flagErrorMatrix
     
      
     [cm,gn] = confusionmat(labelsTestAll, predictedTestAll);
-    class_names = preproc.image2class_simple(gn); %unique(labels); (use when looking at just grasps/modalities)
+    class_names = unique(labels); %preproc.image2class_simple(gn); %original %unique(labels); (use when looking at just grasps/modalities/sizes)
 
     confusionchart(cm,class_names)
 else
