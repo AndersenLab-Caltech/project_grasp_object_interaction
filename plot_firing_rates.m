@@ -12,7 +12,7 @@ spike_sorting_type = 'unsorted_aligned_thr_-4.5';
 %taskName = 'GraspObject_5050'; % 50% Go, 50% No-Go task
 taskName = 'GraspObject_Combined'; % all grasp/object combinations task
 subject_id = 's3';
-session_date = {'20250212'}; % 0830, 0921, 0929, 1005, 1030
+session_date = {'20250424'}; % 0830, 0921, 0929, 1005, 1030
 % 
 % DataName = ['Table_' subject_id '_' taskName spike_sorting_type '.mat'];
 % Data = load(fullfile(saveFolder,DataName));
@@ -40,23 +40,7 @@ session_date = {'20250212'}; % 0830, 0921, 0929, 1005, 1030
 % LOAD DATA
 Data = load(['C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\' subject_id '\Data\Table_' subject_id '_' taskName '_' spike_sorting_type]);
 Data = Data.Go_data;
-% add in Combined information
-if strcmp(taskName, 'GraspObject_Combined')
-    Data.TrialType(strcmp(Data.TrialType, 'Unknown')) = {'Combined'}; % adds in Combined as Trial type
-    % add in column with Object Type for Combined trials and original trial types (H, HO, O with Associated)
-    % Loop through each label and extract the object information
-    for i = 1:height(Data)
-        % Use regular expression to find the size keyword after the last underscore
-        tokens = regexp(Data.LabelNames{i}, '_(deck|block|rod|ball)$', 'tokens');
-        
-        if ~isempty(tokens)
-            % tokens is a cell array; extract the size keyword from it
-            Data.ObjectType{i} = tokens{1}{1};
-        else 
-            Data.ObjectType{i} = 'Associated';
-        end
-    end
-end
+
 Data = Data(strcmp(Data.session_date, session_date), :); % pull desired session
 
 % % add Aperature Size column
@@ -86,7 +70,7 @@ if ~isempty(error_session)
     Data = Data(~condition,:);
 end
 
-brainAreas = Data.frPerChannel{7}; % 6 for original task, 7 for varied sizes?
+brainAreas = Data.frPerChannel{7}; % 6 for original task, 7 for Ripple?
 phase_time_idx = Data.time_phase_labels{1,1};
 numPhases = numel(unique(phase_time_idx));
 phase_changes_idx = diff(phase_time_idx);
@@ -491,12 +475,12 @@ end
 %% SfN plots - ignore separation of grasps and just look at separation of cue
 
 % Analyzing fr for all grasps combined, separated by cue modality
-for n_brain = 5%:length(brainAreas) % 1:5 for AN, 1:3 for FG, [1, 3:6] for GB
+for n_brain = 3%:length(brainAreas) % 1:5 for AN, 1:3 for FG, [1, 3:6] for GB
     
     frData = Data.frPerChannel{n_brain};
     numChannels = size(frData, 1);
     
-    for n_channel = 2%1:numChannels
+    for n_channel = 1:numChannels
         figure('units', 'normalized', 'outerposition', [0 0 0.15 0.2])
         %sgtitle([brainAreas{n_brain} ' - Channel ' num2str(n_channel) ' - All Grasps '], 'FontWeight', 'bold');
         hold on;
@@ -515,7 +499,7 @@ for n_brain = 5%:length(brainAreas) % 1:5 for AN, 1:3 for FG, [1, 3:6] for GB
         color_info = {[.1176 .5333 .8980], [0.8471 0.1059 0.3765], [1 0.7569 0.0275]};
         err_bar = {}; % Initialize error bar handles for legend
 
-        for n_cueType = 1:2%numel(uniqueCueTypes) % Loop through cue modalities (e.g., HO, H, O)
+        for n_cueType = 4%1:2%numel(uniqueCueTypes) % Loop through cue modalities (e.g., HO, H, O)
             dataTmp = fr_sep_cue_type_trial{n_cueType}';
             
             % Compute confidence intervals using bootstrapping
@@ -557,6 +541,127 @@ for n_brain = 5%:length(brainAreas) % 1:5 for AN, 1:3 for FG, [1, 3:6] for GB
     end
 end
 
+%% figuring out what is wrong with Object only for Combined
+% too many channels, plotting all channel's FR on one plot
+
+for n_brain = 3 % Modify as needed
+    
+    frData = Data.frPerChannel{n_brain}; % Extract firing rate data
+    numChannels = size(frData, 1);
+    channelsPerFigure = 16; % 4x4 layout
+    numFigures = ceil(numChannels / channelsPerFigure); % Number of figures required
+    
+    for figIdx = 1:numFigures
+        figure('units', 'normalized', 'outerposition', [0 0 1 1]) % Fullscreen figure
+        
+        % Loop over 16 channels per figure
+        for n_channel_sub = 1:channelsPerFigure
+            n_channel = (figIdx - 1) * channelsPerFigure + n_channel_sub;
+            
+            % Ensure we don't exceed the total number of channels
+            if n_channel > numChannels
+                break;
+            end
+            
+            subplot(4, 4, n_channel_sub);
+            hold on;
+            
+            % Get all "Go" trials
+            all_grasp_idx = cell2mat(Data.TrialCue) == 1; 
+            
+            % Extract firing rate data for all trials
+            fr_combined = squeeze(frData(n_channel, :, all_grasp_idx)); 
+            
+            % Separate trials by cue modality
+            CueType_name = Data.TrialType(all_grasp_idx);
+            fr_sep_cue_type_trial = cellfun(@(x) fr_combined(:, ismember(CueType_name, x)), uniqueCueTypes, 'UniformOutput', false);
+
+            % Define colors for cue types
+            color_info = {[.1176 .5333 .8980], [0.8471 0.1059 0.3765], [1 0.7569 0.0275]};
+
+            for n_cueType = 3 % Modify to plot specific cue modalities if needed
+                dataTmp = fr_sep_cue_type_trial{n_cueType}';
+
+                % Plot each trial separately
+                for trial_idx = 1:size(dataTmp, 1)
+                    plot(1:size(dataTmp, 2), dataTmp(trial_idx, :), 'LineWidth', 0.5);
+                end
+            end
+
+            % Add vertical lines for phase changes
+            for n_phase = 1:numPhases
+                xline(phase_changes(n_phase), 'k--', 'LineWidth', 1);
+            end
+
+            % Formatting
+            xlim([0 174]);
+            %ylim([8 32]);
+            title(['Ch ' num2str(n_channel)]);
+            set(gca, 'FontSize', 10);
+            hold off;
+        end
+    end
+end
+
+%% all chan's FR per trial
+
+frData = Data.frPerChannel{1}; 
+numChannels = size(frData, 1);
+%numTrials = size(frData,3); % for entire dataset
+uniqueTrialTypes = unique(Data.TrialType);
+
+trialsPerFigure = 18; % 3x6 grid
+% numFigures = ceil(numTrials / trialsPerFigure); % Number of figures
+% required for complete dataset
+
+for n_type = 1:length(uniqueTrialTypes)
+    trialType = uniqueTrialTypes{n_type}; % Current trial type
+    
+    % Find indices of trials belonging to this type
+    trialTypeIdx = strcmp(Data.TrialType, trialType);
+    numTrials = sum(trialTypeIdx);
+    
+    % Extract firing rate data for this trial type
+    fr_combined = frData(:, :, trialTypeIdx); % (channels x timebins x selected trials)
+    
+    numFigures = ceil(numTrials / trialsPerFigure); % Number of figures required
+
+    for figIdx = 1:numFigures
+        figure('units', 'normalized', 'outerposition', [0 0 1 1]); 
+        sgtitle(['Trial Type: ' trialType], 'FontSize', 14, 'FontWeight', 'bold');
+       
+        
+        % Loop through 18 trials per figure
+        for trialSubIdx = 1:trialsPerFigure
+            trialIdx = (figIdx - 1) * trialsPerFigure + trialSubIdx;
+            
+            % Ensure we don't exceed the total number of trials
+            if trialIdx > numTrials
+                break;
+            end
+            
+            subplot(3, 6, trialSubIdx);
+            hold on;
+            
+            % Plot each channel's firing rate for this trial
+            for n_channel = 1:numChannels
+                plot(1:size(fr_combined, 2), squeeze(fr_combined(n_channel, :, trialIdx)), 'LineWidth', 1);
+            end
+            
+            % Add vertical lines for phase changes
+            for n_phase = 1:numPhases
+                xline(phase_changes(n_phase), 'k--', 'LineWidth', 1.5);
+            end
+    
+            % Formatting
+            xlim([0 174]); 
+            %ylim([8 32]); 
+            title(['Trial ' num2str(trialIdx)]);
+            set(gca, 'FontSize', 10);
+            hold off;
+        end
+    end
+end
 
 %% testing for sig modality differences (modality-specific units)
 % Analyzing fr for all grasps combined, separated by cue modality

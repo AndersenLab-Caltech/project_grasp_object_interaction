@@ -333,13 +333,10 @@ else
         % get unique grasp types
         unGraspType = unique(graspTypeSession);
 
-        % loop through Condition/Grasp types
-        for n_grasp = 1:numel(unTrialType)
+        % loop through Grasp types
+        for n_grasp = 1:numel(unGraspType)
             
-            % find idx of trial type 
-            trialTypeIdx = ismember(trialTypeSession, unTrialType(n_type));
-            
-            % graspTypeIdx = ismember(graspTypeSession, unGraspType(n_grasp));
+            graspTypeIdx = ismember(graspTypeSession, unGraspType(n_grasp));
     
             % loop through S/M/L 
             for n_size = 1:numel(unApertureSize)

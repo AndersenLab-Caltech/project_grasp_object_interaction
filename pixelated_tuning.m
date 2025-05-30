@@ -3,7 +3,7 @@ clear all
 close all
 
 subject_id = 's2';
-unit_region = 'S1';
+unit_region = 'SMG';
 
 spike_sorting_type = '_unsorted_aligned_thr_-4.5';
 %taskName = 'GraspObject_4S_Action';
@@ -214,23 +214,17 @@ filename = "tuned_channels_" + TaskCue + '_' + unit_region + "_" + analysis_type
 full_path = fullfile(directory, filename);
 load(full_path);
 %% PLOTS
+if flag_Shuffled
+    taskImageType = {'Pixelated Images'};
+else
+    taskImageType = 'Regular Images';
+end
 
 % bar graph w/ CIs
 phase_yCI95 = [];
 phase_tuned_mean = [];
-%sessionToInclude = setdiff(1:numSessions,1);
 
-% code for empty/missing session data
-% rowsToKeep = numUnitsPerSession ~= 0;
-% numUnitsPerSession = numUnitsPerSession(rowsToKeep);
 sessionToInclude = 1:numel(numUnitsPerSession);
-%colsToKeep = true(1,numSessions);
-% for n_session = 1:numSessions
-%     if all(cellfun('isempty',tuned_channels_per_phase(:,n_session)))
-%         colsToKeep(n_session) = false;
-%     end
-% end
-% tuned_channels_per_phase = tuned_channels_per_phase(:,colsToKeep);
 
 figure('units','normalized','outerposition',[0 0 .3 0.45]);
 for n_type = 1:numel(taskCuesAll)
@@ -278,6 +272,59 @@ end
 % legend(taskCuesAll, 'Location', 'Best','FontSize',12);
 % set(gca, 'FontSize', 12);
 % hold off
+%% plotting only Cue phase
+if flag_Shuffled
+    taskImageType = {'Pixelated Images'};
+else
+    taskImageType = 'Regular Images';
+end
+
+% Extract Cue phase index
+cueIdx = find(strcmp(phaseNames, 'Cue')); % Adjust if needed
+
+sessionToInclude = 1:numel(numUnitsPerSession);
+%sessionToInclude = sessionToInclude(2:end); % take out first session (maybe bc novel, barely any tuning)
+numConditions = numel(taskCuesAll);
+
+% Preallocate arrays
+phase_yCI95 = zeros(numConditions, 1);
+phase_tuned_mean = zeros(numConditions, 1);
+
+% Collect data for Cue phase
+figure('units','normalized','outerposition',[0 0 .13 0.25]); 
+hold on
+
+for n_type = 1:numel(taskCuesAll)
+
+    dataTmp = cell2mat(tuned_channels_per_phase(n_type, sessionToInclude)') * 100;
+    percentage_tuned = dataTmp ./ numUnitsPerSession(sessionToInclude);
+    
+    % Compute mean and CI
+    yCI95tmp = utile.calculate_CI(percentage_tuned(:, cueIdx)); 
+    phase_yCI95(n_type) = yCI95tmp(2);
+    phase_tuned_mean(n_type) = mean(percentage_tuned(:, cueIdx), 1);
+
+    % Bar plot for mean
+    bar(n_type, phase_tuned_mean(n_type), 'FaceColor', color_info{n_type}, 'BarWidth', 0.6);
+    
+    % Error bars for CI
+    errorbar(n_type, phase_tuned_mean(n_type), phase_yCI95(n_type), 'k', 'LineWidth', 1.5);
+    
+    % Scatter plot of individual session data points
+    scatter(repmat(n_type, numel(sessionToInclude), 1), percentage_tuned(:, cueIdx), 50, 'k', 'filled', 'MarkerFaceAlpha', 0.6);
+end
+
+% Formatting
+xticks(1:numConditions);
+xticklabels([]);%taskCuesAll);
+xtickangle(45);
+%ylabel('% of Tuned Units');
+ylim([0 70]);
+yticks([0 35 70]);
+title(unit_region); %' -- ' phaseNames{2} ' -- ' taskImageType])
+set(gca, 'FontSize', 12);
+
+hold off
 
 %% for line plot w/ 95% CI
 per_bin_yCI95 = [];

@@ -56,7 +56,7 @@ if ~strcmp(taskName, 'GraspObject_Varied_Size')
         Go_data = Go_data(~condition,:);
     end
     
-    unit_region = 'M1';
+    unit_region = 'AIP';
     brainAreas = Go_data.frPerChannel{6};
     phase_time_idx = Go_data.time_phase_labels{1,1};
     numPhases = numel(unique(phase_time_idx));
@@ -632,7 +632,7 @@ for n_phase = 2:numPhases
     % Initialize a figure for the current phase to display multiple confusion matrices (one for each grasp type)
     figure('units','normalized','outerposition',[0 0 .95 0.4]); 
     
-    for n_type = 1:numel(unTrialType) % grasp/trialType
+    for n_type = 1%:numel(unTrialType) % grasp/trialType
         % Initialize an empty matrix for the summed confusion matrix for the current phase and grasp type
         confMatSize = size(confMatAllSessions{1, n_phase, n_type}); % Get size of the first confusion matrix for the phase and type
         confMatSum = zeros(confMatSize);  % Initialize the sum matrix with zeros
@@ -652,7 +652,7 @@ for n_phase = 2:numPhases
         confMatAvgNorm = round((confMatAvg ./ sum(confMatAvg, 2)) * 100);
         
         % Create subplot for the current grasp type
-        subplot(1, numel(unTrialType), n_type); % numel(unGrasp/TrialType)
+        subplot(1, 1, 1);%numel(unTrialType), n_type); % numel(unGrasp/TrialType)
         
         % Display the normalized average confusion matrix for this grasp type
         cmx = confusionchart(confMatAvgNorm);
@@ -811,7 +811,7 @@ xticks(1:numel(phaseNames));%numPhases);
 xticklabels(phaseNames);
 ylabel('Classification percentage [%]');
 yticks([0 50 100]);
-legend(unTrialType, 'Interpreter', 'none');
+legend(unGraspType, 'Interpreter', 'none');
 title(unit_region);
 set(gca, 'FontSize', 12);
 hold off;

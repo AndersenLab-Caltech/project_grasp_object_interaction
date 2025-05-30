@@ -22,9 +22,9 @@ flag_combined = false; % true for combinations task
 
 if strcmp(subject_id, 's2')
     %session_dates = {'20230831','20230907'};
-    session_dates = {'20250305'};
+    session_dates = {'20250517','20250519','20250520'};
 elseif strcmp(subject_id, 's3')
-    session_dates = {'20250211','20250212'};
+    session_dates = {'20250424'};
 elseif strcmp(subject_id, 's4')
     session_dates = {'20240822'};
 else 
@@ -106,8 +106,27 @@ for n_session = session_date_idx
     
     [numb,txt,raw] = xlsread(fullfile(pwd,'ExcelFiles',filename));
 
-    session_date = str2double(session_dates{n_session});
+    session_date = str2double(session_dates{n_session}); % original code to use if no letter after date (default)
     good_datablocks = numb(session_date==numb(:,1), 2:end);
+
+    % % edit: code to accommodate letter after date
+    % current_session_id = session_dates{n_session};
+    % 
+    % % Read session IDs from Excel file (skip 2 headers (date and cue type))
+    % excel_session_ids = raw(3:end, 1);  % cell array of strings
+    % 
+    % % Find matching row index
+    % match_idx = find(strcmp(current_session_id, excel_session_ids));
+    % 
+    % % Adjust for header row in 'raw' (so add 1 to match row in original Excel file)
+    % % 'numb' has one fewer row because it skips the header
+    % if ~isempty(match_idx)
+    %     good_datablocks = numb(match_idx, 2:end);
+    % else
+    %     error('Session ID "%s" not found in Excel file %s', current_session_id, filename);
+    % end
+    % % end updated code
+
         
     good_datablocks(isnan(good_datablocks)) = [];
     
@@ -141,12 +160,14 @@ for n_session = session_date_idx
     TrialNumber = [];
     LabelNames = {};
     TrialType = {};
+    ObjectType = {};
     TrialCue = [];
     GoLabels = [];
     session_date = [];
     cueType = {};
     time_phase_labels = [];
     time_trial = [];
+    ApertureSize = {};
 
     for n_dataset = 1:length(good_datablocks) 
     
@@ -200,7 +221,26 @@ for n_session = session_date_idx
                 end
             end
             individual_runs{n_dataset}.TrialType = TrialType_ind;
-            TrialType = vertcat(TrialType, TrialType_ind(data_subset)); 
+            TrialType = vertcat(TrialType, TrialType_ind(data_subset));
+            
+            % adding in Combined to Trial Type
+            if strcmp(TaskCue, 'GraspObject_Combined')
+                TrialType(strcmp(TrialType, 'Unknown')) = {'Combined'}; % adds in Combined as Trial type
+                % add in column with Object Type for Combined trials and original trial types (H, HO, O with Associated)
+                % Loop through each label and extract the object information
+                ObjectType = cell(height(TrialType), 1);
+                for i = 1:height(TrialType)
+                    % Use regular expression to find the size keyword after the last underscore
+                    tokens = regexp(LabelNames{i}, '_(deck|block|rod|ball)$', 'tokens');
+                    
+                    if ~isempty(tokens)
+                        % tokens is a cell array; extract the size keyword from it
+                        ObjectType{i} = tokens{1}{1};
+                    else 
+                        ObjectType{i} = 'Associated';
+                    end
+                end
+            end
 
             
             cueType_ind = {task.trialparams(:).cueType}';
@@ -213,6 +253,21 @@ for n_session = session_date_idx
             time_phase_labels = vertcat(time_phase_labels, time_phase_labels_ind);
             time_trial_ind = repmat({individual_runs{n_dataset}.relt},numTrials , 1);
             time_trial = vertcat(time_trial, time_trial_ind);
+
+            % add Aperature Size column
+            if strcmp(TaskCue, 'GraspObject_Varied_Size')
+                sizeKeywords = ['Small', 'Medium', 'Large'];
+                % Loop through each label and extract the size information
+                for i = 1:length(numTrials)
+                    % Use regular expression to find the size keyword after the last underscore
+                    tokens = regexp(LabelNames{i}, '_(Small|Medium|Large)$', 'tokens');
+                    
+                    if ~isempty(tokens)
+                        % tokens is a cell array; extract the size keyword from it
+                        AperatureSize{i} = tokens{1}{1};
+                    end
+                end
+            end
             
     end
   
@@ -270,9 +325,10 @@ for n_session = session_date_idx
         
         %separate channels according to brain area
         if strcmp(subject_id, 's2')
-            SMG_idx = channel <= 96 .* ismember(featdef_ind_sub.nsp_name, 'APX');
-            PMV_idx = logical((channel > 96 & channel <= 224) .* ismember(featdef_ind_sub.nsp_name, 'APX'));
-            S1_idx = channel <= 96   & ismember(featdef_ind_sub.nsp_name, 'S1X_S1');
+            SMG_idx = channel <= 96 .* ismember(featdef_ind_sub.nsp_name, 'SUM1'); % 'APX' for Blackrock
+            PMV_idx = logical((channel > 96 & channel <= 224) .* ismember(featdef_ind_sub.nsp_name, 'SUM1')); % 'APX' for Blackrock
+            %S1_idx = channel <= 96   & ismember(featdef_ind_sub.nsp_name, 'S1X_S1'); % 'S1X_S1' for Blackrock
+            S1_idx = channel > 225   & ismember(featdef_ind_sub.nsp_name, 'SUM1');
             AIP_idx = dataset_channel < 0; %does not exist for s2
             M1_idx = dataset_channel < 0; %does not exist for s2
             dlPFC_idx = dataset_channel < 0; %does not exist for s2
@@ -339,12 +395,12 @@ for n_session = session_date_idx
     GoLabels = cell(size(TrialNumber))';
 
     if strcmp(subject_id, 's2')
-        Go_data = [array2table(TrialNumber') cell2table(LabelNames) cell2table(GraspType) cell2table(TrialType) array2table(TrialCue) ...
+        Go_data = [array2table(TrialNumber') cell2table(LabelNames) cell2table(GraspType) cell2table(TrialType) cell2table(ApertureSize) array2table(TrialCue) ...
                     cell2table(cueType)  cell2table(SMG_Go) cell2table(PMV_Go) cell2table(S1X_Go) cell2table(GoLabels) ...
                     cell2table(session_date) cell2table(time_phase_labels) cell2table(time_trial)];
 
     elseif strcmp(subject_id, 's3')
-        Go_data = [array2table(TrialNumber') cell2table(LabelNames) cell2table(GraspType) cell2table(TrialType) array2table(TrialCue) ...
+        Go_data = [array2table(TrialNumber') cell2table(LabelNames) cell2table(GraspType) cell2table(TrialType) cell2table(ObjectType) array2table(TrialCue) ...
                     cell2table(cueType)  cell2table(SMG_Go) cell2table(PMV_Go) cell2table(S1X_Go) cell2table(AIP_Go) cell2table(M1_Go) cell2table(GoLabels) ...
                     cell2table(session_date) cell2table(time_phase_labels) cell2table(time_trial)];
 

@@ -2,14 +2,14 @@ clc
 clear all
 close all
 
-subject_id = 's2';
-unit_region = 'SMG';
+subject_id = 's4';
+unit_region = 'M1';
 
 spike_sorting_type = '_unsorted_aligned_thr_-4.5';
 flag_4S = true; % true = updated 4S action phase; false = original 2S action phase
 flag_shuffled = false; % true = shuffled images task
-flag_varied_sizes = true; % true for varied sizes task
-flag_GB_images = false; % true for task using images of GB's own hands and real objects
+flag_varied_sizes = false; % true for varied sizes task
+flag_GB_images = true; % true for task using images of GB's own hands and real objects
 flag_5050 = false; % true for 50% Go 50% NoGo trials
 flag_combined = false; % true for combinations task
 
@@ -48,19 +48,19 @@ end
 Data = load(['C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\' subject_id '\Data\Table_' subject_id '_' TaskCue spike_sorting_type]);
 Go_data = Data.Go_data;
 
-% add Aperture Size column
-sizeKeywords = ['Small', 'Medium', 'Large'];
-Go_data.Aperture_Size = cell(height(Go_data),1);
-% Loop through each label and extract the size information
-for i = 1:height(Go_data)
-    % Use regular expression to find the size keyword after the last underscore
-    tokens = regexp(Go_data.LabelNames{i}, '_(Small|Medium|Large)$', 'tokens');
-
-    if ~isempty(tokens)
-        % tokens is a cell array; extract the size keyword from it
-        Go_data.Aperture_Size{i} = tokens{1}{1};
-    end
-end
+% % add Aperture Size column
+% sizeKeywords = ['Small', 'Medium', 'Large'];
+% Go_data.Aperture_Size = cell(height(Go_data),1);
+% % Loop through each label and extract the size information
+% for i = 1:height(Go_data)
+%     % Use regular expression to find the size keyword after the last underscore
+%     tokens = regexp(Go_data.LabelNames{i}, '_(Small|Medium|Large)$', 'tokens');
+% 
+%     if ~isempty(tokens)
+%         % tokens is a cell array; extract the size keyword from it
+%         Go_data.Aperture_Size{i} = tokens{1}{1};
+%     end
+% end
 
 % remove faulty sessions, if any
 error_session = {};
@@ -188,11 +188,11 @@ for n_session = 1:numSessions
     %trialType
     trialTypeSession = Go_data.TrialType(idxThisSession,:);
 
-    % grasp labels
-    graspTypeSession = Go_data.GraspType(idxThisSession,:);
-
-    %ApertureSize
-    apertureSizeSession = Go_data.Aperture_Size(idxThisSession,:);
+    % % grasp labels
+    % graspTypeSession = Go_data.GraspType(idxThisSession,:);
+    % 
+    % %ApertureSize
+    % apertureSizeSession = Go_data.Aperture_Size(idxThisSession,:);
 
     %get idx for Go or NoGo trials
     GoNoGoidx =  logical(cell2mat(Go_data.TrialCue(idxThisSession,:)));
@@ -205,7 +205,7 @@ for n_session = 1:numSessions
         sessionLabels = sessionLabels(GoNoGoidx);
         timePhaseLabels = timePhaseLabels(GoNoGoidx);
         trialTypeSession = trialTypeSession(GoNoGoidx);
-        apertureSizeSession = apertureSizeSession(GoNoGoidx);
+        %apertureSizeSession = apertureSizeSession(GoNoGoidx);
     else
         SessionData = z_scored_data(~GoNoGoidx);
         sessionLabels = sessionLabels(~GoNoGoidx);
@@ -223,53 +223,53 @@ for n_session = 1:numSessions
         % find idx of trial type 
         trialTypeIdx = ismember(trialTypeSession, unTrialType(n_type));
 
-        sessionLabels_modality = trialTypeSession;
-        sessionLabels_grasp = graspTypeSession;
-        sessionLabels_size = apertureSizeSession;
-
-        % Convert modality labels ('Hand', 'HandObject', 'Object') to numerical values
-        modality_labels = {'Hand', 'Hand_Object', 'Object'};
-        grasp_labels = {'Lateral', 'MediumWrap', 'PalmarPinch', 'Sphere3Finger'};
-        size_labels = {'Small', 'Medium', 'Large'};
-
-        sessionLabels_modality_num = zeros(size(sessionLabels_modality));  % Initialize numerical labels
-        sessionLabels_grasp_num = zeros(size(sessionLabels_grasp));
-        sessionLabels_size_num = zeros(size(sessionLabels_size));
-
-        % Loop through labels and assign numerical values
-        for i = 1:length(modality_labels)
-            sessionLabels_modality_num(strcmp(sessionLabels_modality, modality_labels{i})) = i;
-        end  
-        for i = 1:length(grasp_labels)
-            sessionLabels_grasp_num(strcmp(sessionLabels_grasp, grasp_labels{i})) = i;
-        end 
-        for i = 1:length(size_labels)
-            sessionLabels_size_num(strcmp(sessionLabels_size, size_labels{i})) = i;
-        end
+        % sessionLabels_modality = trialTypeSession;
+        % sessionLabels_grasp = graspTypeSession;
+        % sessionLabels_size = apertureSizeSession;
+        % 
+        % % Convert modality labels ('Hand', 'HandObject', 'Object') to numerical values
+        % modality_labels = {'Hand', 'Hand_Object', 'Object'};
+        % grasp_labels = {'Lateral', 'MediumWrap', 'PalmarPinch', 'Sphere3Finger'};
+        % size_labels = {'Small', 'Medium', 'Large'};
+        % 
+        % sessionLabels_modality_num = zeros(size(sessionLabels_modality));  % Initialize numerical labels
+        % sessionLabels_grasp_num = zeros(size(sessionLabels_grasp));
+        % sessionLabels_size_num = zeros(size(sessionLabels_size));
+        % 
+        % % Loop through labels and assign numerical values
+        % for i = 1:length(modality_labels)
+        %     sessionLabels_modality_num(strcmp(sessionLabels_modality, modality_labels{i})) = i;
+        % end  
+        % for i = 1:length(grasp_labels)
+        %     sessionLabels_grasp_num(strcmp(sessionLabels_grasp, grasp_labels{i})) = i;
+        % end 
+        % for i = 1:length(size_labels)
+        %     sessionLabels_size_num(strcmp(sessionLabels_size, size_labels{i})) = i;
+        % end
 
          if flagTunedChannels
             %Compute index of units that are tuned
             if flagRegressionTuning
             
-                % [tunedCombinedChannels, tunedChannelsPhase, tunedChannelsBin, sumPhase, sumBin,numTunedChannelsPerCategory,~,~,p_per_phase] ...
-                %      = classification.getRegressionTunedChannels_paper(SessionData(trialTypeIdx),sessionLabels(trialTypeIdx), ...
-                %  timePhaseLabels(trialTypeIdx), 'multcompare',multipleComparePhase, 'BinperBinTuning', flagBinPerBin); % original code
-
                 [tunedCombinedChannels, tunedChannelsPhase, tunedChannelsBin, sumPhase, sumBin,numTunedChannelsPerCategory,~,~,p_per_phase] ...
-                     = classification.getRegressionTunedChannels_paper(SessionData(trialTypeIdx),sessionLabels_size_num(trialTypeIdx), ...
-                 timePhaseLabels(trialTypeIdx), 'multcompare', multipleComparePhase, 'BinperBinTuning', flagBinPerBin);
+                     = classification.getRegressionTunedChannels_paper(SessionData(trialTypeIdx),sessionLabels(trialTypeIdx), ...
+                 timePhaseLabels(trialTypeIdx), 'multcompare',multipleComparePhase, 'BinperBinTuning', flagBinPerBin); % original code
 
-                %condToTest = arrayfun(@(x) preproc.image2class_simple(x),unique(sessionLabels), 'UniformOutput', false); % original
+                % [tunedCombinedChannels, tunedChannelsPhase, tunedChannelsBin, sumPhase, sumBin,numTunedChannelsPerCategory,~,~,p_per_phase] ...
+                %      = classification.getRegressionTunedChannels_paper(SessionData(trialTypeIdx),sessionLabels_size_num(trialTypeIdx), ...
+                %  timePhaseLabels(trialTypeIdx), 'multcompare', multipleComparePhase, 'BinperBinTuning', flagBinPerBin);
 
-                condToTest = arrayfun(@(x) size_labels(x),unique(sessionLabels_size_num),'UniformOutput', false); % testing for tuning to size
+                condToTest = arrayfun(@(x) preproc.image2class_simple(x),unique(sessionLabels), 'UniformOutput', false); % original
+
+                %condToTest = arrayfun(@(x) size_labels(x),unique(sessionLabels_size_num),'UniformOutput', false); % testing for tuning to size
 
                 if nnz(sumBin) ~= 0
                     figure();
                     plot(sumBin);
                 end
 
-                %tuned_channels_per_graps{n_type,n_session} = numTunedChannelsPerCategory;
-                tuned_channels_per_size{n_type,n_session} = numTunedChannelsPerCategory;
+                tuned_channels_per_graps{n_type,n_session} = numTunedChannelsPerCategory;
+                %tuned_channels_per_size{n_type,n_session} = numTunedChannelsPerCategory;
             else
 
                 tuned_channels_per_graps{n_type,n_session} = [];
@@ -353,7 +353,7 @@ goLabel = goLabel(flagGoTrials + 1);
 
 % Create the filename using the brain region and analysis type
 %filename = ['tuned_channels_' unit_region '_' TaskCue '_' analysis_type '_' goLabel '.mat']; % goLabel determines Go, NoGo label
-filename = "size_tuned_channels_per_condition_" + TaskCue + '_' + unit_region + "_" + analysis_type + "_" + goLabel + ".mat"; % just .mat for original data
+filename = "tuned_channels_per_condition_" + TaskCue + '_' + unit_region + "_" + analysis_type + "_" + goLabel + ".mat"; % just .mat for original data
 %filename = "tuned_channels_per_condition" + TaskCue + '_' + unit_region + "_" + analysis_type + "_" + goLabel + "_z_scored.mat"; % when z-scoring
 
 directory = ['C:\Users\macthurston\Documents\GitHub\project_grasp_object_interaction\analyzedData\' subject_id];
@@ -446,7 +446,7 @@ goLabel = ["NoGo", "Go"];
 goLabel = goLabel(flagGoTrials + 1);
 directory = ['C:\Users\macthurston\Documents\GitHub\project_grasp_object_interaction\analyzedData\' subject_id];
 analysis_type = 'LinearRegression'; % 'LinearRegression' or 'KW'
-filename = "grasp_tuned_channels_per_condition_" + TaskCue + '_' + unit_region + "_" + analysis_type + "_" + goLabel + ".mat"; % just .mat for original data
+filename = "tuned_channels_" + TaskCue + '_' + unit_region + "_" + analysis_type + "_" + goLabel + ".mat"; % just .mat for original data
 %filename = "tuned_channels_" + TaskCue + '_' + unit_region + "_" + analysis_type + "_" + goLabel + "_z_scored.mat"; % when z-scoring
 full_path = fullfile(directory, filename);
 load(full_path);
@@ -847,8 +847,8 @@ xticks(); %xticks(phase_changes);
 %xticklabels(phaseNames);
 xtickangle(45);
 ylabel('% of Total Units');
-ylim([0 70]);
-yticks([0 35 70]);
+ylim([0 100]);
+yticks([0 50 100]);
 legend([err_bar{:}], taskCuesAll,'Location', 'Best','Interpreter', 'none','FontSize',12);
 set(gca, 'FontSize', 12);
 
