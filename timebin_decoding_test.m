@@ -5,10 +5,10 @@ close all
 spike_sorting_type = '_unsorted_aligned_thr_-4.5';
 %taskName = 'GraspObject_4S_Action';
 %taskName = 'GraspObject_Shuffled'; % shuffled images
-taskName = 'GraspObject_Varied_Size'; % varied object/aperture sizes
+%taskName = 'GraspObject_Varied_Size'; % varied object/aperture sizes
 %taskName = 'GraspObject_GB_Images'; % for GB
-%taskName = 'GraspObject_Combined'; % for Combined task
-subject_id = 's2';
+taskName = 'GraspObject_Combined'; % for Combined task
+subject_id = 's3';
 
 % Data = load('C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\s3\Data\IndividualFiles\GraspObject\unsorted_aligned_thr_-4.5\s3_20230803_unsorted_aligned_thr_-4.5_GraspObject');
 %Data = load('C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\s3\Data\IndividualFiles\GraspObject\unsorted_aligned_thr_-4.5\s3_20230724_unsorted_aligned_thr_-4.5_GraspObject');
@@ -28,6 +28,8 @@ if strcmp(subject_id, 's2')
     error_session = {'20231016'};
 elseif strcmp(subject_id, 's3')
     error_session = {'20250212'};
+elseif strcmp(subject_id, 's4')
+    error_session = {'20240613'};
 end 
 
 if ~isempty(error_session)
@@ -51,15 +53,15 @@ if strcmp(taskName, 'GraspObject_Varied_Size')
     end
 end
 
-brainAreas = Go_data.frPerChannel{7}; % 7 for varied sizes, 6 for original
+brainAreas = Go_data.frPerChannel{7}; % 7 for varied sizes, 6 for Blackrock
 phase_time_idx = Go_data.time_phase_labels{1,1};
 numPhases = numel(unique(phase_time_idx));
 phaseTimeTmp = diff(phase_time_idx);
 phase_changes(1) = 1;
 phase_changes(2:numPhases) = find(phaseTimeTmp) + 1;
 phaseNames = {'ITI', 'Cue', 'Delay', 'Action'};
-color_info = {[0.3359, 0.7031, 0.9101],[0.8984 0.6211 0],[0.8320 0.3672 0],[0.7969, 0.4726, 0.6523],[0, 0.6171, 0.4492]}; % SMG, PMV, S1, AIP, M1
-
+% color_info = {[0.3359, 0.7031, 0.9101],[0.8984 0.6211 0],[0.8320 0.3672 0],[0.7969, 0.4726, 0.6523],[0, 0.6171, 0.4492]}; % SMG, PMV, S1, AIP, M1
+color_info = {[0.3359, 0.7031, 0.9101],[0.8984 0.6211 0],[0.8320 0.3672 0],[0.7969, 0.4726, 0.6523],[0, 0.6171, 0.4492],[.9961 .6875 0]}; % SMG, PMV, S1, AIP, M1, dlPFC
 sessions_all = unique(Go_data.session_date);
 numSessions = numel(sessions_all);
 uniqueCueTypes = {'Hand','Hand-Object','Object'};
@@ -69,10 +71,10 @@ end
 
 flagGoTrials = true; 
 
-n_regions = 3; %length(brainAreas);
+n_regions = length(brainAreas);
 num_timebins = 174;
 
-% Initialize storage
+%% Initialize storage
 all_errTest_timebin_all_regions = NaN(numSessions, num_timebins, n_regions);
 first_sig_idx_all = NaN(1, n_regions);
 first_sig_perc_all = NaN(1, n_regions);
@@ -86,7 +88,7 @@ figure('units','normalized','outerposition',[0 0 0.6 0.5]);
 hold on;
 plot_handles = gobjects(n_regions, 1);
 
-for n_region = 1:n_regions
+for n_region = [1,3,4,5,6] %1:n_regions
     unit_region = brainAreas{n_region};
     disp(['Processing brain region: ' unit_region]);
 
@@ -158,7 +160,7 @@ for n_region = 1:n_regions
         graspTypeSession = Go_data.GraspType(idxThisSession,:);
 
         % ApertureSize
-        apertureSizeSession = Go_data.Aperture_Size(idxThisSession,:);
+        %apertureSizeSession = Go_data.Aperture_Size(idxThisSession,:);
 
         % object labels
         %objectTypeSession = Go_data.ObjectType(idxThisSession,:);
@@ -175,7 +177,7 @@ for n_region = 1:n_regions
             time_phase_labels = time_phase_labels(GoNoGoidx);
             trialTypeSession = trialTypeSession(GoNoGoidx);
             graspTypeSession = graspTypeSession(GoNoGoidx);
-            apertureSizeSession = apertureSizeSession(GoNoGoidx);
+            %apertureSizeSession = apertureSizeSession(GoNoGoidx);
             %objectTypeSession = objectTypeSession(GoNoGoidx);
         else
             SessionData = SessionData(~GoNoGoidx);
@@ -193,40 +195,40 @@ for n_region = 1:n_regions
         % separate data according to object 
         %unObjectType = unique(Go_data.ObjectType); % includes "Associated" currently
 
-        % only keeping Small and Large
-        % Define which sizes to keep
-        sizesToKeep = {'Small', 'Large'};
-
-        % Find indices of trials belonging to 'small' or 'large' sessions
-        SLsizeIdx = ismember(apertureSizeSession, sizesToKeep);
-
-        % Extract trials that correspond to 'small' or 'large' sessions
-        SessionData = SessionData(SLsizeIdx);
-        sessionLabels = sessionLabels(SLsizeIdx);
-        time_phase_labels = time_phase_labels(SLsizeIdx);
-        trialTypeSession = trialTypeSession(SLsizeIdx);
-        graspTypeSession = graspTypeSession(SLsizeIdx);
-        apertureSizeSession = apertureSizeSession(SLsizeIdx);
-        %objectTypeSession = objectTypeSession(SLsizeIdx);
-    
-        % seperate data according to size 
-        unAperture = unique(apertureSizeSession);
+        % % only keeping Small and Large
+        % % Define which sizes to keep
+        % sizesToKeep = {'Small', 'Large'};
+        % 
+        % % Find indices of trials belonging to 'small' or 'large' sessions
+        % SLsizeIdx = ismember(apertureSizeSession, sizesToKeep);
+        % 
+        % % Extract trials that correspond to 'small' or 'large' sessions
+        % SessionData = SessionData(SLsizeIdx);
+        % sessionLabels = sessionLabels(SLsizeIdx);
+        % time_phase_labels = time_phase_labels(SLsizeIdx);
+        % trialTypeSession = trialTypeSession(SLsizeIdx);
+        % graspTypeSession = graspTypeSession(SLsizeIdx);
+        % apertureSizeSession = apertureSizeSession(SLsizeIdx);
+        % %objectTypeSession = objectTypeSession(SLsizeIdx);
+        % 
+        % % seperate data according to size 
+        % unAperture = unique(apertureSizeSession);
     
         % code for CMs of grasps and modalities separately
         sessionLabels_modality = trialTypeSession;
         sessionLabels_grasp = graspTypeSession;
-        sessionLabels_size = apertureSizeSession;
+        %sessionLabels_size = apertureSizeSession;
         %sessionLabels_object = objectTypeSession;
     
         % Convert modality labels ('Hand', 'HandObject', 'Object') to numerical values
         modality_labels = {'Combined','Hand', 'Hand_Object', 'Object'};
         grasp_labels = {'Lateral', 'MediumWrap', 'PalmarPinch', 'Sphere3Finger'};
-        size_labels = {'Small', 'Medium', 'Large'};
+        %size_labels = {'Small', 'Medium', 'Large'};
         %object_labels = {'deck','block','rod','ball'};
     
         sessionLabels_modality_num = zeros(size(sessionLabels_modality));  % Initialize numerical labels
         sessionLabels_grasp_num = zeros(size(sessionLabels_grasp));
-        sessionLabels_size_num = zeros(size(sessionLabels_size));
+        %sessionLabels_size_num = zeros(size(sessionLabels_size));
         %sessionLabels_object_num = zeros(size(sessionLabels_object));
     
         % Loop through labels and assign numerical values
@@ -236,9 +238,9 @@ for n_region = 1:n_regions
         for i = 1:length(grasp_labels)
             sessionLabels_grasp_num(strcmp(sessionLabels_grasp, grasp_labels{i})) = i;
         end 
-        for i = 1:length(size_labels)
-            sessionLabels_size_num(strcmp(sessionLabels_size, size_labels{i})) = i;
-        end
+        % for i = 1:length(size_labels)
+        %     sessionLabels_size_num(strcmp(sessionLabels_size, size_labels{i})) = i;
+        % end
         % for i = 1:length(object_labels)
         %     sessionLabels_object_num(strcmp(sessionLabels_object, object_labels{i})) = i;
         % end 
@@ -254,7 +256,7 @@ for n_region = 1:n_regions
             data_per_timebin = cell2mat(cellfun(@(x) x(n_bin, :), SessionData, 'UniformOutput', false));
             
             % Run classification
-            [~, errTestTmp, ~, ~, ~] = classification.LDA_classification_rep(data_per_timebin, sessionLabels_size_num, ...
+            [~, errTestTmp, ~, ~, ~] = classification.LDA_classification_rep(data_per_timebin, sessionLabels_grasp_num, ...
                 'flagErrorMatrix', false, 'PCA_variance', 95, 'flagLeaveOneOut', true);
         
             % Store classification accuracy
@@ -275,9 +277,12 @@ for n_region = 1:n_regions
     mean_acc = mean(all_errTest_timebin, 1, 'omitnan');
     ci_upper = CI95(2, :);
     ci_lower = CI95(1, :);
-    chance = 1 / numel(unAperture) * 100;
+    chance = 1 / numel(unGraspType) * 100;
 
     first_sig_idx = find(mean_acc(phase_changes(2):end) + ci_lower(phase_changes(2):end) > chance, 1, 'first') + 42;
+    if isempty(first_sig_idx)
+        first_sig_idx = 1;
+    end
     first_sig_perc = mean_acc(first_sig_idx);
 
     [~, cue_peak_rel_idx] = max(mean_acc(phase_changes(2):phase_changes(3)));
@@ -313,7 +318,7 @@ xlim([0 179]);
 xtickangle(45);
 xlabel('Timebin');
 ylabel('Classification Accuracy [%]');
-title('Size Classification Accuracy Over Time');
+title('Grasp Classification Accuracy Over Time');
 yline(chance, '--r', 'LineWidth', 1.5);
 ylim([25 100]);
 yticks([25 50 75 100]);
@@ -324,7 +329,7 @@ hold off;
 % Save everything to one file
 goLabel = ["NoGo", "Go"];
 goLabel = goLabel(flagGoTrials + 1);
-filename = "decoded_sizeExtremes_per_timebin_" + taskName + "_ALL_REGIONS_LDA_" + goLabel + "_z_scored.mat";
+filename = "decoded_grasp_per_timebin_" + taskName + "_ALL_REGIONS_LDA_" + goLabel + "_z_scored.mat";
 directory = ['C:\Users\macthurston\Documents\GitHub\project_grasp_object_interaction\analyzedData\' subject_id];
 save(fullfile(directory, filename), ...
     'all_errTest_timebin_all_regions', ...
@@ -669,24 +674,122 @@ save(full_path, 'all_errTest_timebin','first_sig_idx','first_sig_perc','peak_Cue
 goLabel = ["NoGo", "Go"];
 goLabel = goLabel(flagGoTrials + 1);
 directory = ['C:\Users\macthurston\Documents\GitHub\project_grasp_object_interaction\analyzedData\' subject_id];
-filename = "decoded_grasp_per_timebin_per_cue_" + taskName + '_' + unit_region + "_LDA_" + goLabel + "_z_scored.mat"; % when z-scoring
-%filename = "decoded_per_timebin_" + taskName + '_ALL_REGIONS' + "_LDA_" + goLabel + "_z_scored.mat"; 
+%filename = "decoded_grasp_per_timebin_per_cue_" + taskName + '_' + unit_region + "_LDA_" + goLabel + "_z_scored.mat"; % when z-scoring
+filename = "decoded_objects_per_timebin_" + taskName + '_ALL_REGIONS' + "_LDA_" + goLabel + "_z_scored.mat"; 
 full_path = fullfile(directory, filename);
 load(full_path);
+
+%% trying to load multiple so can plot object and grasp decoding together
+% GRASP %
+G_all_errTest_timebin_all_regions = all_errTest_timebin_all_regions;
+G_first_sig_idx_all = first_sig_idx_all;
+G_first_sig_perc_all = first_sig_perc_all;
+G_peak_Cue_idx_all = peak_Cue_idx_all;
+G_peak_Cue_perc_all = peak_Cue_perc_all;
+G_peak_perc_all = peak_perc_all;
+G_peak_idx_all = peak_idx_all;
+
+%% trying to load multiple so can plot object and grasp decoding together
+% OBJECT %
+O_all_errTest_timebin_all_regions = all_errTest_timebin_all_regions;
+O_first_sig_idx_all = first_sig_idx_all;
+O_first_sig_perc_all = first_sig_perc_all;
+O_peak_Cue_idx_all = peak_Cue_idx_all;
+O_peak_Cue_perc_all = peak_Cue_perc_all;
+O_peak_perc_all = peak_perc_all;
+O_peak_idx_all = peak_idx_all;
+
+%% plot grasp and object classification together
+% Determine number of items to be plotted together (decoded items, ie. grasp, object, size)
+n_decoded = 2;
+chance = 1 / 4 * 100; 
+numPhases = numel(phase_changes);
+
+% Create figure
+figure('units','normalized','outerposition',[0 0 0.3 0.3]);
+hold on;
+plot_handles = gobjects(n_decoded, 1);
+%color_info = {[0.3359, 0.7031, 0.9101],[0.8984 0.6211 0],[0.8320 0.3672 0],[0.7969, 0.4726, 0.6523],[0, 0.6171, 0.4492],[.9961 .6875 0]}; % SMG, PMV, S1, AIP, M1, dlPFC
+color_info = {[0, 0.3529, 0.7098],[0.9608, 0.7333, 0.1176]}; % blue for grasp, yellow for object (pull from FR)
+
+for n_region = 5 %1:n_regions
+    G_mean_acc = mean(G_all_errTest_timebin_all_regions(:,:,n_region), 1, 'omitnan');
+    G_CI95 = utile.calculate_CI(G_all_errTest_timebin_all_regions(:,:,n_region));
+    G_ci_upper = G_CI95(2, :);
+    G_ci_lower = G_CI95(1, :);
+
+    G_ER = utile.shadedErrorBar(1:num_timebins, G_mean_acc, G_ci_upper, 'lineprops', '-b');
+    G_ER.mainLine.Color = color_info{1};
+    G_ER.mainLine.LineWidth = 2;
+    G_ER.patch.FaceColor = color_info{1};
+    G_ER.edge(1).LineStyle = 'none';
+    G_ER.edge(2).LineStyle = 'none';
+    plot_handles(1) = G_ER.mainLine;
+
+    hold on;
+
+    O_mean_acc = mean(O_all_errTest_timebin_all_regions(:,:,n_region), 1, 'omitnan');
+    O_CI95 = utile.calculate_CI(O_all_errTest_timebin_all_regions(:,:,n_region));
+    O_ci_upper = O_CI95(2, :);
+    O_ci_lower = O_CI95(1, :);
+
+    O_ER = utile.shadedErrorBar(1:num_timebins, O_mean_acc, O_ci_upper, 'lineprops', '-b');
+    O_ER.mainLine.Color = color_info{2};
+    O_ER.mainLine.LineWidth = 2;
+    O_ER.patch.FaceColor = color_info{2};
+    O_ER.edge(1).LineStyle = 'none';
+    O_ER.edge(2).LineStyle = 'none';
+    plot_handles(2) = O_ER.mainLine;
+
+    % Plot first significant timepoint for GRASP
+    plot(G_first_sig_idx_all(n_region), G_first_sig_perc_all(n_region), 'v', ...
+        'MarkerSize', 6, 'MarkerFaceColor', color_info{1}, 'MarkerEdgeColor', 'k');
+
+    % Plot peak timepoint for GRASP
+    plot(G_peak_Cue_idx_all(n_region), G_peak_Cue_perc_all(n_region), 'o', ...
+        'MarkerSize', 6, 'MarkerFaceColor', color_info{1}, 'MarkerEdgeColor', 'k');
+
+    % Plot first significant timepoint for OBJECT
+    plot(O_first_sig_idx_all(n_region), O_first_sig_perc_all(n_region), 'v', ...
+        'MarkerSize', 6, 'MarkerFaceColor', color_info{2}, 'MarkerEdgeColor', 'k');
+
+    % Plot peak timepoint for OBJECT
+    plot(O_peak_Cue_idx_all(n_region), O_peak_Cue_perc_all(n_region), 'o', ...
+        'MarkerSize', 6, 'MarkerFaceColor', color_info{2}, 'MarkerEdgeColor', 'k');
+end
+
+% Finalize plot
+for n_phase = 1:numPhases
+    xline(phase_changes(n_phase), 'k--', phaseNames{n_phase}, 'LineWidth', 1.5, 'FontSize', 12);
+end
+xlim([0 num_timebins]);
+xtickangle();
+xlabel('Time (s)');
+xticks(phase_changes);
+xticklabels([0 2 4 6]);
+ylabel('Classification Accuracy [%]');
+title([brainAreas(n_region)]);
+yline(chance, '--r', 'LineWidth', 1.5);
+ylim([0 100]);
+yticks([0 25 50 75 100]);
+legend(plot_handles, [{'Grasp'},{'Object'}], 'Location', 'best');
+set(gca, 'FontSize', 12);
+hold off;
 
 %% plot all regions once loaded
 
 % Determine number of regions
-n_regions = 3;
-chance = 1 / 2 * 100; 
+n_regions = 6;
+chance = 1 / 4 * 100; 
 numPhases = numel(phase_changes);
 
 % Create figure
 figure('units','normalized','outerposition',[0 0 0.3 0.3]);
 hold on;
 plot_handles = gobjects(n_regions, 1);
+color_info = {[0.3359, 0.7031, 0.9101],[0.8984 0.6211 0],[0.8320 0.3672 0],[0.7969, 0.4726, 0.6523],[0, 0.6171, 0.4492],[.9961 .6875 0]}; % SMG, PMV, S1, AIP, M1, dlPFC
 
-for n_region = 1:n_regions
+for n_region = [1,3,4,5] %1:n_regions
     mean_acc = mean(all_errTest_timebin_all_regions(:,:,n_region), 1, 'omitnan');
     CI95 = utile.calculate_CI(all_errTest_timebin_all_regions(:,:,n_region));
     ci_upper = CI95(2, :);
@@ -700,13 +803,13 @@ for n_region = 1:n_regions
     ER.edge(2).LineStyle = 'none';
     plot_handles(n_region) = ER.mainLine;
 
-    % Plot first significant timepoint
-    plot(first_sig_idx_all(n_region), first_sig_perc_all(n_region), 'v', ...
-        'MarkerSize', 6, 'MarkerFaceColor', color_info{n_region}, 'MarkerEdgeColor', 'k');
-
-    % Plot peak timepoint
-    plot(peak_Cue_idx_all(n_region), peak_Cue_perc_all(n_region), 'o', ...
-        'MarkerSize', 6, 'MarkerFaceColor', color_info{n_region}, 'MarkerEdgeColor', 'k');
+    % % Plot first significant timepoint
+    % plot(first_sig_idx_all(n_region), first_sig_perc_all(n_region), 'v', ...
+    %     'MarkerSize', 6, 'MarkerFaceColor', color_info{n_region}, 'MarkerEdgeColor', 'k');
+    % 
+    % % Plot peak timepoint
+    % plot(peak_Cue_idx_all(n_region), peak_Cue_perc_all(n_region), 'o', ...
+    %     'MarkerSize', 6, 'MarkerFaceColor', color_info{n_region}, 'MarkerEdgeColor', 'k');
 end
 
 % Finalize plot
@@ -717,11 +820,11 @@ xlim([0 num_timebins]);
 xtickangle(45);
 xlabel('Timebin');
 ylabel('Classification Accuracy [%]');
-title('Size Classification Accuracy Over Time');
+title('Grasp Classification Accuracy Over Time');
 yline(chance, '--r', 'LineWidth', 1.5);
-ylim([25 100]);
-yticks([25 50 75 100]);
-%legend(plot_handles, brainAreas, 'Location', 'best');
+ylim([0 100]);
+yticks([0 25 50 75 100]);
+legend(plot_handles([1,3:5]), brainAreas([1,3:5]), 'Location', 'best');
 set(gca, 'FontSize', 12);
 hold off;
 

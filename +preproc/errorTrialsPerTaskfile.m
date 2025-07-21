@@ -406,6 +406,102 @@ if strcmp(subject, 's2')
     elseif strcmp(taskfile, '20250520-112456-112509-GraspObject')
         wrongTrials = [9,14,21];
 
+    % COMBINATIONS SESSIONS %
+
+    elseif strcmp(taskfile, '20250530-152947-153035-GraspObject')
+        wrongTrials = [];
+    elseif strcmp(taskfile, '20250530-153420-153450-GraspObject')
+        wrongTrials = [18];
+    elseif strcmp(taskfile, '20250530-153847-153908-GraspObject')
+        wrongTrials = [];
+    elseif strcmp(taskfile, '20250530-154445-154454-GraspObject')
+        wrongTrials = [16,18];
+    elseif strcmp(taskfile, '20250530-155149-155158-GraspObject')
+        wrongTrials = [14,19];
+    elseif strcmp(taskfile, '20250530-155630-155641-GraspObject')
+        wrongTrials = [5,6,7];
+    elseif strcmp(taskfile, '20250530-160038-160050-GraspObject')
+        wrongTrials = [18,20];
+
+    elseif strcmp(taskfile, '20250604-154049-154152-GraspObject')
+        wrongTrials = [];
+    elseif strcmp(taskfile, '20250604-154532-154550-GraspObject')
+        wrongTrials = [];
+    elseif strcmp(taskfile, '20250604-154935-155006-GraspObject')
+        wrongTrials = [];
+    elseif strcmp(taskfile, '20250604-155335-155437-GraspObject')
+        wrongTrials = [];
+    elseif strcmp(taskfile, '20250604-155829-155843-GraspObject')
+        wrongTrials = [];
+    elseif strcmp(taskfile, '20250604-160213-160224-GraspObject')
+        wrongTrials = [];
+    elseif strcmp(taskfile, '20250604-160602-160612-GraspObject')
+        wrongTrials = [];
+
+    elseif strcmp(taskfile, '20250613-162839-162913-GraspObject')
+        wrongTrials = [4,11,12,13,17,18];
+    elseif strcmp(taskfile, '20250613-163354-163409-GraspObject')
+        wrongTrials = [3,7,16,17];
+    elseif strcmp(taskfile, '20250613-163818-163830-GraspObject')
+        wrongTrials = [6,7,12,17,18];
+    elseif strcmp(taskfile, '20250613-164221-164253-GraspObject')
+        wrongTrials = [3,4,5,10,13,14,15];
+    elseif strcmp(taskfile, '20250613-164658-164708-GraspObject')
+        wrongTrials = [1,2,4,9,10,13,15,20];
+    elseif strcmp(taskfile, '20250613-165054-165103-GraspObject')
+        wrongTrials = [2,4,8,13,17,19,20];
+
+    elseif strcmp(taskfile, '20250618-163109-163125-GraspObject')
+        wrongTrials = [20];
+    elseif strcmp(taskfile, '20250618-163506-163540-GraspObject')
+        wrongTrials = [8,12,18];
+    elseif strcmp(taskfile, '20250618-163917-163952-GraspObject')
+        wrongTrials = [1,2,4,5,9,11,12,13,17,18];
+    elseif strcmp(taskfile, '20250618-164344-164352-GraspObject')
+        wrongTrials = [1,2,6,7,12,13,14,15,19,20];
+    elseif strcmp(taskfile, '20250618-164812-164821-GraspObject')
+        wrongTrials = [1,6,9,12,13,15,16,17,18,19,20];
+    elseif strcmp(taskfile, '20250618-165203-165212-GraspObject')
+        wrongTrials = [2,3,4,5,10,13,14,18,19];
+
+    elseif strcmp(taskfile, '20250627-162046-162153-GraspObject')
+        wrongTrials = [15,18];
+    elseif strcmp(taskfile, '20250627-162639-162700-GraspObject')
+        wrongTrials = [3,4,7,13,15,17];
+    elseif strcmp(taskfile, '20250627-163051-163142-GraspObject')
+        wrongTrials = [3,7,8,11,12,13,17];
+    elseif strcmp(taskfile, '20250627-163531-163607-GraspObject')
+        wrongTrials = [4,5,9,12,13,17,18,19];
+    elseif strcmp(taskfile, '20250627-164025-164037-GraspObject')
+        wrongTrials = [5,10,12,15,19,20];
+    elseif strcmp(taskfile, '20250627-164413-164422-GraspObject')
+        wrongTrials = [5,7,11,15,20];
+
+    elseif strcmp(taskfile, '20250702-174752-174802-GraspObject')
+        wrongTrials = [];
+    elseif strcmp(taskfile, '20250702-175209-175226-GraspObject')
+        wrongTrials = [];
+    elseif strcmp(taskfile, '20250702-175617-175643-GraspObject')
+        wrongTrials = [];
+    elseif strcmp(taskfile, '20250702-180010-180039-GraspObject')
+        wrongTrials = [];
+    elseif strcmp(taskfile, '20250702-180010-180406-GraspObject')
+        wrongTrials = [7,12,16,18];
+    elseif strcmp(taskfile, '20250702-180010-180825-GraspObject')
+        wrongTrials = [1,2,5,6,8,10,16,17,20];
+
+    elseif strcmp(taskfile, '20250711-124537-124549-GraspObject')
+        wrongTrials = [];
+    elseif strcmp(taskfile, '20250711-125045-125054-GraspObject')
+        wrongTrials = [];
+    elseif strcmp(taskfile, '20250711-125445-125453-GraspObject')
+        wrongTrials = [10,12,13,15,18,19,20];
+    elseif strcmp(taskfile, '20250711-131634-131935-GraspObject')
+        wrongTrials = [1];
+    elseif strcmp(taskfile, '20250711-132407-132424-GraspObject')
+        wrongTrials = [];
+    elseif strcmp(taskfile, '20250711-132821-132846-GraspObject')
+        wrongTrials = [7,11,13,14,15,16,19];
 
 
  %  elseif strcmp(taskfile, '')
@@ -1091,6 +1187,86 @@ elseif strcmp(subject, 's4')
     elseif strcmp(taskfile,'20240822-162623-162637-GraspObject')
         wrongTrials = []; 
     elseif strcmp(taskfile,'20240822-163238-163253-GraspObject')
+        wrongTrials = [];
+
+    % VARIED_SIZE SESSIONS %
+
+    elseif strcmp(taskfile,'20250602-152126-152216-GraspObject')
+        wrongTrials = []; 
+    elseif strcmp(taskfile,'20250602-153305-153319-GraspObject')
+        wrongTrials = []; 
+    elseif strcmp(taskfile,'20250602-154028-154154-GraspObject')
+        wrongTrials = []; 
+    elseif strcmp(taskfile,'20250602-154824-154847-GraspObject')
+        wrongTrials = [];
+    elseif strcmp(taskfile,'20250602-155450-155523-GraspObject')
+        wrongTrials = []; 
+    elseif strcmp(taskfile,'20250602-160253-160425-GraspObject')
+        wrongTrials = [];
+
+    elseif strcmp(taskfile,'20250616-160629-160649-GraspObject')
+        wrongTrials = []; 
+    elseif strcmp(taskfile,'20250616-161712-161759-GraspObject')
+        wrongTrials = []; 
+    elseif strcmp(taskfile,'20250616-162350-162422-GraspObject')
+        wrongTrials = []; 
+    elseif strcmp(taskfile,'20250616-163151-163202-GraspObject')
+        wrongTrials = [];
+    elseif strcmp(taskfile,'20250616-163758-163809-GraspObject')
+        wrongTrials = []; 
+    elseif strcmp(taskfile,'20250616-164422-164432-GraspObject')
+        wrongTrials = [];
+
+    elseif strcmp(taskfile,'20250624-155639-155707-GraspObject')
+        wrongTrials = []; 
+    elseif strcmp(taskfile,'20250624-160505-160540-GraspObject')
+        wrongTrials = []; 
+    elseif strcmp(taskfile,'20250624-161150-161205-GraspObject')
+        wrongTrials = []; 
+    elseif strcmp(taskfile,'20250624-161759-161810-GraspObject')
+        wrongTrials = [];
+    elseif strcmp(taskfile,'20250624-162416-162436-GraspObject')
+        wrongTrials = []; 
+    elseif strcmp(taskfile,'20250624-163027-163035-GraspObject')
+        wrongTrials = [];
+
+    elseif strcmp(taskfile,'20250626-155605-155615-GraspObject')
+        wrongTrials = []; 
+    elseif strcmp(taskfile,'20250626-160230-160307-GraspObject')
+        wrongTrials = []; 
+    elseif strcmp(taskfile,'20250626-160857-160958-GraspObject')
+        wrongTrials = []; 
+    elseif strcmp(taskfile,'20250626-161618-161643-GraspObject')
+        wrongTrials = [];
+    elseif strcmp(taskfile,'20250626-162303-162327-GraspObject')
+        wrongTrials = []; 
+    elseif strcmp(taskfile,'20250626-163349-163406-GraspObject')
+        wrongTrials = [];
+
+    elseif strcmp(taskfile,'20250702-153717-154927-GraspObject')
+        wrongTrials = []; 
+    elseif strcmp(taskfile,'20250702-155745-155820-GraspObject')
+        wrongTrials = []; 
+    elseif strcmp(taskfile,'20250702-160645-160710-GraspObject')
+        wrongTrials = [8,21]; 
+    elseif strcmp(taskfile,'20250702-161606-161622-GraspObject')
+        wrongTrials = [];
+    elseif strcmp(taskfile,'20250702-162225-162238-GraspObject')
+        wrongTrials = []; 
+    elseif strcmp(taskfile,'20250702-162824-162835-GraspObject')
+        wrongTrials = [];
+
+    elseif strcmp(taskfile,'20250717-161029-161131-GraspObject')
+        wrongTrials = []; 
+    elseif strcmp(taskfile,'20250717-161806-161834-GraspObject')
+        wrongTrials = []; 
+    elseif strcmp(taskfile,'20250717-162447-162608-GraspObject')
+        wrongTrials = []; 
+    elseif strcmp(taskfile,'20250717-163201-163216-GraspObject')
+        wrongTrials = [];
+    elseif strcmp(taskfile,'20250717-163817-163941-GraspObject')
+        wrongTrials = []; 
+    elseif strcmp(taskfile,'20250717-164533-164545-GraspObject')
         wrongTrials = [];
         % elseif strcmp(taskfile,'')
     %    wrongTrials = []; 

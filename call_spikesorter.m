@@ -4,33 +4,24 @@ clc
 clear all
 close all
 
-%subject_id = 's4'; %GB
+subject_id = 's4'; %GB
 %subject_id = 's3';  %AN
-subject_id = 's2'; %FG
+%subject_id = 's2'; %FG
 
 subject = hst.Subject(subject_id);
 
 %threshold session using blackrock filter. You can define the threshold
 %here. 
-% Blackrock.thresholdSession('20230721', 's3', 'THRESHOLD', -4.5, 'noise_model', 'Blackrock')
-% Blackrock.thresholdSession('20230803', 's3', 'THRESHOLD', -4.5, 'noise_model', 'Blackrock')
-% Blackrock.thresholdSession('20230724', 's3', 'THRESHOLD', -4.5, 'noise_model', 'Blackrock')
 
-%Blackrock.thresholdSession('20250517', subject_id, 'THRESHOLD', -4.5, 'noise_model', 'Blackrock')
-% Blackrock.thresholdSession('20250519', subject_id, 'THRESHOLD', -4.5, 'noise_model', 'Blackrock')
-Blackrock.thresholdSession('20250520', subject_id, 'THRESHOLD', -4.5, 'noise_model', 'Blackrock')
-
-% Blackrock.thresholdSession('20230725', 's2', 'THRESHOLD', -4.5, 'noise_model', 'Blackrock')
-% Blackrock.thresholdSession('20230803', 's2', 'THRESHOLD', -4.5, 'noise_model', 'Blackrock')
-% Blackrock.thresholdSession('20230810', 's2', 'THRESHOLD', -4.5, 'noise_model', 'Blackrock')
+Blackrock.thresholdSession('20250717', subject_id, 'THRESHOLD', -4.5, 'noise_model', 'Blackrock')
 
 %%
-  keyboard
+  %keyboard
 %%
 
 tasktype = {};
 end_comment = {};
-session_dates = {'20250519'};
+session_dates = {'20250717'};
 taskfileTest = 2;
 
 idxToRemove = [];
