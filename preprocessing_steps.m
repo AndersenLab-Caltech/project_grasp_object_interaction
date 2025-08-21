@@ -15,18 +15,18 @@ flag_4S = true; % updated Action to 4S, should ALWAYS be true
 
 % task variations - only 1 should be true
 flag_shuffled = false; % true for shuffled images task
-flag_varied_size = true; % true for varied object/aperature size
+flag_varied_size = false; % true for varied object/aperature size
 flag_GB_images = false; % true for task using images of GB's own hands and real objects
 flag_5050 = false; % true for 50/50 Go/NoGo task
-flag_combined = false; % true for combinations task
+flag_combined = true; % true for combinations task
 
 if strcmp(subject_id, 's2')
     %session_dates = {'20230831','20230907'};
-    session_dates = {'20250711'};
+    session_dates = {'20250725'};
 elseif strcmp(subject_id, 's3')
     session_dates = {'20250424'};
 elseif strcmp(subject_id, 's4')
-    session_dates = {'20250717'};
+    session_dates = {'20250806','20250807'};
 else 
     error('unknown subject')
 end 
@@ -326,21 +326,20 @@ for n_session = session_date_idx
         %separate channels according to brain area
         if strcmp(subject_id, 's2')
             % Ripple
-            % SMG_idx = channel <= 96 .* ismember(featdef_ind_sub.nsp_name, 'SUM1'); % 'APX' for Blackrock
-            % PMV_idx = logical((channel > 96 & channel <= 224) .* ismember(featdef_ind_sub.nsp_name, 'SUM1')); % 'APX' for Blackrock
-            % %S1_idx = channel <= 96   & ismember(featdef_ind_sub.nsp_name, 'S1X_S1'); % 'S1X_S1' for Blackrock
-            % S1_idx = channel > 225   & ismember(featdef_ind_sub.nsp_name, 'SUM1');
-            % AIP_idx = dataset_channel < 0; %does not exist for s2
-            % M1_idx = dataset_channel < 0; %does not exist for s2
-            % dlPFC_idx = dataset_channel < 0; %does not exist for s2
-
-            % Blackrock
-            SMG_idx = channel <= 96 .* ismember(featdef_ind_sub.nsp_name, 'APX'); 
-            PMV_idx = logical((channel > 96 & channel <= 224) .* ismember(featdef_ind_sub.nsp_name, 'APX')); 
-            S1_idx = channel <= 96   & ismember(featdef_ind_sub.nsp_name, 'S1X_S1'); % 'S1X_S1' for Blackrock
+            SMG_idx = channel <= 96 .* ismember(featdef_ind_sub.nsp_name, 'SUM1'); 
+            PMV_idx = logical((channel > 96 & channel <= 224) .* ismember(featdef_ind_sub.nsp_name, 'SUM1')); 
+            S1_idx = channel > 225   & ismember(featdef_ind_sub.nsp_name, 'SUM1');
             AIP_idx = dataset_channel < 0; %does not exist for s2
             M1_idx = dataset_channel < 0; %does not exist for s2
             dlPFC_idx = dataset_channel < 0; %does not exist for s2
+
+            % Blackrock
+            % SMG_idx = channel <= 96 .* ismember(featdef_ind_sub.nsp_name, 'APX'); 
+            % PMV_idx = logical((channel > 96 & channel <= 224) .* ismember(featdef_ind_sub.nsp_name, 'APX')); 
+            % S1_idx = channel <= 96   & ismember(featdef_ind_sub.nsp_name, 'S1X_S1'); 
+            % AIP_idx = dataset_channel < 0; %does not exist for s2
+            % M1_idx = dataset_channel < 0; %does not exist for s2
+            % dlPFC_idx = dataset_channel < 0; %does not exist for s2
 
             % SMG_idx = dataset_channel <= 96 .* ismember(featdef_ind_sub.nsp_name, 'APX');
             % PMV_idx1 = (dataset_channel > 96 & dataset_channel <= 224) .* ismember(featdef_ind_sub.nsp_name, 'APX');

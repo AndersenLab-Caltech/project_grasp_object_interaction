@@ -12,13 +12,13 @@ spike_sorting_type = 'unsorted_aligned_thr_-4.5';
 %taskName = 'GraspObject_5050'; % 50% Go, 50% No-Go task
 taskName = 'GraspObject_Combined'; % all grasp/object combinations task
 subject_id = 's2';
-session_date = {'20230830'}; % 0830, 0921, 0929, 1005, 1030 
+session_date = {'20250728'}; % 0830, 0921, 0929, 1005, 1030 
 
 % LOAD DATA
 Data = load(['C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\' subject_id '\Data\Table_' subject_id '_' taskName '_' spike_sorting_type]);
 Data = Data.Go_data;
 
-Data = Data(strcmp(Data.session_date, session_date), :); % pull desired session
+%Data = Data(strcmp(Data.session_date, session_date), :); % pull desired session, comment out when calculating specific units across sessions
 
 % add Aperture Size column
 sizeKeywords = ['Small', 'Medium', 'Large'];
@@ -57,7 +57,9 @@ error_session = {};
 if strcmp(subject_id, 's2')
     error_session = {'20231016'};
 elseif strcmp(subject_id, 's3')
-    error_session = {};
+    error_session = {'20250212'};
+elseif strcmp(subject_id, 's4')
+    error_session = {'20240613'};
 end 
 
 if ~isempty(error_session)
@@ -201,8 +203,7 @@ for i = 1:12
     xlabel('Timebins');
     ylabel('Value');
 end
-%%
-% analyzing fr for each grasp separated by aperture size
+%% analyzing fr for each grasp separated by aperture size/object type
 if strcmp(taskName, 'GraspObject_Varied_Size')
     for n_brain = 4%:length(brainAreas) % 1:5 for AN, 1:3 for FG, [1, 3:6] for GB
         
@@ -284,13 +285,13 @@ if strcmp(taskName, 'GraspObject_Varied_Size')
         end
     end
 elseif strcmp(taskName, 'GraspObject_Combined')
-    for n_brain = 5%:length(brainAreas) % 1:5 for AN, 1:3 for FG, [1, 3:6] for GB
+    for n_brain = 1%:length(brainAreas) % 1:5 for AN, 1:3 for FG, [1, 3:6] for GB
         
         frData = Data.frPerChannel{n_brain};
         numChannels = size(frData, 1);
         
         for n_channel = 1:numChannels
-            figure('units','normalized','outerposition',[0 0 .25 .35]);%[0 0 0.5 1])
+            figure('units','normalized','outerposition',[0 0 .17 .25]);%[0 0 0.5 1])
             sgtitle([brainAreas{n_brain} ' - Channel ' num2str(n_channel)]);
             
             %for n_grasp = 1:numel(uniqueGraspTypes)
@@ -318,9 +319,9 @@ elseif strcmp(taskName, 'GraspObject_Combined')
                 %chan_fr = cell2mat(cellfun(@(x) x(n_channel,:), fr_sep_cue_type_mean, 'UniformOutput',false));
                 err_bar = {};
                 %color_info = {[.1176 .5333 .8980],[.8471 .1059 .3765],[1 .7569.0275]}; %conditions
-                color_info = {[.9961 .6875 0],[.3906 .5586 .9961],[.4688 .3672 .9375],[.8594 .1484 .4961],[.9922 .3789 0]}; % objects (including Assoc.)
+                color_info = {[.3906 .5586 .9961],[.4688 .3672 .9375],[.8594 .1484 .4961],[.9922 .3789 0]}; % objects (including Assoc.) [.9961 .6875 0],
     
-                for n_type = 2:5 %1:numel(uniqueObjectType) % analyzing sizes (S, M, L)
+                for n_type = 1:numel(uniqueObjectType) % analyzing sizes (S, M, L)
                     dataTmp = fr_sep_object_type_trial{n_type}';
     
                     ci = bootci(1000, {@mean,dataTmp});
@@ -355,7 +356,7 @@ elseif strcmp(taskName, 'GraspObject_Combined')
                 hold off;
             %end
             % legend([err_bar{:}], uniqueApertureSize','Interpreter', 'none');
-            legend([err_bar{:}], uniqueObjectType{2:5},'Interpreter', 'none');
+            legend([err_bar{:}], uniqueObjectType,'Interpreter', 'none');
             xlabel('Timebins (50 ms)');
             xlim([0 180]);
             ylabel('Average Firing Rate');
@@ -1193,7 +1194,16 @@ h4 = patch(NaN, NaN, sizeOverlapColor);
 legend([h2 h1 h4 h3], {'Grasp+Size', 'Grasp-only', 'Size+Grasp', 'Size-only'}, ...
     'Location', 'northeastoutside');
 %% GS, Object Parameters 
-phase_bins = 94:174; % cue = 42:82, action = 94:174
+phase = 'Cue';
+%phase = 'Action';
+if strcmp(phase, 'Cue')
+    phase_bins = 42:82; 
+elseif strcmp(phase, 'Action')
+    phase_bins = 94:174; 
+else 
+    keyboard
+    error([phase ' not added to pipeline, must add timebins'])
+end
 alpha = 0.05;
 
 % Preallocate storage
@@ -1384,7 +1394,7 @@ set(gca, 'XTick', x, 'XTickLabel', brainRegions, 'FontSize', 12);
 ylabel('Percentage of Units (%)');
 ylim([0 100]);
 yticks(0:25:100);
-title('Grasp- and Object-specific Units during Action Phase');
+title(['Grasp- and Object-specific Units during ' phase]);
 
 % Legend
 h1 = patch(NaN, NaN, graspColor);

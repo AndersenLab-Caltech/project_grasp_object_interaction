@@ -3,11 +3,11 @@ clear all
 close all 
 
 spike_sorting_type = '_unsorted_aligned_thr_-4.5';
-taskName = 'GraspObject_4S_Action';
+%taskName = 'GraspObject_4S_Action';
 %taskName = 'GraspObject_Shuffled'; % shuffled images
-taskName = 'GraspObject_Varied_Size'; % varied object/aperture sizes
+%taskName = 'GraspObject_Varied_Size'; % varied object/aperture sizes
 %taskName = 'GraspObject_GB_Images'; % for GB
-%taskName = 'GraspObject_Combined'; % for Combined task
+taskName = 'GraspObject_Combined'; % for Combined task
 subject_id = 's4';
 
 % Data = load('C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\s3\Data\IndividualFiles\GraspObject\unsorted_aligned_thr_-4.5\s3_20230803_unsorted_aligned_thr_-4.5_GraspObject');
@@ -56,7 +56,7 @@ if ~strcmp(taskName, 'GraspObject_Varied_Size')
         Go_data = Go_data(~condition,:);
     end
     
-    unit_region = 'SMG';
+    unit_region = 'M1';
     brainAreas = Go_data.frPerChannel{7};
     phase_time_idx = Go_data.time_phase_labels{1,1};
     numPhases = numel(unique(phase_time_idx));
@@ -89,7 +89,7 @@ if ~strcmp(taskName, 'GraspObject_Varied_Size')
     %all_errTest = NaN(numSessions, numPhases, numel(uniqueGraspTypes)); % for sep by Grasp Types
     
     % Initialize a cell array to store confusion matrices for each phase
-    confMatAllSessions = cell(numSessions,numPhases,1); %cell(numSessions,numPhases); 1 bc only running for Cue rn
+    confMatAllSessions = cell(numSessions,numPhases,numel(uniqueCueTypes)); %cell(numSessions,numPhases); 1 bc only running for Cue rn
     figure(); 
     
     for n_session = 1:numSessions
@@ -158,7 +158,7 @@ if ~strcmp(taskName, 'GraspObject_Varied_Size')
         graspTypeSession = Go_data.GraspType(idxThisSession,:);
 
         % object labels
-        %objectTypeSession = Go_data.ObjectType(idxThisSession,:);
+        objectTypeSession = Go_data.ObjectType(idxThisSession,:);
         
     
         %get idx for Go or NoGo trials
@@ -173,7 +173,7 @@ if ~strcmp(taskName, 'GraspObject_Varied_Size')
             time_phase_labels = time_phase_labels(GoNoGoidx);
             trialTypeSession = trialTypeSession(GoNoGoidx);
             graspTypeSession = graspTypeSession(GoNoGoidx);
-            %objectTypeSession = objectTypeSession(GoNoGoidx);
+            objectTypeSession = objectTypeSession(GoNoGoidx);
         else
             SessionData = SessionData(~GoNoGoidx);
             sessionLabels = sessionLabels(~GoNoGoidx);
@@ -190,7 +190,7 @@ if ~strcmp(taskName, 'GraspObject_Varied_Size')
         unGraspType = unique(Go_data.GraspType);
 
         % separate data according to object 
-        %unObjectType = unique(Go_data.ObjectType); % includes "Associated" currently
+        unObjectType = unique(Go_data.ObjectType); % includes "Associated" currently
     
         % loop through cue conditions
         for n_type = 1:numel(unTrialType) 
@@ -201,16 +201,16 @@ if ~strcmp(taskName, 'GraspObject_Varied_Size')
             % code for CMs of grasps and modalities separately
             sessionLabels_modality = trialTypeSession;
             sessionLabels_grasp = graspTypeSession;
-            %sessionLabels_object = objectTypeSession;
+            sessionLabels_object = objectTypeSession;
 
             % Convert modality labels ('Hand', 'HandObject', 'Object') to numerical values
             modality_labels = {'Hand', 'Hand_Object', 'Object'}; % 'Combined',
             grasp_labels = {'Lateral', 'MediumWrap', 'PalmarPinch', 'Sphere3Finger'};
-            %object_labels = {'deck','block','rod','ball'};
+            object_labels = {'block','rod','deck','ball'};
 
             sessionLabels_modality_num = zeros(size(sessionLabels_modality));  % Initialize numerical labels
             sessionLabels_grasp_num = zeros(size(sessionLabels_grasp));
-            %sessionLabels_object_num = zeros(size(sessionLabels_object));
+            sessionLabels_object_num = zeros(size(sessionLabels_object));
 
             % Loop through labels and assign numerical values
             for i = 1:length(modality_labels)
@@ -219,9 +219,9 @@ if ~strcmp(taskName, 'GraspObject_Varied_Size')
             for i = 1:length(grasp_labels)
                 sessionLabels_grasp_num(strcmp(sessionLabels_grasp, grasp_labels{i})) = i;
             end 
-            % for i = 1:length(object_labels)
-            %     sessionLabels_object_num(strcmp(sessionLabels_object, object_labels{i})) = i;
-            % end 
+            for i = 1:length(object_labels)
+                sessionLabels_object_num(strcmp(sessionLabels_object, object_labels{i})) = i;
+            end 
     
             % loop through task phases 
             for n_phase = 1:numPhases
@@ -231,8 +231,8 @@ if ~strcmp(taskName, 'GraspObject_Varied_Size')
     
                 %[errTrain, errTestTmp,~,~,confMat] = classification.LDA_classification_rep(data_per_phase_per_cue,sessionLabels(trialTypeIdx),'flagErrorMatrix', false, 'PCA_variance', 95,'flagLeaveOneOut', true); % original
                 [errTrain, errTestTmp,~,~,confMat] = classification.LDA_classification_rep(data_per_phase_per_cue,sessionLabels_grasp_num(trialTypeIdx),'flagErrorMatrix', false, 'PCA_variance', 95,'flagLeaveOneOut', true); % testing with my method to see if we still get same decoding
-                %[errTrain, errTestTmp,~,~,confMat] = classification.LDA_classification_rep(data_per_phase_per_cue,sessionLabels_object_num(trialTypeIdx),'flagErrorMatrix', true, 'PCA_variance', 95,'flagLeaveOneOut', true);
-                %[errTrain, errTestTmp,~,~,confMat] = classification.LDA_classification_rep(data_per_phase,sessionLabels_object_num, 'flagErrorMatrix', true, 'PCA_variance', 95, 'flagLeaveOneOut', true);
+                %[errTrain, errTestTmp,~,~,confMat] = classification.LDA_classification_rep(data_per_phase_per_cue,sessionLabels_object_num(trialTypeIdx),'flagErrorMatrix', false, 'PCA_variance', 95,'flagLeaveOneOut', true);
+                %[errTrain, errTestTmp,~,~,confMat] = classification.LDA_classification_rep(data_per_phase,sessionLabels_grasp_num, 'flagErrorMatrix', true, 'PCA_variance', 95, 'flagLeaveOneOut', true);
                 errTest(n_phase,n_type) =  (1-mean(errTestTmp))*100; % sub 1 for n_type when separating by condition first
                 %title([ sessions_all{n_session} ' - ' unit_region ' - ' phaseNames{n_phase}]) % ' - ' unTrialType{n_type}])
                 
@@ -269,7 +269,7 @@ if ~strcmp(taskName, 'GraspObject_Varied_Size')
         end 
         
         % Store the classification accuracy for each session
-        all_errTest(n_session, :, :) = errTest;
+        all_errTest(n_session, :, :) = errTest; % add ,:) aka 3rd dimension when separating by CONDITION
     
         subplot(4,2,n_session) % code using var names instead of hard 
     
@@ -326,7 +326,7 @@ else
         Go_data = Go_data(~condition,:);
     end
     
-    unit_region = 'AIP';
+    unit_region = 'SMG';
     brainAreas = Go_data.frPerChannel{7};
     phase_time_idx = Go_data.time_phase_labels{1,1};
     numPhases = numel(unique(phase_time_idx));
@@ -356,13 +356,13 @@ else
     flagGoTrials = true; %if true, extract Go trials, if false, extract NoGo trials
     
     % Initialize a matrix to store classification accuracy for all sessions
-    all_errTest = NaN(numSessions, numPhases, numel(uniqueCueTypes)); % for sep by Cue Modality
+    %all_errTest = NaN(numSessions, numPhases, numel(uniqueCueTypes)); % for sep by Cue Modality
     %all_errTest = NaN(numSessions, numPhases, numel(uniqueGraspTypes)); % for sep by Grasp Types
     %all_errTest = NaN(numSessions, numPhases, numel(uniqueApertureSize)); % for sep by Aperture Size
-    %all_errTest = NaN(numSessions, numPhases); % unseparated
+    all_errTest = NaN(numSessions, numPhases); % unseparated
     
     % Initialize a cell array to store confusion matrices for each phase
-    confMatAllSessions = cell(numSessions,numPhases,numel(uniqueCueTypes)); %grasp/cueType ; cell(numSessions,numPhases); 1 bc only running for Cue rn
+    %confMatAllSessions = cell(numSessions,numPhases,numel(uniqueCueTypes)); %grasp/cueType ; cell(numSessions,numPhases); 1 bc only running for Cue rn
     
     % Original code
     figure(); 
@@ -468,27 +468,27 @@ else
 
         unGraspType = unique(Go_data.GraspType);
 
-        % % only keeping Small and Large
-        % % Define which sizes to keep
-        % sizesToKeep = {'Small', 'Large'};
-        % 
-        % % Find indices of trials belonging to 'small' or 'large' sessions
-        % SLsizeIdx = ismember(apertureSizeSession, sizesToKeep);
-        % 
-        % % Extract trials that correspond to 'small' or 'large' sessions
-        % z_scored_data = z_scored_data(SLsizeIdx);
-        % sessionLabels = sessionLabels(SLsizeIdx);
-        % time_phase_labels = time_phase_labels(SLsizeIdx);
-        % trialTypeSession = trialTypeSession(SLsizeIdx);
-        % graspTypeSession = graspTypeSession(SLsizeIdx);
-        % apertureSizeSession = apertureSizeSession(SLsizeIdx);
-        % uniqueApertureSize = unique(apertureSizeSession);
+        % only keeping Small and Large
+        % Define which sizes to keep
+        sizesToKeep = {'Small', 'Large'};
+
+        % Find indices of trials belonging to 'small' or 'large' sessions
+        SLsizeIdx = ismember(apertureSizeSession, sizesToKeep);
+
+        % Extract trials that correspond to 'small' or 'large' sessions
+        z_scored_data = z_scored_data(SLsizeIdx);
+        sessionLabels = sessionLabels(SLsizeIdx);
+        time_phase_labels = time_phase_labels(SLsizeIdx);
+        trialTypeSession = trialTypeSession(SLsizeIdx);
+        graspTypeSession = graspTypeSession(SLsizeIdx);
+        apertureSizeSession = apertureSizeSession(SLsizeIdx);
+        uniqueApertureSize = unique(apertureSizeSession);
 
         % loop through cue modalities/sizes/grasps
-        for n_type = 1:numel(unTrialType) %1:numel(unGraspType) %1:numel(unTrialType) %n_size = 1:numel(unAperture)       %
+        %for n_type = 1:numel(unGraspType) %1:numel(unGraspType) %1:numel(unTrialType) %n_size = 1:numel(unAperture)       %
             
             % find idx of trial type 
-            trialTypeIdx = ismember(trialTypeSession, unTrialType(n_type));
+            %trialTypeIdx = ismember(trialTypeSession, unTrialType(n_type));
     
             % find idx of size type 
             %trialSizeIdx = ismember(apertureSizeSession, unAperture(n_size));
@@ -532,27 +532,24 @@ else
                     %mean(x{1,1}(y{:}==
                     %n_phase,:),1),SessionData(trialGraspIdx),time_phase_labels(trialGraspIdx),
                     %'UniformOutput', false)); % sep by grasp data
-                %data_per_phase = cell2mat(arrayfun(@(x,y)
-                    %mean(x{1,1}(y{:}==
-                    %n_phase,:),1),SessionData,time_phase_labels,
-                    %'UniformOutput', false)); % all data
+                data_per_phase = cell2mat(arrayfun(@(x,y) mean(x{1,1}(y{:}== n_phase,:),1),z_scored_data,time_phase_labels,'UniformOutput', false)); % all data
 
-                z_data_per_phase_per_condition = cell2mat(arrayfun(@(x,y) mean(x{1,1}(y{:}== n_phase,:),1),z_scored_data(trialTypeIdx),time_phase_labels(trialTypeIdx),'UniformOutput', false)); % sep z-scored data by condition per phase
+                %z_data_per_phase_per_condition = cell2mat(arrayfun(@(x,y) mean(x{1,1}(y{:}== n_phase,:),1),z_scored_data(trialTypeIdx),time_phase_labels(trialTypeIdx),'UniformOutput', false)); % sep z-scored data by condition per phase
                 %z_data_per_phase_per_grasp = cell2mat(arrayfun(@(x,y) mean(x{1,1}(y{:}== n_phase,:),1),z_scored_data(trialGraspIdx),time_phase_labels(trialGraspIdx),'UniformOutput', false)); % sep by grasp data
 
                 % [errTrain, errTestTmp] = classification.LDA_classification_rep(data_per_phase_per_cue,sessionLabels(trialTypeIdx),'flagErrorMatrix', false, 'PCA_variance', 95,'flagLeaveOneOut', true); % original
                 % [errTrain, errTestTmp] = classification.LDA_classification_rep(data_per_phase_per_cue,sessionLabels_size_num(trialTypeIdx),'flagErrorMatrix', false, 'PCA_variance', 95,'flagLeaveOneOut', true); % classifying size from modality
                 
-                [errTrain, errTestTmp,~,~,confMat] = classification.LDA_classification_rep(z_data_per_phase_per_condition,sessionLabels_grasp_num(trialTypeIdx),'flagErrorMatrix', false, 'PCA_variance', 95,'flagLeaveOneOut', true); % classifying grasp from modality using z-scored data
-                %[errTrain, errTestTmp,~,~,confMat] = classification.LDA_classification_rep(z_data_per_phase_per_condition,sessionLabels_size_num(trialTypeIdx),'flagErrorMatrix', true, 'PCA_variance', 95,'flagLeaveOneOut', true); % classifying size from modality using z-scored data
+                %[errTrain, errTestTmp,~,~,confMat] = classification.LDA_classification_rep(z_data_per_phase_per_condition,sessionLabels_grasp_num(trialTypeIdx),'flagErrorMatrix', false, 'PCA_variance', 95,'flagLeaveOneOut', true); % classifying grasp from modality using z-scored data
+                %[errTrain, errTestTmp,~,~,confMat] = classification.LDA_classification_rep(z_data_per_phase_per_condition,sessionLabels_size_num(trialTypeIdx),'flagErrorMatrix', false, 'PCA_variance', 95,'flagLeaveOneOut', true); % classifying size from modality using z-scored data
                 %[errTrain, errTestTmp,~,~,confMat] = classification.LDA_classification_rep(z_data_per_phase_per_grasp,sessionLabels_size_num(trialGraspIdx),'flagErrorMatrix', false, 'PCA_variance', 95,'flagLeaveOneOut', true); % classifying size from grasp using z-scored data
                 %[errTrain, errTestTmp] = classification.LDA_classification_rep(data_per_phase_per_grasp,sessionLabels_size_num(trialGraspIdx),'flagErrorMatrix', false, 'PCA_variance', 95,'flagLeaveOneOut', true);
-                %[errTrain, errTestTmp] = classification.LDA_classification_rep(data_per_phase,sessionLabels_modality_num, 'flagErrorMatrix', true, 'PCA_variance', 95, 'flagLeaveOneOut', true);
+                [errTrain, errTestTmp,~,~,confMat] = classification.LDA_classification_rep(data_per_phase,sessionLabels_size_num, 'flagErrorMatrix', true, 'PCA_variance', 95, 'flagLeaveOneOut', true);
                 %title([ sessions_all{n_session} ' - ' unit_region ' - ' phaseNames{n_phase} ])
-                errTest(n_phase,n_type) =  (1-mean(errTestTmp))*100;
+                errTest(n_phase,1) =  (1-mean(errTestTmp))*100; % sub 1 for : when separating by condition
     
                 % Store the confusion matrix for this phase and session
-                confMatAllSessions{n_session, n_phase, n_type} = confMat;
+                confMatAllSessions{n_session, n_phase, 1} = confMat; % sub 1 for : when separating by condition
                 %title([ sessions_all{n_session} ' - ' unit_region ' - ' phaseNames{n_phase} ' - ' unTrialType{n_type} ]) %grasp/trialType; works for TrialType but not GraspType?
     
                 %data_per_phase_per_all = cell2mat(arrayfun(@(x,y) mean(x{1,1}(y{:}== n_phase,:),1),SessionData,time_phase_labels,'UniformOutput', false)); % original
@@ -584,24 +581,24 @@ else
               
     
             end   
-        end 
+        %end 
         
         % Store the classification accuracy for each session
-        all_errTest(n_session, :, :) = errTest;
+        all_errTest(n_session, :, 1) = errTest; % sub 1 for : when separating by condition
     
         subplot(4,2,n_session) % code using var names instead of hard 
     
       %  figure();
         bar(errTest)
         %yline(1/numel(unique(sessionLabels(trialTypeIdx)))*100) % when using assigned session labels
-        %yline((1/numel(uniqueApertureSize))*100) % when classifying size
-        yline((1/numel(uniqueGraspTypes))*100);
+        yline((1/numel(uniqueApertureSize))*100) % when classifying size
+        %yline((1/numel(uniqueGraspTypes))*100);
         ylim([0 100])
         xticklabels(phaseNames)
     
         if n_session ==3
-            legend(unTrialType, 'Interpreter','none') % sep by cue
-            %legend(unGraspType, 'Interpreter','none') % sep by grasp
+            %legend(unTrialType, 'Interpreter','none') % sep by cue
+            legend(unGraspType, 'Interpreter','none') % sep by grasp
         end 
         ylabel('Classification percentage [%]')
         title(sessions_all{n_session})
@@ -620,14 +617,14 @@ for n_phase = 2:numPhases
     % Initialize a figure for the current phase to display multiple confusion matrices (one for each grasp type)
     figure('units','normalized','outerposition',[0 0 .95 0.4]); 
     
-    for n_type = 1:numel(unTrialType) % grasp/trialType
+    %for n_type = 1:numel(unTrialType) % grasp/trialType
         % Initialize an empty matrix for the summed confusion matrix for the current phase and grasp type
-        confMatSize = size(confMatAllSessions{1, n_phase, n_type}); % Get size of the first confusion matrix for the phase and type
+        confMatSize = size(confMatAllSessions{1, n_phase});%, n_type}); % Get size of the first confusion matrix for the phase and type
         confMatSum = zeros(confMatSize);  % Initialize the sum matrix with zeros
 
         % Sum the confusion matrices across sessions for the current phase and grasp type
         for n_session = 1:numSessions
-            cmx = confMatAllSessions{n_session, n_phase, n_type};  
+            cmx = confMatAllSessions{n_session, n_phase};%, n_type};  
             if ~isempty(cmx)
                 confMatSum = confMatSum + cmx;
             end
@@ -640,15 +637,15 @@ for n_phase = 2:numPhases
         confMatAvgNorm = round((confMatAvg ./ sum(confMatAvg, 2)) * 100);
         
         % Create subplot for the current grasp type
-        subplot(1, numel(unTrialType), n_type); % numel(unGrasp/TrialType)
+        %subplot(1, numel(unTrialType), n_type); % numel(unGrasp/TrialType)
         
         % Display the normalized average confusion matrix for this grasp type
         cmx = confusionchart(confMatAvgNorm);
         cmx.DiagonalColor = '#0072BD';
         cmx.OffDiagonalColor = '#0072BD';
         cmx.FontSize = 20;
-        cmx.Title = sprintf('Normalized Average Classification\n%s - %s - %s', unit_region, phaseNames{n_phase}, unTrialType{n_type}); %grasp/trialType
-    end
+        cmx.Title = sprintf('Normalized Average Classification\n%s - %s - %s', unit_region, phaseNames{n_phase});%, unTrialType{n_type}); %grasp/trialType
+    %end
 end
 %% poster
 for n_phase = 2%:numPhases
@@ -780,7 +777,7 @@ end
 
 % Add error bars
 numPhases = size(mean_errTest, 1);
-for n_type = 1:numel(unTrialType) %(unGraspType) %(unTrialType)
+for n_type = 1:numel(unTrialType) %(unTrialType) unGraspType
     % Get the X positions for the current group of bars
     xPositions = bar_handle(n_type).XEndPoints; 
     % Plot the error bars
@@ -792,7 +789,6 @@ end
 % Customize plot appearance
 chance = 1/(numel(unGraspType))*100; %grasp or object
 %chance = 1/(numel(uniqueApertureSize))*100;
-%chance = 50; % classifying size extremes (S/L)
 yline(chance,'--k','LineWidth',1.5);
 ylim([0 100]);
 xticks(1:numel(phaseNames));%numPhases);
@@ -800,6 +796,7 @@ xticklabels(phaseNames);
 ylabel('Classification percentage [%]');
 yticks([0 50 100]);
 legend(unTrialType, 'Interpreter', 'none');
+%legend(unGraspType, 'Interpreter', 'none');
 title(unit_region);
 set(gca, 'FontSize', 12);
 hold off;

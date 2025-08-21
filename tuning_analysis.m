@@ -3,7 +3,7 @@ clear all
 close all
 
 subject_id = 's3';
-unit_region = 'PMV';
+unit_region = 'SMG';
 
 spike_sorting_type = '_unsorted_aligned_thr_-4.5';
 flag_4S = true; % true = updated 4S action phase; false = original 2S action phase
@@ -220,8 +220,8 @@ for n_session = 1:numSessions
     
 
     if flagGoTrials
-        SessionData = SessionData(GoNoGoidx);
-        %SessionData = z_scored_data(GoNoGoidx);
+        %SessionData = SessionData(GoNoGoidx);
+        SessionData = z_scored_data(GoNoGoidx);
         sessionLabels = sessionLabels(GoNoGoidx);
         timePhaseLabels = timePhaseLabels(GoNoGoidx);
         trialTypeSession = trialTypeSession(GoNoGoidx);
@@ -271,26 +271,39 @@ for n_session = 1:numSessions
         sessionLabels_object_num(strcmp(sessionLabels_object, object_labels{i})) = i;
     end 
 
-    % loop through cue modalities 
-    for n_type = 1%:numel(unTrialType)
+    nSubsamples = 10;
+    n_conditions = numel(unTrialType);
+    n_trials_per_type = zeros(n_conditions, 1);
+
+    % num trials per condition
+    for n_type = 1:n_conditions
+        n_trials_per_type(n_type) = sum(ismember(trialTypeSession, unTrialType(n_type)));
+    end
+
+    % 2. Minimum number of trials across conditions
+    min_n_trials = min(n_trials_per_type);
+
+    % loop through cue conditions 
+    for n_type = 1:numel(unTrialType)
 
         % find idx of trial type 
-        trialTypeIdx = ismember(trialTypeSession, unTrialType(n_type));
-        SessionData = SessionData(trialTypeIdx); % keep data only for Combined trials
-        timePhaseLabels = timePhaseLabels(trialTypeIdx); % keep timePhaseLabels for Combined trials only
+        trialTypeIdx_full = ismember(trialTypeSession, unTrialType(n_type)); % for subsampling
+        %trialTypeIdx = ismember(trialTypeSession, unTrialType(n_type));
+        %SessionData = SessionData(trialTypeIdx); % keep data only for Combined trials
+        %timePhaseLabels = timePhaseLabels(trialTypeIdx); % keep timePhaseLabels for Combined trials only
 
-        sessionLabels_object = sessionLabels_object(trialTypeIdx); % pulls out names for objects
-        sessionLabels_object_num = sessionLabels_object_num(trialTypeIdx); % for object tuning, idx so only Combined dataset used
-        sessionLabels_grasp = sessionLabels_grasp(trialTypeIdx); % TEST pulls out names for grasps
-        sessionLabels_grasp_num = sessionLabels_grasp_num(trialTypeIdx); % TEST for grasp tuning, idx so only Combined dataset used
+        % sessionLabels_object = sessionLabels_object(trialTypeIdx); % pulls out names for objects
+        % sessionLabels_object_num = sessionLabels_object_num(trialTypeIdx); % for object tuning, idx so only Combined dataset used
+        % sessionLabels_grasp = sessionLabels_grasp(trialTypeIdx); % TEST pulls out names for grasps
+        % sessionLabels_grasp_num = sessionLabels_grasp_num(trialTypeIdx); % TEST for grasp tuning, idx so only Combined dataset used
 
         % for n_object = 1:numel(object_labels) % loop through each object to test tuning to each grasp
 
             %objectTypeIdx = ismember(sessionLabels_object, object_labels(n_object)); 
 
-        for n_grasp = 1:numel(grasp_labels) % TEST loop through each grasp to test tuning to each object
+        %for n_grasp = 1:numel(grasp_labels) % TEST loop through each grasp to test tuning to each object
 
-            graspTypeIdx = ismember(sessionLabels_grasp, grasp_labels(n_grasp)); % TEST
+            %graspTypeIdx = ismember(sessionLabels_grasp, grasp_labels(n_grasp)); % TEST
 
          if flagTunedChannels
             %Compute index of units that are tuned
@@ -302,20 +315,46 @@ for n_session = 1:numSessions
 
                 % [tunedCombinedChannels, tunedChannelsPhase, tunedChannelsBin, sumPhase, sumBin,numTunedChannelsPerCategory,~,~,p_per_phase] ...
                 %      = classification.getRegressionTunedChannels_paper(SessionData(trialTypeIdx),sessionLabels_grasp_num(trialTypeIdx), ...
-                %  timePhaseLabels(trialTypeIdx), 'multcompare',multipleComparePhase, 'BinperBinTuning', flagBinPerBin); % for size/grasp
+                %  timePhaseLabels(trialTypeIdx), 'multcompare',multipleComparePhase, 'BinperBinTuning', flagBinPerBin, 'flagUnequalTrialNumbers', true); % for size/grasp
 
                  % [tunedCombinedChannels, tunedChannelsPhase, tunedChannelsBin, sumPhase, sumBin,numTunedChannelsPerCategory,~,~,p_per_phase] ...
                  %     = classification.getRegressionTunedChannels_paper(SessionData(trialTypeIdx),sessionLabels_object_num, ...
                  % timePhaseLabels(trialTypeIdx), 'multcompare',multipleComparePhase, 'BinperBinTuning', flagBinPerBin); % for object
 
-                [tunedCombinedChannels, tunedChannelsPhase, tunedChannelsBin, sumPhase, sumBin,numTunedChannelsPerCategory,~,~,p_per_phase] ...
-                     = classification.getRegressionTunedChannels_paper(SessionData(graspTypeIdx),sessionLabels_object_num(graspTypeIdx), ...
-                 timePhaseLabels(graspTypeIdx), 'multcompare',multipleComparePhase, 'BinperBinTuning', flagBinPerBin); % for grasp tuning per object and object tuning per grasp
+                % [tunedCombinedChannels, tunedChannelsPhase, tunedChannelsBin, sumPhase, sumBin,numTunedChannelsPerCategory,~,~,p_per_phase] ...
+                %      = classification.getRegressionTunedChannels_paper(SessionData(graspTypeIdx),sessionLabels_object_num(graspTypeIdx), ...
+                %  timePhaseLabels(graspTypeIdx), 'multcompare',multipleComparePhase, 'BinperBinTuning', flagBinPerBin); % for grasp tuning per object and object tuning per grasp
 
+                % testing subsampling to account for unequal trials
+                % Initialize accumulators for subsampling
+                sumPhase_all = zeros(length(unique(timePhaseLabels{1})), 1);
+                sumBin_all = zeros(size(SessionData{1}, 1), 1);  % assuming constant bin count
+                tunedChannelsPhase_acc = zeros(length(SessionData{1}(1,:)), length(unique(timePhaseLabels{1})));
+                tunedChannelsBin_acc = zeros(size(SessionData{1}, 1), length(unique(sessionLabels_grasp_num)),length(SessionData{1}(1,:)));
+                numTunedChannelsPerCategory_acc = zeros(length(unique(sessionLabels_grasp_num)), 1);
+            
+                for s = 1:nSubsamples
+                    % 4. Randomly subsample min_n_trials trials from this condition
+                    rand_idx = randsample(trialTypeIdx_full, min_n_trials);
+            
+                    % Run tuning function on subsampled data
+                    [tunedCombinedChannels, tunedChannelsPhase, tunedChannelsBin, sumPhase, sumBin, ...
+                        numTunedChannelsPerCategory,~,~,p_per_phase] = classification.getRegressionTunedChannels_paper( ...
+                            SessionData(rand_idx), sessionLabels_grasp_num(rand_idx), timePhaseLabels(rand_idx), ...
+                            'multcompare', multipleComparePhase, ...
+                            'BinperBinTuning', flagBinPerBin); 
+            
+                    % Accumulate
+                    sumPhase_all = sumPhase_all + sumPhase;
+                    sumBin_all = sumBin_all + sumBin;
+                    tunedChannelsPhase_acc = tunedChannelsPhase_acc + tunedChannelsPhase;
+                    tunedChannelsBin_acc = tunedChannelsBin_acc + tunedChannelsBin;
+                    numTunedChannelsPerCategory_acc = numTunedChannelsPerCategory_acc + numTunedChannelsPerCategory;
+                end
                 %condToTest = arrayfun(@(x) preproc.image2class_simple(x),unique(sessionLabels), 'UniformOutput', false); % original
-                %condToTest = arrayfun(@(x) grasp_labels(x),unique(sessionLabels_grasp_num),'UniformOutput',false); % testing for tuning to grasp
+                condToTest = arrayfun(@(x) grasp_labels(x),unique(sessionLabels_grasp_num),'UniformOutput',false); % testing for tuning to grasp
                 %condToTest = arrayfun(@(x) size_labels(x),unique(sessionLabels_size_num),'UniformOutput', false); % testing for tuning to size
-                condToTest = arrayfun(@(x) object_labels(x),unique(sessionLabels_object_num),'UniformOutput', false); % testing for tuning to object
+                %condToTest = arrayfun(@(x) object_labels(x),unique(sessionLabels_object_num),'UniformOutput', false); % testing for tuning to object
 
                 if nnz(sumBin) ~= 0
                     figure();
@@ -326,7 +365,7 @@ for n_session = 1:numSessions
                 %tuned_channels_per_size{n_type,n_session} = numTunedChannelsPerCategory;
                 %tuned_channels_per_object{n_type,n_session} = numTunedChannelsPerCategory;
                 %tuned_channels_per_object{n_object,n_session} = numTunedChannelsPerCategory; % combined tuning per object
-                tuned_channels_per_grasp{n_grasp,n_session} = numTunedChannelsPerCategory; % combined tuning per grasp
+                %tuned_channels_per_grasp{n_grasp,n_session} = numTunedChannelsPerCategory; % combined tuning per grasp
             else
 
                 tuned_channels_per_grasp{n_type,n_session} = [];
@@ -336,15 +375,22 @@ for n_session = 1:numSessions
             end
 
                 if nnz(sumBin) > 0
-                % sum_bin_all{n_type, n_session } = sumBin;
-                sum_bin_all{n_grasp, n_session } = sumBin; % TEST
+                sum_bin_all{n_type, n_session } = sumBin;
+                %sum_bin_all{n_grasp, n_session } = sumBin; % TEST
 
             else
                 sum_bin_all{n_type, n_session } = [];
 
                 end
 
-            % tuned_channels_per_phase{n_type,n_session} = sumPhase;
+            % 5. Average across subsamples
+            tuned_channels_per_grasp{n_type, n_session} = round(numTunedChannelsPerCategory_acc / nSubsamples);
+            tuned_channels_per_phase{n_type, n_session} = round(sumPhase_all / nSubsamples);
+            sum_bin_all{n_type, n_session} = round(sumBin_all / nSubsamples);
+            tuned_channels_per_phase_vector{n_type,n_session} = tunedChannelsPhase_acc / nSubsamples;
+            tuned_channels_per_bin_vector{n_type,n_session} = tunedChannelsBin_acc / nSubsamples;
+
+            % tuned_channels_per_phase{n_type,n_session} = sumPhase; % original
             % tuned_channels_per_phase_vector{n_type,n_session} = tunedChannelsPhase;
             % tuned_channels_per_bin_vector{n_type,n_session} = tunedChannelsBin;
 
@@ -352,26 +398,26 @@ for n_session = 1:numSessions
             % tuned_channels_per_phase_vector{n_object,n_session} = tunedChannelsPhase; 
             % tuned_channels_per_bin_vector{n_object,n_session} = tunedChannelsBin; 
 
-            tuned_channels_per_phase{n_grasp,n_session} = sumPhase; % TEST for object tuning per grasp
-            tuned_channels_per_phase_vector{n_grasp,n_session} = tunedChannelsPhase; % TEST
-            tuned_channels_per_bin_vector{n_grasp,n_session} = tunedChannelsBin; % TEST
+            % tuned_channels_per_phase{n_grasp,n_session} = sumPhase; % TEST for object tuning per grasp
+            % tuned_channels_per_phase_vector{n_grasp,n_session} = tunedChannelsPhase; % TEST
+            % tuned_channels_per_bin_vector{n_grasp,n_session} = tunedChannelsBin; % TEST
 
 
          
          end
-        end
+        %end
     end 
 
     n_phases = size(tuned_channels_per_phase_vector{1,n_session}, 2);
     n_units = size(tuned_channels_per_phase_vector{1,n_session}, 1);
 
-    % % Initialize a binary matrix: [n_units x n_phases x n_conditions]
-    % tuned_phase_matrix = false(n_units, n_phases, numel(unTrialType));
-    % 
-    % for cond = 1:numel(unTrialType)
-    %     tuned_phase_matrix(:,:,cond) = tuned_channels_per_phase_vector{cond,n_session};
-    % end
-    % 
+    % Initialize a binary matrix: [n_units x n_phases x n_conditions]
+    tuned_phase_matrix = false(n_units, n_phases, numel(unTrialType));
+
+    for cond = 1:numel(unTrialType)
+        tuned_phase_matrix(:,:,cond) = tuned_channels_per_phase_vector{cond,n_session};
+    end
+
     % % calculating tuning overlap per phase 
     % hand     = tuned_phase_matrix(:,:,1);
     % ho       = tuned_phase_matrix(:,:,2);
@@ -564,16 +610,16 @@ goLabel = goLabel(flagGoTrials + 1);
 % Create the filename using the brain region and analysis type
 %filename = ['tuned_channels_per_condition' TaskCue '_' unit_region '_' analysis_type '_' goLabel '.mat']; % goLabel determines Go, NoGo label
 %filename = "grasp_tuned_channels_per_condition_" + TaskCue + '_' + unit_region + "_" + analysis_type + "_" + goLabel + ".mat"; % just .mat for original data
-filename = "object_tuned_channels_per_grasp_" + TaskCue + '_' + unit_region + "_" + analysis_type + "_" + goLabel + "_z_scored.mat"; % when z-scoring
+filename = "TEST_grasp_tuned_channels_per_condition_" + TaskCue + '_' + unit_region + "_" + analysis_type + "_" + goLabel + "_z_scored.mat"; % when z-scoring
 
 directory = ['C:\Users\macthurston\Documents\GitHub\project_grasp_object_interaction\analyzedData\' subject_id];
 full_path = fullfile(directory, filename);
 
 % Save the relevant variables with the dynamic filename
-% save(full_path, 'sum_bin_all', 'tuned_channels_per_phase', 'tuned_channels_per_phase_vector','tuned_channels_per_bin_vector','numUnitsPerSession',...
-%     'hand_ho_overlap_units_all','object_ho_overlap_units_all','object_hand_overlap_units_all','object_hand_ho_overlap_units_all',...
-%     'hand_ho_overlap_units_all_sessions','object_ho_overlap_units_all_sessions','object_hand_overlap_units_all_sessions','object_hand_ho_overlap_units_all_sessions',...
-%     'hand_total_units','ho_total_units','object_total_units'); 
+%save(full_path, 'sum_bin_all', 'tuned_channels_per_phase', 'tuned_channels_per_phase_vector','tuned_channels_per_bin_vector','numUnitsPerSession',...
+    % 'hand_ho_overlap_units_all','object_ho_overlap_units_all','object_hand_overlap_units_all','object_hand_ho_overlap_units_all',...
+    % 'hand_ho_overlap_units_all_sessions','object_ho_overlap_units_all_sessions','object_hand_overlap_units_all_sessions','object_hand_ho_overlap_units_all_sessions',...
+    % 'hand_total_units','ho_total_units','object_total_units'); % for overlap
 
 save(full_path, 'sum_bin_all', 'tuned_channels_per_phase', 'tuned_channels_per_phase_vector','tuned_channels_per_bin_vector','numUnitsPerSession'); % object tuning for Combo dataset
 
@@ -769,7 +815,7 @@ end
 tuned_channels_per_phase = tuned_channels_per_phase(:,colsToKeep);
 
 figure('units','normalized','outerposition',[0 0 .38 0.38]); %[0 0 .5 .5]); %[0 0 .38 0.38]);
-for n_type = 1%:numel(taskCuesAll)
+for n_type = 1:numel(taskCuesAll)
     dataTmp = cell2mat(tuned_channels_per_phase(n_type,sessionToInclude)')*100;
     percentage_tuned = dataTmp./numUnitsPerSession(sessionToInclude);
     percentage_tuned_all{n_type} = percentage_tuned;
@@ -869,7 +915,7 @@ end
 % variables
 unTrialType = unique(Go_data.TrialType);
 
-for n_type = 1%:numel(unTrialType) 
+for n_type = 1:numel(unTrialType) 
     if numSessions ~= 1
         tunedUnitsPerType(n_type,:) = sum(cell2mat(tuned_channels_per_phase(n_type,:)'));
 
@@ -1002,7 +1048,7 @@ percentage_tuned_per_bin_all = cell(numel(taskCuesAll), 1);
 per_bin_yCI95 = zeros(numel(taskCuesAll),min_timebin_length);
 per_bin_tuned_mean = zeros(numel(taskCuesAll),min_timebin_length);
 %sessionToInclude = setdiff(1:numSessions,1);
-color_info = {[0.2, 0.13, 0.53], [0.067, 0.467, 0.2], [0.53, 0.8, 0.93], [0.53, 0.13, 0.33]}; % grasps/objects: Purple, Green, Light Blue, Dark Pink
+%color_info = {[0.2, 0.13, 0.53], [0.067, 0.467, 0.2], [0.53, 0.8, 0.93], [0.53, 0.13, 0.33]}; % grasps/objects: Purple, Green, Light Blue, Dark Pink
 
 %code for empty/missing session data
 rowsToKeep = numUnitsPerSession ~= 0;
@@ -1018,7 +1064,7 @@ sum_bin_all = sum_bin_all(:,colsToKeep);
 
 figure('units','normalized','outerposition',[0 0 0.25 0.245]); %[0 0 0.5 0.45]) %[0 0 0.25 0.245]);
 err_bar = {};
-for n_type = 1:numel(grasp_labels) %taskCuesAll)
+for n_type = 1:numel(taskCuesAll) %grasp_labels) %taskCuesAll)
     dataTmp = cell2mat(sum_bin_all(n_type,sessionToInclude))*100;
     percentage_tuned_per_bin = dataTmp./(numUnitsPerSession(sessionToInclude)');
     percentage_tuned_per_bin_all{n_type} = percentage_tuned_per_bin;
@@ -1049,8 +1095,8 @@ xtickangle(45);
 ylabel('% of Total Units');
 ylim([0 70]);
 yticks([0 35 70]);
-%legend([err_bar{:}], taskCuesAll,'Location', 'Best','Interpreter', 'none','FontSize',12);
-legend([err_bar{:}], grasp_labels,'Location', 'Best','Interpreter', 'none','FontSize',12);
+legend([err_bar{:}], taskCuesAll,'Location', 'Best','Interpreter', 'none','FontSize',12);
+%legend([err_bar{:}], grasp_labels,'Location', 'Best','Interpreter', 'none','FontSize',12);
 set(gca, 'FontSize', 12);
 
 %% ANOVA for percentage tuned across first half of Cue
