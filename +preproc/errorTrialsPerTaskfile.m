@@ -1361,6 +1361,32 @@ elseif strcmp(subject, 's4')
     elseif strcmp(taskfile,'20250807-162711-164219-GraspObject')
         wrongTrials = [9,18,23,29,33];
 
+    elseif strcmp(taskfile,'20250818-160756-160831-GraspObject')
+        wrongTrials = []; 
+    elseif strcmp(taskfile,'20250818-162031-162055-GraspObject')
+        wrongTrials = []; 
+    elseif strcmp(taskfile,'20250818-163028-163051-GraspObject')
+        wrongTrials = [17]; 
+    elseif strcmp(taskfile,'20250818-163709-163720-GraspObject')
+        wrongTrials = [33];
+    elseif strcmp(taskfile,'20250818-163709-164331-GraspObject')
+        wrongTrials = []; 
+    elseif strcmp(taskfile,'20250818-163709-165127-GraspObject')
+        wrongTrials = [];
+
+    elseif strcmp(taskfile,'20250820-161357-161643-GraspObject')
+        wrongTrials = []; 
+    elseif strcmp(taskfile,'20250820-162313-162343-GraspObject')
+        wrongTrials = []; 
+    elseif strcmp(taskfile,'20250820-163025-163047-GraspObject')
+        wrongTrials = []; 
+    elseif strcmp(taskfile,'20250820-163707-163721-GraspObject')
+        wrongTrials = [];
+    elseif strcmp(taskfile,'20250820-163707-164331-GraspObject')
+        wrongTrials = [24]; 
+    elseif strcmp(taskfile,'20250820-163707-164929-GraspObject')
+        wrongTrials = [];
+
         % elseif strcmp(taskfile,'')
     %    wrongTrials = []; 
 

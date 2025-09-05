@@ -26,7 +26,7 @@ if strcmp(subject_id, 's2')
 elseif strcmp(subject_id, 's3')
     session_dates = {'20250424'};
 elseif strcmp(subject_id, 's4')
-    session_dates = {'20250806','20250807'};
+    session_dates = {'20250818'};
 else 
     error('unknown subject')
 end 
@@ -333,7 +333,7 @@ for n_session = session_date_idx
             M1_idx = dataset_channel < 0; %does not exist for s2
             dlPFC_idx = dataset_channel < 0; %does not exist for s2
 
-            % Blackrock
+            % % Blackrock
             % SMG_idx = channel <= 96 .* ismember(featdef_ind_sub.nsp_name, 'APX'); 
             % PMV_idx = logical((channel > 96 & channel <= 224) .* ismember(featdef_ind_sub.nsp_name, 'APX')); 
             % S1_idx = channel <= 96   & ismember(featdef_ind_sub.nsp_name, 'S1X_S1'); 
@@ -341,6 +341,7 @@ for n_session = session_date_idx
             % M1_idx = dataset_channel < 0; %does not exist for s2
             % dlPFC_idx = dataset_channel < 0; %does not exist for s2
 
+            % % Original
             % SMG_idx = dataset_channel <= 96 .* ismember(featdef_ind_sub.nsp_name, 'APX');
             % PMV_idx1 = (dataset_channel > 96 & dataset_channel <= 224) .* ismember(featdef_ind_sub.nsp_name, 'APX');
             % S1_idx2 = dataset_channel > 225  & ismember(featdef_ind_sub.nsp_name, 'S1X_S1');

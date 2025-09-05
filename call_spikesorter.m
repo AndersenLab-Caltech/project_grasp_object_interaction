@@ -4,8 +4,8 @@ clc
 clear all
 close all
 
-%subject_id = 's4'; %GB
-subject_id = 's3';  %AN
+subject_id = 's4'; %GB
+%subject_id = 's3';  %AN
 %subject_id = 's2'; %FG
 
 subject = hst.Subject(subject_id);
@@ -22,7 +22,7 @@ Blackrock.thresholdSession('20250820', subject_id, 'THRESHOLD', -4.5, 'noise_mod
 
 tasktype = {};
 end_comment = {};
-session_dates = {'20250818'};
+session_dates = {'20250820'};
 taskfileTest = 2;
 
 idxToRemove = [];

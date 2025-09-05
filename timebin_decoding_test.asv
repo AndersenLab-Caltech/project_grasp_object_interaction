@@ -3,11 +3,11 @@ clear all
 close all 
 
 spike_sorting_type = '_unsorted_aligned_thr_-4.5';
-taskName = 'GraspObject_4S_Action';
+%taskName = 'GraspObject_4S_Action';
 %taskName = 'GraspObject_Shuffled'; % shuffled images
 %taskName = 'GraspObject_Varied_Size'; % varied object/aperture sizes
 %taskName = 'GraspObject_GB_Images'; % for GB
-%taskName = 'GraspObject_Combined'; % for Combined task
+taskName = 'GraspObject_Combined'; % for Combined task
 subject_id = 's4';
 
 % Data = load('C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\s3\Data\IndividualFiles\GraspObject\unsorted_aligned_thr_-4.5\s3_20230803_unsorted_aligned_thr_-4.5_GraspObject');
@@ -562,7 +562,7 @@ for n_session = 1:numSessions
 
     errTest_timebin = NaN(num_timebins, 1);
     
-    for n_type = 1:numel(unTrialType) 
+    for n_type = 2:numel(unTrialType) % skip Combined
 
         % find idx of trial type 
         trialTypeIdx = ismember(trialTypeSession, unTrialType(n_type));
@@ -611,7 +611,7 @@ chance = 1 / numel(unGraspType) * 100;
 legend_handles = gobjects(numel(unTrialType), 1); % store line handles
 legend_labels = cell(numel(unTrialType), 1);      % store labels
 
-for n_type = 1:numel(unTrialType)
+for n_type = 2:numel(unTrialType)
     % Find first significant bin (Cue phase or later)
     sig_search_idx = phase_changes(2):num_timebins;
     sig_idx = find(mean_acc(n_type, sig_search_idx) + ci_lower(n_type, sig_search_idx) > chance, 1, 'first');
