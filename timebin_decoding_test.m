@@ -3,12 +3,12 @@ clear all
 close all 
 
 spike_sorting_type = '_unsorted_aligned_thr_-4.5';
-taskName = 'GraspObject_4S_Action';
+%taskName = 'GraspObject_4S_Action';
 %taskName = 'GraspObject_Shuffled'; % shuffled images
 %taskName = 'GraspObject_Varied_Size'; % varied object/aperture sizes
 %taskName = 'GraspObject_GB_Images'; % for GB
-%taskName = 'GraspObject_Combined'; % for Combined task
-subject_id = 's4';
+taskName = 'GraspObject_Combined'; % for Combined task
+subject_id = 's2';
 
 % Data = load('C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\s3\Data\IndividualFiles\GraspObject\unsorted_aligned_thr_-4.5\s3_20230803_unsorted_aligned_thr_-4.5_GraspObject');
 %Data = load('C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\s3\Data\IndividualFiles\GraspObject\unsorted_aligned_thr_-4.5\s3_20230724_unsorted_aligned_thr_-4.5_GraspObject');
@@ -777,7 +777,7 @@ n_decoded = 4;
 numPhases = numel(phase_changes);
 
 % Create figure
-figure('units','normalized','outerposition',[0 0 0.137 0.163]); %.137 or .08
+figure('units','normalized','outerposition',[0 0 0.08 0.163]); %.137 or .08
 hold on;
 plot_handles = gobjects(n_decoded, 1);
 %color_info = {[0.3359, 0.7031, 0.9101],[0.8984 0.6211 0],[0.8320 0.3672 0],[0.7969, 0.4726, 0.6523],[0, 0.6171, 0.4492],[.9961 .6875 0]}; % SMG, PMV, S1, AIP, M1, dlPFC
@@ -788,38 +788,38 @@ color_info = {[0, 0.3529, 0.7098],[0.9608, 0.7333, 0.1176],[0.75 0.75 0.75]}; % 
 % colors for size
 %color_info = {[0, 0.3529, 0.7098],[0.2039, 0.6902, 0.2902],[0.75 0.75 0.75]}; % blue for grasp, green for size (pull from FR), gray for shuffled
 
-for n_region = 4 %1:n_regions
-    % PLOT GRASP
-    G_mean_acc = mean(G_all_errTest_timebin_all_regions(:,:,n_region), 1, 'omitnan');
-    G_CI95 = utile.calculate_CI(G_all_errTest_timebin_all_regions(:,:,n_region));
-    G_ci_upper = G_CI95(2, :);
-    G_ci_lower = G_CI95(1, :);
-
-    G_ER = utile.shadedErrorBar(1:num_timebins, G_mean_acc, G_ci_upper, 'lineprops', '-b');
-    G_ER.mainLine.Color = color_info{1};
-    G_ER.mainLine.LineWidth = 2;
-    G_ER.patch.FaceColor = color_info{1};
-    G_ER.edge(1).LineStyle = 'none';
-    G_ER.edge(2).LineStyle = 'none';
-    plot_handles(1) = G_ER.mainLine;
-
-    hold on;
-
-    % PLOT SHUFFLED GRASP
-    SG_mean_acc = mean(SG_all_errTest_timebin_all_regions(:,:,n_region), 1, 'omitnan');
-    SG_CI95 = utile.calculate_CI(SG_all_errTest_timebin_all_regions(:,:,n_region));
-    SG_ci_upper = SG_CI95(2, :);
-    SG_ci_lower = SG_CI95(1, :);
-
-    SG_ER = utile.shadedErrorBar(1:num_timebins, SG_mean_acc, SG_ci_upper, 'lineprops', '-.');
-    SG_ER.mainLine.Color = color_info{3};
-    SG_ER.mainLine.LineWidth = 2;
-    SG_ER.patch.FaceColor = color_info{3};
-    SG_ER.edge(1).LineStyle = 'none';
-    SG_ER.edge(2).LineStyle = 'none';
-    plot_handles(2) = SG_ER.mainLine;
-
-    hold on;
+for n_region = 2 %1:n_regions
+    % % PLOT GRASP
+    % G_mean_acc = mean(G_all_errTest_timebin_all_regions(:,:,n_region), 1, 'omitnan');
+    % G_CI95 = utile.calculate_CI(G_all_errTest_timebin_all_regions(:,:,n_region));
+    % G_ci_upper = G_CI95(2, :);
+    % G_ci_lower = G_CI95(1, :);
+    % 
+    % G_ER = utile.shadedErrorBar(1:num_timebins, G_mean_acc, G_ci_upper, 'lineprops', '-b');
+    % G_ER.mainLine.Color = color_info{1};
+    % G_ER.mainLine.LineWidth = 2;
+    % G_ER.patch.FaceColor = color_info{1};
+    % G_ER.edge(1).LineStyle = 'none';
+    % G_ER.edge(2).LineStyle = 'none';
+    % plot_handles(1) = G_ER.mainLine;
+    % 
+    % hold on;
+    % 
+    % % PLOT SHUFFLED GRASP
+    % SG_mean_acc = mean(SG_all_errTest_timebin_all_regions(:,:,n_region), 1, 'omitnan');
+    % SG_CI95 = utile.calculate_CI(SG_all_errTest_timebin_all_regions(:,:,n_region));
+    % SG_ci_upper = SG_CI95(2, :);
+    % SG_ci_lower = SG_CI95(1, :);
+    % 
+    % SG_ER = utile.shadedErrorBar(1:num_timebins, SG_mean_acc, SG_ci_upper, 'lineprops', '-.');
+    % SG_ER.mainLine.Color = color_info{3};
+    % SG_ER.mainLine.LineWidth = 2;
+    % SG_ER.patch.FaceColor = color_info{3};
+    % SG_ER.edge(1).LineStyle = 'none';
+    % SG_ER.edge(2).LineStyle = 'none';
+    % plot_handles(2) = SG_ER.mainLine;
+    % 
+    % hold on;
 
     % PLOT X
     X_mean_acc = mean(X_all_errTest_timebin_all_regions(:,:,n_region), 1, 'omitnan');
@@ -882,8 +882,8 @@ xticklabels([0]); %8
 %ylabel('Classification Accuracy [%]');
 %title([brainAreas(n_region)]);
 %yline(chance, '--r', 'LineWidth', 1.5);
-ylim([13 70]); %40 80 ; 15 80
-yticks([25 70]); %50 80  ; 25 80
+ylim([10 45]); %40 80 ; 15 80
+yticks([25 45]); %50 80  ; 25 80
 %legend(plot_handles, [{'Grasp'},{'Shuffled Grasp'},{'Object'},{'Shuffled Object'}], 'Location', 'best'); %[{'Grasp'},{'Shuffled Grasp'},{'Object'},{'Shuffled Object'}]
 set(gca, 'FontSize', 10);
 hold off;
@@ -896,12 +896,12 @@ chance = 1 / 4 * 100;
 numPhases = numel(phase_changes);
 
 % Create figure
-figure('units','normalized','outerposition',[0 0 0.3 0.3]);
+figure('units','normalized','outerposition',[0 0 0.15 0.18]);
 hold on;
 plot_handles = gobjects(n_regions, 1);
 color_info = {[0.3359, 0.7031, 0.9101],[0.8984 0.6211 0],[0.8320 0.3672 0],[0.7969, 0.4726, 0.6523],[0, 0.6171, 0.4492],[.9961 .6875 0]}; % SMG, PMV, S1, AIP, M1, dlPFC
 
-for n_region = 1:n_regions % GB: [1,3,4,5] %1:n_regions
+for n_region = [3,5]%:n_regions % GB: [1,3,4,5] %1:n_regions
     mean_acc = mean(all_errTest_timebin_all_regions(:,:,n_region), 1, 'omitnan');
     CI95 = utile.calculate_CI(all_errTest_timebin_all_regions(:,:,n_region));
     ci_upper = CI95(2, :);
@@ -915,13 +915,13 @@ for n_region = 1:n_regions % GB: [1,3,4,5] %1:n_regions
     ER.edge(2).LineStyle = 'none';
     plot_handles(n_region) = ER.mainLine;
 
-    % % Plot first significant timepoint
-    % plot(first_sig_idx_all(n_region), first_sig_perc_all(n_region), 'v', ...
-    %     'MarkerSize', 6, 'MarkerFaceColor', color_info{n_region}, 'MarkerEdgeColor', 'k');
-    % 
-    % % Plot peak timepoint
-    % plot(peak_Cue_idx_all(n_region), peak_Cue_perc_all(n_region), 'o', ...
-    %     'MarkerSize', 6, 'MarkerFaceColor', color_info{n_region}, 'MarkerEdgeColor', 'k');
+    % Plot first significant timepoint
+    plot(first_sig_idx_all(n_region), first_sig_perc_all(n_region), 'v', ...
+        'MarkerSize', 6, 'MarkerFaceColor', color_info{n_region}, 'MarkerEdgeColor', 'k');
+
+    % Plot peak timepoint
+    plot(peak_Cue_idx_all(n_region), peak_Cue_perc_all(n_region), 'o', ...
+        'MarkerSize', 6, 'MarkerFaceColor', color_info{n_region}, 'MarkerEdgeColor', 'k');
 end
 
 % Finalize plot
@@ -930,13 +930,14 @@ for n_phase = 1:numPhases
 end
 xlim([0 num_timebins]);
 xtickangle(45);
-xlabel('Timebin');
-ylabel('Classification Accuracy [%]');
-title('Grasp Classification Accuracy Over Time');
+xticklabels([]);
+%xlabel('Timebin');
+%ylabel('Classification Accuracy [%]');
+%title('Grasp Classification Accuracy Over Time');
 yline(chance, '--r', 'LineWidth', 1.5);
 ylim([0 100]);
-yticks([0 25 50 75 100]);
-legend(plot_handles, brainAreas([1:3]), 'Location', 'best'); % GB: ([1,3:5])
+yticks([0 50 100]);
+legend(plot_handles([3,5]), brainAreas([3,5]), 'Location', 'best'); % GB: ([1,3:5])
 set(gca, 'FontSize', 12);
 hold off;
 

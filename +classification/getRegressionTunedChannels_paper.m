@@ -180,8 +180,6 @@ multipleCompare = true;
 combineTunedChannels = true;
 flagBinperBin = false;
 flagShuffleTest = false; 
-flagUnequalTrialNumbers = false;
-nPermutations = 250; % default
 
 % Loading optional arguments
 while ~isempty(varargin)
@@ -194,8 +192,6 @@ while ~isempty(varargin)
             flagBinperBin = varargin{2};                          
         case 'flagshuffletest'
             flagShuffleTest = varargin{2};
-        case 'flagunequaltrialnumbers'
-            flagUnequalTrialNumbers = varargin{2};
         otherwise
             error(['Unexpected option: ' varargin{1}])
     end
@@ -273,27 +269,7 @@ for n_phase = 1:numPhases
       pFStatTmp = anova(mdl,'summary');
       %save the pvalue of f-stastistic (is model better than constant coefficients?)
       pFStat(n_phase, n_channel) = pFStatTmp.pValue(2);
-
-      if flagUnequalTrialNumbers
-           actual_model = fitlm(X, FR);
-           actual_F = anova(actual_model, 'summary').F(2);
-
-           shuffled_Fs = zeros(nPermutations, 1);
-           for p = 1:nPermutations
-               shuffled_X = X(randperm(size(X,1)), :);  % shuffle labels
-               shuffled_model = fitlm(shuffled_X, FR);
-               shuffled_Fs(p) = anova(shuffled_model, 'summary').F(2);
-           end
-
-           pFStat(n_phase, n_channel) = mean(shuffled_Fs >= actual_F); % permutation p-value
-           p_per_phase(n_phase,:,n_channel) = NaN; % not computed with shuffle
-       else
-           mdl = fitlm(X,FR);
-           pFStatTmp = anova(mdl,'summary');
-           pFStat(n_phase, n_channel) = pFStatTmp.pValue(2);
-           p_per_phase(n_phase,:,n_channel) = mdl.Coefficients.pValue(2:end); 
-       end
-
+      p_per_phase(n_phase,:,n_channel) = mdl.Coefficients.pValue(2:end); 
 
       p_per_phase(n_phase,:,n_channel) = mdl.Coefficients.pValue(2:end); 
       p_per_phaseOrig(n_phase,:,n_channel) =  p_per_phase(n_phase,:,n_channel);
@@ -316,35 +292,18 @@ if flagBinperBin
           DataPerBinTrialOrdered = DataPerBinTrial;
           ITI_Data = ones(max(groupCount),1)*mean(mean(ITI_DataAll(:,n_channel)));
 
-          %perform linear regression for each channel for each phase for each of the 5 grasps 
+          %perform linear regression for each channel for each phase for each of the grasps 
           FR = [ITI_Data; DataPerBinTrialOrdered];  
 
-          if flagUnequalTrialNumbers
-              % Permutation test
-              actual_model = fitlm(X, FR);
-              actual_F = anova(actual_model, 'summary').F(2);  % F for model
+          mdl = fitlm(X,FR);
+          p_val_bin = mdl.Coefficients.pValue(2:end);
 
-              shuffled_Fs = zeros(nPermutations,1);
-              for p = 1:nPermutations
-                  shuffled_X = X(randperm(size(X,1)), :);
-                  shuffled_model = fitlm(shuffled_X, FR);
-                  shuffled_Fs(p) = anova(shuffled_model, 'summary').F(2);
-              end
+          if multipleCompare
+              [~,~,p_val_bin] = utile.MultipleComparisonsCorrection(p_val_bin,'method', 'fdr');
+          end 
 
-              p_val_bin = mean(shuffled_Fs >= actual_F);
-              % Store the p-value across all conditions (same for each)
-              p_per_bin(n_bin,:,n_channel) = repmat(p_val_bin, 1, numConditions);
-          else
-              mdl = fitlm(X,FR);
-              p_val_bin = mdl.Coefficients.pValue(2:end);
+          p_per_bin(n_bin,:,n_channel) = p_val_bin; 
 
-              if multipleCompare
-                  [~,~,p_val_bin] = utile.MultipleComparisonsCorrection(p_val_bin,'method', 'fdr');
-              end 
-
-              p_per_bin(n_bin,:,n_channel) = p_val_bin; 
-
-          end
     end 
 end 
 

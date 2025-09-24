@@ -3,7 +3,7 @@ clear all
 close all
 
 subject_id = 's3';
-unit_region = 'PMV';
+unit_region = 'SMG';
 
 spike_sorting_type = '_unsorted_aligned_thr_-4.5';
 flag_4S = true; % true = updated 4S action phase; false = original 2S action phase
@@ -11,7 +11,7 @@ flag_shuffled = false; % true = shuffled images task
 flag_varied_sizes = false; % true for varied sizes task
 flag_GB_images = false; % true for task using images of GB's own hands and real objects
 flag_5050 = false; % true for 50% Go 50% NoGo trials
-flag_combined = true; % true for combinations task
+flag_combined = false; % true for combinations task
 
 if ~flag_4S
     TaskCue = 'GraspObject';
@@ -144,6 +144,8 @@ object_ho_overlap_units_all = cell(numSessions,1);
 object_hand_overlap_units_all = cell(numSessions,1);
 object_hand_ho_overlap_units_all = cell(numSessions,1);
 
+%uniqueApertureSize = unique(Go_data.Aperture_Size); % comment out when not varied sizes
+
 %% Analysis
 for n_session = 1:numSessions
 
@@ -214,7 +216,7 @@ for n_session = 1:numSessions
     %apertureSizeSession = Go_data.Aperture_Size(idxThisSession,:);
 
     % object labels
-    objectTypeSession = Go_data.ObjectType(idxThisSession,:);
+    %objectTypeSession = Go_data.ObjectType(idxThisSession,:);
 
     %get idx for Go or NoGo trials
     GoNoGoidx =  logical(cell2mat(Go_data.TrialCue(idxThisSession,:)));
@@ -229,7 +231,7 @@ for n_session = 1:numSessions
         trialTypeSession = trialTypeSession(GoNoGoidx);
         graspTypeSession = graspTypeSession(GoNoGoidx);
         %apertureSizeSession = apertureSizeSession(GoNoGoidx);
-        objectTypeSession = objectTypeSession(GoNoGoidx);
+        %objectTypeSession = objectTypeSession(GoNoGoidx);
     else
         SessionData = z_scored_data(~GoNoGoidx);
         sessionLabels = sessionLabels(~GoNoGoidx);
@@ -244,20 +246,20 @@ for n_session = 1:numSessions
 
     sessionLabels_modality = trialTypeSession;
     sessionLabels_grasp = graspTypeSession;
-    %sessionLabels_size = apertureSizeSession;
-    sessionLabels_object = objectTypeSession;
+   % sessionLabels_size = apertureSizeSession;
+    %sessionLabels_object = objectTypeSession;
 
     % Convert word labels (ie.,'Hand', 'HandObject', 'Object') to numerical values
     modality_labels = {'Combined','Hand', 'Hand_Object', 'Object'}; % 'Combined'
     grasp_labels = {'Lateral', 'MediumWrap', 'PalmarPinch', 'Sphere3Finger'};
     %size_labels = {'Small', 'Medium', 'Large'};
-    object_labels = {'block','rod','deck','ball'}; % numbering mirrors associated grasp
+    %object_labels = {'block','rod','deck','ball'}; % numbering mirrors associated grasp
 
     % Initialize numerical labels
     sessionLabels_modality_num = zeros(size(sessionLabels_modality)); 
     sessionLabels_grasp_num = zeros(size(sessionLabels_grasp));
     %sessionLabels_size_num = zeros(size(sessionLabels_size));
-    sessionLabels_object_num = zeros(size(sessionLabels_object));
+    %sessionLabels_object_num = zeros(size(sessionLabels_object));
 
     % Loop through labels and assign numerical values
     for i = 1:length(modality_labels)
@@ -269,30 +271,52 @@ for n_session = 1:numSessions
     % for i = 1:length(size_labels)
     %     sessionLabels_size_num(strcmp(sessionLabels_size, size_labels{i})) = i;
     % end
-    for i = 1:length(object_labels)
-        sessionLabels_object_num(strcmp(sessionLabels_object, object_labels{i})) = i;
-    end 
+    % for i = 1:length(object_labels)
+    %     sessionLabels_object_num(strcmp(sessionLabels_object, object_labels{i})) = i;
+    % end 
 
-    % % % ADDRESSING UNEQUAL TRIAL NUMBERS % % %
-    % Number of repetitions for balancing
-    nRepeats = 10;  
-    
-    % Preallocate containers
-    all_sumPhase              = cell(nRepeats,1);
-    all_sumBin                = cell(nRepeats,1);
-    
-    % Get trial indices per type
-    trialTypeIdx_all = cell(numel(unTrialType),1);
-    nTrialsPerType   = zeros(numel(unTrialType),1);
-    for n_type = 1:numel(unTrialType)
-        trialTypeIdx_all{n_type} = find(ismember(trialTypeSession, unTrialType(n_type)));
-        nTrialsPerType(n_type)   = numel(trialTypeIdx_all{n_type});
-    end
-    minTrials = min(nTrialsPerType);  % balance to smallest count
-    % % %
+    % % % % ADDRESSING UNEQUAL TRIAL NUMBERS % % %
+    % % Number of repetitions for balancing
+    % nRepeats = 10;  
+    % 
+    % % Preallocate containers
+    % all_sumPhase              = cell(nRepeats,1);
+    % all_sumBin                = cell(nRepeats,1);
+    % 
+    % % Get trial indices per type
+    % trialTypeIdx_all = cell(numel(unTrialType),1);
+    % nTrialsPerType   = zeros(numel(unTrialType),1);
+    % for n_type = 1:numel(unTrialType)
+    %     trialTypeIdx_all{n_type} = find(ismember(trialTypeSession, unTrialType(n_type)));
+    %     nTrialsPerType(n_type)   = numel(trialTypeIdx_all{n_type});
+    % end
+    % minTrials = min(nTrialsPerType);  % balance to smallest count
+    % % % %
+
+    % % only keeping Small and Large
+    % % Define which sizes to keep
+    % sizesToKeep = {'Small', 'Large'};
+    % size_labels = {'Small', 'Large'};
+    % 
+    % % Find indices of trials belonging to 'small' or 'large' sessions
+    % SLsizeIdx = ismember(apertureSizeSession, sizesToKeep);
+    % 
+    % % Extract trials that correspond to 'small' or 'large' sessions
+    % SessionData = SessionData(SLsizeIdx);
+    % sessionLabels = sessionLabels(SLsizeIdx);
+    % timePhaseLabels = timePhaseLabels(SLsizeIdx);
+    % trialTypeSession = trialTypeSession(SLsizeIdx);
+    % graspTypeSession = graspTypeSession(SLsizeIdx);
+    % apertureSizeSession = apertureSizeSession(SLsizeIdx);
+    % uniqueApertureSize = unique(apertureSizeSession);
+    % sessionLabels_size = apertureSizeSession;
+    % sessionLabels_size_num = zeros(size(sessionLabels_size));
+    % for i = 1:length(size_labels)
+    %     sessionLabels_size_num(strcmp(sessionLabels_size, size_labels{i})) = i;
+    % end
 
     % loop through cue conditions 
-    for n_type = 1%:numel(unTrialType)
+    for n_type = 1:numel(unTrialType)
         trialTypeIdx = ismember(trialTypeSession, unTrialType(n_type));
         %SessionData = SessionData(trialTypeIdx); % keep data only for Combined trials
         %timePhaseLabels = timePhaseLabels(trialTypeIdx); % keep timePhaseLabels for Combined trials only
@@ -317,86 +341,86 @@ for n_session = 1:numSessions
                 % [tunedCombinedChannels, tunedChannelsPhase, tunedChannelsBin, sumPhase, sumBin,numTunedChannelsPerCategory,~,~,p_per_phase] ...
                 %      = classification.getRegressionTunedChannels_paper(SessionData(trialTypeIdx),sessionLabels(trialTypeIdx), ...
                 %  timePhaseLabels(trialTypeIdx), 'multcompare',multipleComparePhase, 'BinperBinTuning', flagBinPerBin); % original code
-                % % % ADDRESSING UNEQUAL TRIAL NUMBERS % % %
-                if n_type == 1 % USE WHEN COMBINED DATASET/UNEQUAL TRIALS
-                    % separate out Combined dataset
-                    combinedData = SessionData(trialTypeIdx);
-                    %combined_grasp_labels = sessionLabels_grasp_num(trialTypeIdx);
-                    combined_object_labels = sessionLabels_object_num(trialTypeIdx);
-                    combinedTimePhaseLabels = timePhaseLabels(trialTypeIdx);
-                    %use cvpartition to randomly select trials within the
-                    %combined dataset to even out #s of trials
-                    tunedPhaseMat = [];
-                    tunedBinMat = [];
-                    combinedIdx   = trialTypeIdx_all{n_type};
-                    % for grasps
-                    % graspVars = graspTypeSession(combinedIdx);
-                    % uniqueGrasps = unique(graspVars);
-                    % for objects
-                    objectVars = objectTypeSession(combinedIdx);
-                    uniqueObjects = unique(objectVars);
-
-                    % count per grasp
-                    % countsPerGrasp = histcounts(categorical(graspVars));
-                    % minPerGrasp = min(countsPerGrasp);
-                    % counts per object
-                    countsPerObject = histcounts(categorical(objectVars));
-                    minPerObject = min(countsPerObject);
-
-                    % to keep total minTrialsPerType
-                    %perGraspTarget = floor(minTrials / numel(uniqueGrasps));
-                    % target objects
-                    perObjectTarget = floor(minTrials / numel(uniqueObjects));
-
-                    for r = 1:nRepeats
-                        balancedIdx = [];
-                        keepIdx = [];
-                        for g = 1:numel(uniqueObjects) %numel(uniqueGrasps)
-                            % per grasp index
-                            %gIdx = find(strcmpi(graspVars, uniqueGrasps(g)));
-                            % per object idx
-                            oIdx = find(strcmpi(objectVars, uniqueObjects(g)));
-                            % subsample per grasp
-                            c = cvpartition(numel(oIdx),'HoldOut',perObjectTarget); %numel(gIdx),'HoldOut',perGraspTarget);
-                            gKeep = oIdx(test(c)); %gIdx
-
-                            % Map back to session-wide indices
-                            keepIdx = [keepIdx; combinedIdx(gKeep)];
-                        end
-
-                        balancedIdx = ismember(combinedIdx, keepIdx);
-
-                         [tunedCombinedChannels_r, tunedChannelsPhase_r, tunedChannelsBin_r, sumPhase_r, sumBin_r,numTunedChannelsPerCategory_r,~,~,p_per_phase_r] ...
-                             = classification.getRegressionTunedChannels_paper(combinedData(balancedIdx),combined_object_labels(balancedIdx), ...
-                         combinedTimePhaseLabels(balancedIdx), 'multcompare',multipleComparePhase, 'BinperBinTuning', flagBinPerBin); % for grasp/object
-
-                         %condToTest = arrayfun(@(x) grasp_labels(x),unique(sessionLabels_grasp_num),'UniformOutput',false); % testing for tuning to grasp
-                         condToTest = arrayfun(@(x) object_labels(x),unique(combined_object_labels),'UniformOutput', false); % testing for tuning to object
-
-                         % Store results needed for downstream analysis
-                        all_sumPhase{r}              = sumPhase_r;
-                        all_sumBin{r}                = sumBin_r;
-                        tunedPhaseMat = cat(3, tunedPhaseMat, tunedChannelsPhase_r);
-                        tunedBinMat = cat(4, tunedBinMat, tunedChannelsBin_r);
-
-                    end
-                   
-                    % sum number of tuned channels and divide by nRepeats
-                    sumPhase = round((sum(cat(3, all_sumPhase{:}), 3))/nRepeats);
-                    sumBin   = round(sum(cat(3, all_sumBin{:}), 3)/nRepeats);
-
-                    % Consensus rule: tuned if tuned ≥50% of repetitions
-                    % (somewhat arbitrary but only use the sums downstream
-                    % so this is more to keep the format the same across
-                    % each condition)
-                    tunedChannelsPhase = mean(tunedPhaseMat,3) >= 0.5;
-                    tunedChannelsBin = mean(tunedBinMat,4) >= 0.5;
-
-
-                else
-                % % % 
+                % % % % ADDRESSING UNEQUAL TRIAL NUMBERS % % %
+                % if n_type == 1 % USE WHEN COMBINED DATASET/UNEQUAL TRIALS
+                %     % separate out Combined dataset
+                %     combinedData = SessionData(trialTypeIdx);
+                %     %combined_grasp_labels = sessionLabels_grasp_num(trialTypeIdx);
+                %     combined_object_labels = sessionLabels_object_num(trialTypeIdx);
+                %     combinedTimePhaseLabels = timePhaseLabels(trialTypeIdx);
+                %     %use cvpartition to randomly select trials within the
+                %     %combined dataset to even out #s of trials
+                %     tunedPhaseMat = [];
+                %     tunedBinMat = [];
+                %     combinedIdx   = trialTypeIdx_all{n_type};
+                %     % for grasps
+                %     % graspVars = graspTypeSession(combinedIdx);
+                %     % uniqueGrasps = unique(graspVars);
+                %     % for objects
+                %     objectVars = objectTypeSession(combinedIdx);
+                %     uniqueObjects = unique(objectVars);
+                % 
+                %     % count per grasp
+                %     % countsPerGrasp = histcounts(categorical(graspVars));
+                %     % minPerGrasp = min(countsPerGrasp);
+                %     % counts per object
+                %     countsPerObject = histcounts(categorical(objectVars));
+                %     minPerObject = min(countsPerObject);
+                % 
+                %     % to keep total minTrialsPerType
+                %     %perGraspTarget = floor(minTrials / numel(uniqueGrasps));
+                %     % target objects
+                %     perObjectTarget = floor(minTrials / numel(uniqueObjects));
+                % 
+                %     for r = 1:nRepeats
+                %         balancedIdx = [];
+                %         keepIdx = [];
+                %         for g = 1:numel(uniqueObjects) %numel(uniqueGrasps)
+                %             % per grasp index
+                %             %gIdx = find(strcmpi(graspVars, uniqueGrasps(g)));
+                %             % per object idx
+                %             oIdx = find(strcmpi(objectVars, uniqueObjects(g)));
+                %             % subsample per grasp
+                %             c = cvpartition(numel(oIdx),'HoldOut',perObjectTarget); %numel(gIdx),'HoldOut',perGraspTarget);
+                %             gKeep = oIdx(test(c)); %gIdx
+                % 
+                %             % Map back to session-wide indices
+                %             keepIdx = [keepIdx; combinedIdx(gKeep)];
+                %         end
+                % 
+                %         balancedIdx = ismember(combinedIdx, keepIdx);
+                % 
+                %          [tunedCombinedChannels_r, tunedChannelsPhase_r, tunedChannelsBin_r, sumPhase_r, sumBin_r,numTunedChannelsPerCategory_r,~,~,p_per_phase_r] ...
+                %              = classification.getRegressionTunedChannels_paper(combinedData(balancedIdx),combined_object_labels(balancedIdx), ...
+                %          combinedTimePhaseLabels(balancedIdx), 'multcompare',multipleComparePhase, 'BinperBinTuning', flagBinPerBin); % for grasp/object
+                % 
+                %          %condToTest = arrayfun(@(x) grasp_labels(x),unique(sessionLabels_grasp_num),'UniformOutput',false); % testing for tuning to grasp
+                %          condToTest = arrayfun(@(x) object_labels(x),unique(combined_object_labels),'UniformOutput', false); % testing for tuning to object
+                % 
+                %          % Store results needed for downstream analysis
+                %         all_sumPhase{r}              = sumPhase_r;
+                %         all_sumBin{r}                = sumBin_r;
+                %         tunedPhaseMat = cat(3, tunedPhaseMat, tunedChannelsPhase_r);
+                %         tunedBinMat = cat(4, tunedBinMat, tunedChannelsBin_r);
+                % 
+                %     end
+                % 
+                %     % sum number of tuned channels and divide by nRepeats
+                %     sumPhase = round((sum(cat(3, all_sumPhase{:}), 3))/nRepeats);
+                %     sumBin   = round(sum(cat(3, all_sumBin{:}), 3)/nRepeats);
+                % 
+                %     % Consensus rule: tuned if tuned ≥50% of repetitions
+                %     % (somewhat arbitrary but only use the sums downstream
+                %     % so this is more to keep the format the same across
+                %     % each condition)
+                %     tunedChannelsPhase = mean(tunedPhaseMat,3) >= 0.5;
+                %     tunedChannelsBin = mean(tunedBinMat,4) >= 0.5;
+                % 
+                % 
+                % else
+                % % % % 
                     [tunedCombinedChannels, tunedChannelsPhase, tunedChannelsBin, sumPhase, sumBin,numTunedChannelsPerCategory,~,~,p_per_phase] ...
-                         = classification.getRegressionTunedChannels_paper(SessionData(trialTypeIdx),sessionLabels_object_num(trialTypeIdx), ...
+                         = classification.getRegressionTunedChannels_paper(SessionData(trialTypeIdx),sessionLabels_grasp_num(trialTypeIdx), ...
                      timePhaseLabels(trialTypeIdx), 'multcompare',multipleComparePhase, 'BinperBinTuning', flagBinPerBin); % for size/grasp
 
                  % [tunedCombinedChannels, tunedChannelsPhase, tunedChannelsBin, sumPhase, sumBin,numTunedChannelsPerCategory,~,~,p_per_phase] ...
@@ -408,17 +432,17 @@ for n_session = 1:numSessions
                 %  timePhaseLabels(graspTypeIdx), 'multcompare',multipleComparePhase, 'BinperBinTuning', flagBinPerBin); % for grasp tuning per object and object tuning per grasp
 
                 %condToTest = arrayfun(@(x) preproc.image2class_simple(x),unique(sessionLabels), 'UniformOutput', false); % original
-                %condToTest = arrayfun(@(x) grasp_labels(x),unique(sessionLabels_grasp_num),'UniformOutput',false); % testing for tuning to grasp
+                condToTest = arrayfun(@(x) grasp_labels(x),unique(sessionLabels_grasp_num),'UniformOutput',false); % testing for tuning to grasp
                 %condToTest = arrayfun(@(x) size_labels(x),unique(sessionLabels_size_num),'UniformOutput', false); % testing for tuning to size
-                condToTest = arrayfun(@(x) object_labels(x),unique(sessionLabels_object_num),'UniformOutput', false); % testing for tuning to object
-                end
+                %condToTest = arrayfun(@(x) object_labels(x),unique(sessionLabels_object_num),'UniformOutput', false); % testing for tuning to object
+                %end
 
                 if nnz(sumBin) ~= 0
                     figure();
                     plot(sumBin);
                 end
 
-                %tuned_channels_per_grasp{n_type,n_session} = numTunedChannelsPerCategory;
+                tuned_channels_per_grasp{n_type,n_session} = numTunedChannelsPerCategory;
                 %tuned_channels_per_size{n_type,n_session} = numTunedChannelsPerCategory;
                 %tuned_channels_per_object{n_type,n_session} = numTunedChannelsPerCategory;
                 %tuned_channels_per_object{n_object,n_session} = numTunedChannelsPerCategory; % combined tuning per object
@@ -649,8 +673,8 @@ goLabel = goLabel(flagGoTrials + 1);
 
 % Create the filename using the brain region and analysis type
 %filename = ['tuned_channels_per_condition' TaskCue '_' unit_region '_' analysis_type '_' goLabel '.mat']; % goLabel determines Go, NoGo label
-%filename = "grasp_tuned_channels_per_condition_" + TaskCue + '_' + unit_region + "_" + analysis_type + "_" + goLabel + ".mat"; % just .mat for original data
-filename = "balanced_object_tuned_channels_per_condition_" + TaskCue + '_' + unit_region + "_" + analysis_type + "_" + goLabel + ".mat"; 
+filename = "grasp_tuned_channels_per_condition_" + TaskCue + '_' + unit_region + "_" + analysis_type + "_" + goLabel + ".mat"; % just .mat for original data
+%filename = "balanced_object_tuned_channels_per_condition_" + TaskCue + '_' + unit_region + "_" + analysis_type + "_" + goLabel + ".mat"; 
 %filename = "TEST_balanced_grasp_tuned_channels_per_condition_" + TaskCue + '_' + unit_region + "_" + analysis_type + "_" + goLabel + "_z_scored.mat"; % when z-scoring
 
 directory = ['C:\Users\macthurston\Documents\GitHub\project_grasp_object_interaction\analyzedData\' subject_id];
@@ -668,54 +692,54 @@ keyboard
 
 %% across sessions tuned units overlapping 
 
-% tuned_channels_per_phase_vector; % 3 (modality) x 5 (sessions)
-% % I can compare within sessions how much overlap there is and then average
-% % the sessions together to get average overlap
-% 
-% % H-HO overlap
-% hand_ho_overlap_vector = (tuned_channels_per_phase_vector{1,1} == 1) & (tuned_channels_per_phase_vector{2,1} == 1); % this tells me the overlap between hand and hand-object units
-% % I can sum and then substract from the total to get the venn diagram
-% hand_ho_overlap_units = sum(hand_ho_overlap_vector, 1);
-% 
-% tuned_channels_per_phase; % total units for each modality
-% hand_only_units = tuned_channels_per_phase{1,1} - hand_ho_overlap_units;
-% ho_only_units_h = tuned_channels_per_phase{2,1} - hand_ho_overlap_units;
-% 
-% % next find average by iterating through each session and then finding the
-% % mean
-% 
-% % O-HO overlap
-% object_ho_overlap_vector = (tuned_channels_per_phase_vector{3,1} == 1) & (tuned_channels_per_phase_vector{2,1} == 1); % this tells me the overlap between object and hand-object units
-% % I can sum and then substract from the total to get the venn diagram
-% object_ho_overlap_units = sum(object_ho_overlap_vector, 1);
-% 
-% tuned_channels_per_phase; % total units for each modality
-% object_only_units = tuned_channels_per_phase{3,1} - object_ho_overlap_units;
-% ho_only_units_o = tuned_channels_per_phase{2,1} - object_ho_overlap_units;
-% 
-% % next find average by iterating through each session and then finding the
-% % mean
-% 
-% % O-H overlap
-% object_hand_overlap_vector = (tuned_channels_per_phase_vector{3,1} == 1) & (tuned_channels_per_phase_vector{1,1} == 1); % this tells me the overlap between object and hand units
-% % I can sum and then substract from the total to get the venn diagram
-% object_hand_overlap_units = sum(object_hand_overlap_vector, 1);
-% 
-% tuned_channels_per_phase; % total units for each modality
-% object_only_units_h = tuned_channels_per_phase{3,1} - object_hand_overlap_units;
-% hand_only_units_o = tuned_channels_per_phase{1,1} - object_hand_overlap_units;
-% 
-% % next find average by iterating through each session and then finding the
-% % mean
-% 
-% % all 3 modalities overlap
-% object_hand_ho_overlap_vector = (tuned_channels_per_phase_vector{3,1} == 1) & (tuned_channels_per_phase_vector{1,1} == 1) & (tuned_channels_per_phase_vector{2,1} == 1); % this tells me the overlap between object and hand units
-% % I can sum and then substract from the total to get the venn diagram
-% object_hand_ho_overlap_units = sum(object_hand_ho_overlap_vector, 1);
-% 
-% tuned_channels_per_phase; % total units for each modality
-% object_only_units_h = tuned_channels_per_phase{3,1} - object_hand_overlap_units;
-% hand_only_units_o = tuned_channels_per_phase{1,1} - object_hand_overlap_units;
+tuned_channels_per_phase_vector; % 3 (modality) x 5 (sessions)
+% I can compare within sessions how much overlap there is and then average
+% the sessions together to get average overlap
+
+% H-HO overlap
+hand_ho_overlap_vector = (tuned_channels_per_phase_vector{1,1} == 1) & (tuned_channels_per_phase_vector{2,1} == 1); % this tells me the overlap between hand and hand-object units
+% I can sum and then substract from the total to get the venn diagram
+hand_ho_overlap_units = sum(hand_ho_overlap_vector, 1);
+
+tuned_channels_per_phase; % total units for each modality
+hand_only_units = tuned_channels_per_phase{1,1} - hand_ho_overlap_units;
+ho_only_units_h = tuned_channels_per_phase{2,1} - hand_ho_overlap_units;
+
+% next find average by iterating through each session and then finding the
+% mean
+
+% O-HO overlap
+object_ho_overlap_vector = (tuned_channels_per_phase_vector{3,1} == 1) & (tuned_channels_per_phase_vector{2,1} == 1); % this tells me the overlap between object and hand-object units
+% I can sum and then substract from the total to get the venn diagram
+object_ho_overlap_units = sum(object_ho_overlap_vector, 1);
+
+tuned_channels_per_phase; % total units for each modality
+object_only_units = tuned_channels_per_phase{3,1} - object_ho_overlap_units;
+ho_only_units_o = tuned_channels_per_phase{2,1} - object_ho_overlap_units;
+
+% next find average by iterating through each session and then finding the
+% mean
+
+% O-H overlap
+object_hand_overlap_vector = (tuned_channels_per_phase_vector{3,1} == 1) & (tuned_channels_per_phase_vector{1,1} == 1); % this tells me the overlap between object and hand units
+% I can sum and then substract from the total to get the venn diagram
+object_hand_overlap_units = sum(object_hand_overlap_vector, 1);
+
+tuned_channels_per_phase; % total units for each modality
+object_only_units_h = tuned_channels_per_phase{3,1} - object_hand_overlap_units;
+hand_only_units_o = tuned_channels_per_phase{1,1} - object_hand_overlap_units;
+
+% next find average by iterating through each session and then finding the
+% mean
+
+% all 3 modalities overlap
+object_hand_ho_overlap_vector = (tuned_channels_per_phase_vector{3,1} == 1) & (tuned_channels_per_phase_vector{1,1} == 1) & (tuned_channels_per_phase_vector{2,1} == 1); % this tells me the overlap between object and hand units
+% I can sum and then substract from the total to get the venn diagram
+object_hand_ho_overlap_units = sum(object_hand_ho_overlap_vector, 1);
+
+tuned_channels_per_phase; % total units for each modality
+object_only_units_h = tuned_channels_per_phase{3,1} - object_hand_overlap_units;
+hand_only_units_o = tuned_channels_per_phase{1,1} - object_hand_overlap_units;
 
 %% example (requires Statistics and Machine Learning Toolbox) => unsure if
 % % can handle 3 inputs
@@ -1102,9 +1126,9 @@ for n_session = 1:numSessions
 end
 sum_bin_all = sum_bin_all(:,colsToKeep);
 
-figure('units','normalized','outerposition',[0 0 0.08 0.163]); %[0 0 0.5 0.45]) %[0 0 0.25 0.245]);
+figure('units','normalized','outerposition',[0 0 0.137 0.163]); %[0 0 0.5 0.45]) %[0 0 0.25 0.245]);
 err_bar = {};
-for n_type = 1%:numel(taskCuesAll) %grasp_labels) %taskCuesAll)
+for n_type = 1:numel(taskCuesAll) %grasp_labels) %taskCuesAll)
     dataTmp = cell2mat(sum_bin_all(n_type,sessionToInclude))*100;
     percentage_tuned_per_bin = dataTmp./(numUnitsPerSession(sessionToInclude)');
     percentage_tuned_per_bin_all{n_type} = percentage_tuned_per_bin;
@@ -1126,18 +1150,18 @@ for n_phase = 1:numPhases
     xline(phase_changes(n_phase), 'k--', 'LineWidth', 1.5,'FontSize',12); %phaseNames{n_phase}
 end
 
-%title(unit_region); %(['Tuned Units Throughout Trial in ' unit_region]);
-%xlabel('Time (s)');
+title(unit_region); %(['Tuned Units Throughout Trial in ' unit_region]);
+xlabel('Timebins (50ms)');
 xlim([30 134]); %shortened %(min_timebin_length + 5)]) % 5 chosen as a buffer
-xticks([1 42 83 124]);
-xticklabels([0]);
+%xticks([1 42 83 124]);
+%xticklabels(phase_names); %0 2 4 6
 xtickangle(45);
 ylabel('% of Total Units');
-ylim([0 30]);
-yticks([0 30]);
+ylim([0 70]);
+yticks([0 70]);
 legend([err_bar{:}], taskCuesAll,'Location', 'Best','Interpreter', 'none','FontSize',12);
 %legend([err_bar{:}], grasp_labels,'Location', 'Best','Interpreter', 'none','FontSize',12);
-set(gca, 'FontSize', 9);
+set(gca, 'FontSize', 12);
 
 %% ANOVA for percentage tuned across first half of Cue
 % I need to take the average percent of units across that 1st

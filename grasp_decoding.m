@@ -5,9 +5,9 @@ close all
 spike_sorting_type = '_unsorted_aligned_thr_-4.5';
 %taskName = 'GraspObject_4S_Action';
 %taskName = 'GraspObject_Shuffled'; % shuffled images
-taskName = 'GraspObject_Varied_Size'; % varied object/aperture sizes
+%taskName = 'GraspObject_Varied_Size'; % varied object/aperture sizes
 %taskName = 'GraspObject_GB_Images'; % for GB
-%taskName = 'GraspObject_Combined'; % for Combined task
+taskName = 'GraspObject_Combined'; % for Combined task
 subject_id = 's3';
 
 % Data = load('C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\s3\Data\IndividualFiles\GraspObject\unsorted_aligned_thr_-4.5\s3_20230803_unsorted_aligned_thr_-4.5_GraspObject');

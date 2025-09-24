@@ -9,7 +9,7 @@ spike_sorting_type = 'unsorted_aligned_thr_-4.5';
 %taskName = 'GraspObject_4S_Action';
 %taskName = 'GraspObject_Shuffled'; % shuffled images
 taskName = 'GraspObject_Varied_Size'; % varied object/aperature sizes 
-subject_id = 's3';
+subject_id = 's2';
 session_date = {'20240521'}; 
 % 
 % DataName = ['Table_' subject_id '_' taskName spike_sorting_type '.mat'];

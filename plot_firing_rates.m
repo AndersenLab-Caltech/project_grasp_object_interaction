@@ -6,13 +6,13 @@ close all
 % saveFolder = 'C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\s3\Data';
 % 
 spike_sorting_type = 'unsorted_aligned_thr_-4.5';
-%taskName = 'GraspObject_4S_Action';
+taskName = 'GraspObject_4S_Action';
 %taskName = 'GraspObject_Shuffled'; % shuffled images
 %taskName = 'GraspObject_Varied_Size'; % varied object/aperture sizes 
 %taskName = 'GraspObject_5050'; % 50% Go, 50% No-Go task
-taskName = 'GraspObject_Combined'; % all grasp/object combinations task
+%taskName = 'GraspObject_Combined'; % all grasp/object combinations task
 subject_id = 's3';
-session_date = {'20250424'}; % 0830, 0921, 0929, 1005, 1030 
+session_date = {'20231030'}; % 0830, 0921, 0929, 1005, 1030 
 
 % LOAD DATA
 Data = load(['C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\' subject_id '\Data\Table_' subject_id '_' taskName '_' spike_sorting_type]);
@@ -69,7 +69,7 @@ if ~isempty(error_session)
     Data = Data(~condition,:);
 end
 
-brainAreas = Data.frPerChannel{7}; % 6 for original task, 7 for Ripple?
+brainAreas = Data.frPerChannel{6}; % 6 for original task, 7 for Ripple?
 phase_time_idx = Data.time_phase_labels{1,1};
 numPhases = numel(unique(phase_time_idx));
 phase_changes_idx = diff(phase_time_idx);
@@ -102,7 +102,7 @@ for n_brain = 3%:5 %:length(brainAreas) % 1:5 for AN, 1:3 for FG, [1, 3:6] for G
     numChannels = size(frData, 1);
     allTrials = cell(1,numChannels);
 
-    for n_channel = 1:numChannels
+    for n_channel = 1%:numChannels
         figure('units','normalized','outerposition',[0 0 0.5 1])
         sgtitle([brainAreas{n_brain} ' - Channel ' num2str(n_channel)]);
         
@@ -212,7 +212,7 @@ if strcmp(taskName, 'GraspObject_Varied_Size')
         frData = Data.frPerChannel{n_brain};
         numChannels = size(frData, 1);
         
-        for n_channel = 39%1:numChannels
+        for n_channel = 1:numChannels
             figure('units','normalized','outerposition',[0 0 0.15 0.2]);%[0 0 0.5 1])
             %sgtitle([brainAreas{n_brain} ' - Channel ' num2str(n_channel)]);
             
@@ -235,7 +235,7 @@ if strcmp(taskName, 'GraspObject_Varied_Size')
                 %subplot(numel(uniqueGraspTypes), 1, n_grasp);
                 hold on;
                 for n_phase = 1:numPhases
-                    xline(phase_changes(n_phase), 'k--', phaseNames{n_phase}, 'LineWidth', 1.5);
+                    xline(phase_changes(n_phase), 'k--', 'LineWidth', 1.5);%phaseNames{n_phase},
                 end
                 
                 %chan_fr = cell2mat(cellfun(@(x) x(n_channel,:), fr_sep_cue_type_mean, 'UniformOutput',false));
@@ -282,20 +282,20 @@ if strcmp(taskName, 'GraspObject_Varied_Size')
             legend([err_bar{:}], [{'Large'} {'Small'}],'Interpreter', 'none');
             xlim([30 134]) % 174 (# timebins) + 5 (buffer)
             xticks([1 42 83 124]); %165
-            xticklabels([0 2 4 6]); %8
-            yticks([15 23 30]);
-            ylim([15 30]);
+            xticklabels([0]); %8
+            %yticks([5 15]);
+            %ylim([5 16]);
             set(gca, 'FontSize', 12);
             
         end
     end
 elseif strcmp(taskName, 'GraspObject_Combined')
-    for n_brain = 5%:length(brainAreas) % 1:5 for AN, 1:3 for FG, [1, 3:6] for GB
+    for n_brain = 1%:length(brainAreas) % 1:5 for AN, 1:3 for FG, [1, 3:6] for GB
         
         frData = Data.frPerChannel{n_brain};
         numChannels = size(frData, 1);
         
-        for n_channel = 10%1:numChannels
+        for n_channel = 84%1:numChannels
             figure('units','normalized','outerposition',[0 0 0.15 0.2]);%[0 0 0.5 1])
             %sgtitle([brainAreas{n_brain} ' - Channel ' num2str(n_channel)]);
             
@@ -365,8 +365,8 @@ elseif strcmp(taskName, 'GraspObject_Combined')
             xlim([30 134]) % 174 (# timebins) + 5 (buffer)
             xticks([1 42 83 124]); %165
             xticklabels([0]); %8
-            yticks([15 25 35]);
-            ylim([10 35]);
+            yticks([10 25]);
+            ylim([5 27]);
 
             
         end
@@ -375,14 +375,14 @@ end
 %% SfN plots - all grasps on 1 plot
 
 % Analyzing fr for each grasp, ignoring cue modality and plotting on a single plot
-for n_brain = 4%:length(brainAreas) % 1:5 for AN, 1:3 for FG, [1, 3:6] for GB
+for n_brain = 1%:length(brainAreas) % 1:5 for AN, 1:3 for FG, [1, 3:6] for GB
     
     frData = Data.frPerChannel{n_brain};
     numChannels = size(frData, 1);
     
-    for n_channel = 1:numChannels
+    for n_channel = 22%1:numChannels
         figure('units','normalized','outerposition',[0 0 0.15 0.2])
-        %sgtitle([brainAreas{n_brain} ' - Channel ' num2str(n_channel)],'FontWeight','bold');
+        sgtitle([brainAreas{n_brain} ' - Channel ' num2str(n_channel)],'FontWeight','bold');
         
         hold on; % Hold the plot for multiple grasps
 
@@ -428,12 +428,12 @@ for n_brain = 4%:length(brainAreas) % 1:5 for AN, 1:3 for FG, [1, 3:6] for GB
         end
         
         % Set labels and legend
-        %xlabel('Timebins (50 ms)');
-        xlim([30 134]) % 174 (# timebins) + 5 (buffer)
-        xticks([0]); % corresponds to phases and end of trial
-        %ylabel('Average Firing Rate (Hz)');
-        %ylim([8 32]);
-        %yticks([10 20 30]);
+        xlabel('Timebins (50 ms)');
+        xlim([0 174]) % 174 (# timebins) + 5 (buffer)
+        %xticks([0]); % corresponds to phases and end of trial
+        ylabel('Average Firing Rate (Hz)');
+        %ylim([1 15]);
+        %yticks([5 15]);
         %legend(plotHandles, {'L', 'MW', 'PP', 'S3F'}, 'Interpreter', 'none', 'Location', 'best');
         set(gca, 'FontSize', 12);
         
