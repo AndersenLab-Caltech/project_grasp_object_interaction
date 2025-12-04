@@ -633,7 +633,32 @@ elseif strcmp(subject, 's3')
     elseif strcmp(taskfile,'20231030-113942-114002-GraspObject')
         wrongTrials = []; 
     elseif strcmp(taskfile,'20231030-114723-114736-GraspObject')
-        wrongTrials = [];
+
+    elseif strcmp(taskfile,'20250930-143929-143939-GraspObject')
+        wrongTrials = [21]; 
+    elseif strcmp(taskfile,'20250930-144720-144743-GraspObject')
+        wrongTrials = [10,38]; 
+    elseif strcmp(taskfile,'20250930-145428-145438-GraspObject')
+        wrongTrials = [3,7]; 
+    elseif strcmp(taskfile,'20250930-150252-150303-GraspObject')
+        wrongTrials = [3,15,30]; 
+    elseif strcmp(taskfile,'20250930-151007-151017-GraspObject')
+        wrongTrials = [23,39]; 
+    elseif strcmp(taskfile,'20250930-151658-151712-GraspObject')
+        wrongTrials = [8,14,15,20,26,31,32,37,39];
+
+    elseif strcmp(taskfile,'20251023-103531-103731-GraspObject')
+        wrongTrials = [1]; 
+    elseif strcmp(taskfile,'20251023-104447-104456-GraspObject')
+        wrongTrials = [33]; 
+    elseif strcmp(taskfile,'20251023-105128-105139-GraspObject')
+        wrongTrials = [27,30,36,38]; 
+    elseif strcmp(taskfile,'20251023-110001-110009-GraspObject')
+        wrongTrials = [19,24,32,28]; 
+    elseif strcmp(taskfile,'20251023-110643-110655-GraspObject')
+        wrongTrials = [10,16,17,18,20,35]; 
+    elseif strcmp(taskfile,'20251023-111333-111415-GraspObject')
+        wrongTrials = [2,22,26,28,33,34];
 
     % SHUFFLED IMAGES SESSIONS %
 

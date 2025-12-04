@@ -231,11 +231,13 @@ p_per_bin = ones(numBins, numConditions, numChannels);
 pFStat = ones(numPhases,numChannels);
 r_per_phase = zeros(numPhases,numChannels); 
 r_per_phase_adjusted = zeros(numPhases,numChannels); 
+r2 = zeros(numBins,numChannels);
+eta2 = zeros(numBins,numChannels);
 
 p_multcomp_per_phase = ones(numPhases,numConditions,numChannels);
 p_multcomp_per_bin = ones(numBins, numConditions, numChannels);
 try
-    ITI_DataAll =  cell2mat(arrayfun(@(x,y) mean(x{1,1}(y{:}== 1,:),1),Data,TimePhaseLabels, 'UniformOutput', false));
+    ITI_DataAll =  cell2mat(arrayfun(@(x,y) mean(x{1,1}(y{:}== 1,:),1),Data,TimePhaseLabels, 'UniformOutput', false)); % n_trials x n_chans; average ITI activity of that channel across trials
 
 catch
    keyboard
@@ -274,7 +276,7 @@ for n_phase = 1:numPhases
       p_per_phase(n_phase,:,n_channel) = mdl.Coefficients.pValue(2:end); 
       p_per_phaseOrig(n_phase,:,n_channel) =  p_per_phase(n_phase,:,n_channel);
       r_per_phase(n_phase, n_channel) = mdl.Rsquared.Ordinary;
-      r_per_phase_adjusted(n_phase, n_channel) = mdl.Rsquared.Adjusted;
+      r_per_phase_adjusted(n_phase, n_channel) = mdl.Rsquared.Adjusted; % couuld maybe use these values to report effect size of tuning
 
 
   end    
@@ -284,18 +286,27 @@ if flagBinperBin
 
     for n_bin = 1:numBins
         disp(['Bin number ' num2str(n_bin)])
-        DataPerBin = cell2mat(arrayfun(@(x,y) Data{x,1}(n_bin,:),1:size(Data,1), 'UniformOutput', false)');
+        DataPerBin = cell2mat(arrayfun(@(x,y) Data{x,1}(n_bin,:),1:size(Data,1), 'UniformOutput', false)'); % trials x chans FR for this timebin
 
         for n_channel = 1:numChannels
 
-          DataPerBinTrial = DataPerBin(:,n_channel);
+          DataPerBinTrial = DataPerBin(:,n_channel); % for each chan, this is a vector of the first timebin for every trial (n_trials x 1)
           DataPerBinTrialOrdered = DataPerBinTrial;
-          ITI_Data = ones(max(groupCount),1)*mean(mean(ITI_DataAll(:,n_channel)));
+          ITI_Data = ones(max(groupCount),1)*mean(ITI_DataAll(:,n_channel)); % mean of all ITI averages across trials
 
-          %perform linear regression for each channel for each phase for each of the grasps 
-          FR = [ITI_Data; DataPerBinTrialOrdered];  
+          %perform linear regression for each channel for each timebin for each of the grasps 
+          FR = [ITI_Data; DataPerBinTrialOrdered]; % tack on 16 avg ITI FR to the beginning bc 16 trials of each grasp
 
           mdl = fitlm(X,FR);
+          % EFFECT SIZES (figuring out)
+          % Option A: R²
+          r2(n_bin,n_channel) = mdl.Rsquared.Ordinary;
+          % Option B: eta²
+          anova_tbl = anova(mdl, 'summary');
+          SS_effect = anova_tbl.SumSq(1);
+          SS_total  = sum(anova_tbl.SumSq);
+          eta2(n_bin,n_channel) = SS_effect / SS_total;
+
           p_val_bin = mdl.Coefficients.pValue(2:end);
 
           if multipleCompare
@@ -304,6 +315,7 @@ if flagBinperBin
 
           p_per_bin(n_bin,:,n_channel) = p_val_bin; 
 
+        end
     end 
 end 
 

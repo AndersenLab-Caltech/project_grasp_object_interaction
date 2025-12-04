@@ -3,7 +3,7 @@ clear all
 close all
 
 subject_id = 's3';
-unit_region = 'SMG';
+unit_region = 'M1';
 
 spike_sorting_type = '_unsorted_aligned_thr_-4.5';
 flag_4S = true; % true = updated 4S action phase; false = original 2S action phase
@@ -11,7 +11,7 @@ flag_shuffled = false; % true = shuffled images task
 flag_varied_sizes = false; % true for varied sizes task
 flag_GB_images = false; % true for task using images of GB's own hands and real objects
 flag_5050 = false; % true for 50% Go 50% NoGo trials
-flag_combined = false; % true for combinations task
+flag_combined = true; % true for combinations task
 
 if ~flag_4S
     TaskCue = 'GraspObject';
@@ -482,7 +482,8 @@ for n_session = 1:numSessions
         %end
     end 
 
-    % % calculating tuning overlap per phase 
+    % % calculating tuning overlap per phase % tried to update but haven't
+    % worked out all the kinks yet
     % hand     = tuned_phase_matrix(:,:,1);
     % ho       = tuned_phase_matrix(:,:,2);
     % object   = tuned_phase_matrix(:,:,3);
@@ -504,16 +505,52 @@ for n_session = 1:numSessions
     % object_ho_overlap_units_all{n_session}      = object_ho_overlap_units;
     % object_hand_overlap_units_all{n_session}    = object_hand_overlap_units;
     % object_hand_ho_overlap_units_all{n_session} = object_hand_ho_overlap_units;
+
+     % calculating tuning overlap
+    % H-HO overlap
+    hand_ho_overlap_vector = (tuned_channels_per_phase_vector{1,n_session} == 1) & (tuned_channels_per_phase_vector{2,n_session} == 1); % this tells me the overlap between hand and hand-object units
+    hand_ho_overlap_units = sum(hand_ho_overlap_vector, 1);
+    hand_ho_overlap_units_all{n_session} = hand_ho_overlap_units;
+
+    % hand_only_units = tuned_channels_per_phase{1,n_session} - hand_ho_overlap_units;
+    % ho_only_units_h = tuned_channels_per_phase{2,n_session} - hand_ho_overlap_units;
+    % hand_only_units_all{n_session} = hand_only_units;
+    % ho_only_units_h_all{n_session} = ho_only_units_h;
+
+    % O-HO overlap
+    object_ho_overlap_vector = (tuned_channels_per_phase_vector{3,n_session} == 1) & (tuned_channels_per_phase_vector{2,n_session} == 1); % this tells me the overlap between object and hand-object units
+    object_ho_overlap_units = sum(object_ho_overlap_vector, 1);
+    object_ho_overlap_units_all{n_session} = object_ho_overlap_units;
+
+    % object_only_units = tuned_channels_per_phase{3,n_session} - object_ho_overlap_units;
+    % ho_only_units_o = tuned_channels_per_phase{2,n_session} - object_ho_overlap_units;
+    % object_only_units_all{n_session} = object_only_units;
+    % ho_only_units_o_all{n_session} = ho_only_units_o;
+
+    % O-H overlap
+    object_hand_overlap_vector = (tuned_channels_per_phase_vector{3,n_session} == 1) & (tuned_channels_per_phase_vector{1,n_session} == 1); % this tells me the overlap between object and hand units
+    object_hand_overlap_units = sum(object_hand_overlap_vector, 1);
+    object_hand_overlap_units_all{n_session} = object_hand_overlap_units;
+
+    % object_only_units_h = tuned_channels_per_phase{3,n_session} - object_hand_overlap_units;
+    % hand_only_units_o = tuned_channels_per_phase{1,n_session} - object_hand_overlap_units;
+    % object_only_units_h_all{n_session} = object_only_units_h;
+    % hand_only_units_o_all{n_session} = hand_only_units_o;
+
+    % all 3 modalities overlap
+    object_hand_ho_overlap_vector = (tuned_channels_per_phase_vector{3,n_session} == 1) & (tuned_channels_per_phase_vector{1,n_session} == 1) & (tuned_channels_per_phase_vector{2,n_session} == 1); % this tells me the overlap between object, HO, and hand units
+    object_hand_ho_overlap_units = sum(object_hand_ho_overlap_vector, 1);
+    object_hand_ho_overlap_units_all{n_session} = object_hand_ho_overlap_units;
 end 
 
-% hand_ho_overlap_units_all_sessions = sum(cell2mat(hand_ho_overlap_units_all));
-% object_ho_overlap_units_all_sessions = sum(cell2mat(object_ho_overlap_units_all));
-% object_hand_overlap_units_all_sessions = sum(cell2mat(object_hand_overlap_units_all));
-% object_hand_ho_overlap_units_all_sessions = sum(cell2mat(object_hand_ho_overlap_units_all));
-% 
-% hand_total_units = sum(cell2mat(tuned_channels_per_phase(1,:)'));
-% ho_total_units = sum(cell2mat(tuned_channels_per_phase(2,:)'));
-% object_total_units = sum(cell2mat(tuned_channels_per_phase(3,:)'));
+hand_ho_overlap_units_all_sessions = sum(cell2mat(hand_ho_overlap_units_all));
+object_ho_overlap_units_all_sessions = sum(cell2mat(object_ho_overlap_units_all));
+object_hand_overlap_units_all_sessions = sum(cell2mat(object_hand_overlap_units_all));
+object_hand_ho_overlap_units_all_sessions = sum(cell2mat(object_hand_ho_overlap_units_all));
+
+hand_total_units = sum(cell2mat(tuned_channels_per_phase(1,:)'));
+ho_total_units = sum(cell2mat(tuned_channels_per_phase(2,:)'));
+object_total_units = sum(cell2mat(tuned_channels_per_phase(3,:)'));
 
 %%
 % n_phases = numel(phase_bin_ranges);
@@ -681,12 +718,12 @@ directory = ['C:\Users\macthurston\Documents\GitHub\project_grasp_object_interac
 full_path = fullfile(directory, filename);
 
 % Save the relevant variables with the dynamic filename
-%save(full_path, 'sum_bin_all', 'tuned_channels_per_phase', 'tuned_channels_per_phase_vector','tuned_channels_per_bin_vector','numUnitsPerSession',...
-    % 'hand_ho_overlap_units_all','object_ho_overlap_units_all','object_hand_overlap_units_all','object_hand_ho_overlap_units_all',...
-    % 'hand_ho_overlap_units_all_sessions','object_ho_overlap_units_all_sessions','object_hand_overlap_units_all_sessions','object_hand_ho_overlap_units_all_sessions',...
-    % 'hand_total_units','ho_total_units','object_total_units'); % for overlap
+save(full_path, 'sum_bin_all', 'tuned_channels_per_phase', 'tuned_channels_per_phase_vector','tuned_channels_per_bin_vector','numUnitsPerSession',...
+    'hand_ho_overlap_units_all','object_ho_overlap_units_all','object_hand_overlap_units_all','object_hand_ho_overlap_units_all',...
+    'hand_ho_overlap_units_all_sessions','object_ho_overlap_units_all_sessions','object_hand_overlap_units_all_sessions','object_hand_ho_overlap_units_all_sessions',...
+    'hand_total_units','ho_total_units','object_total_units'); % for overlap
 
-save(full_path, 'sum_bin_all', 'tuned_channels_per_phase', 'tuned_channels_per_phase_vector','tuned_channels_per_bin_vector','numUnitsPerSession'); % object tuning for Combo dataset
+%save(full_path, 'sum_bin_all', 'tuned_channels_per_phase', 'tuned_channels_per_phase_vector','tuned_channels_per_bin_vector','numUnitsPerSession'); % object tuning for Combo dataset
 %%
 keyboard
 
@@ -768,8 +805,8 @@ goLabel = ["NoGo", "Go"];
 goLabel = goLabel(flagGoTrials + 1);
 directory = ['C:\Users\macthurston\Documents\GitHub\project_grasp_object_interaction\analyzedData\' subject_id];
 analysis_type = 'LinearRegression'; % 'LinearRegression' or 'KW'
-%filename = "grasp_tuned_channels_per_condition_" + TaskCue + '_' + unit_region + "_" + analysis_type + "_" + goLabel + ".mat"; % just .mat for original data
-filename = "tuned_channels_" + TaskCue + '_' + unit_region + "_" + analysis_type + "_" + 'Pixelated'; % Pixelated/Regular
+filename = "size_tuned_channels_per_condition_" + TaskCue + '_' + unit_region + "_" + analysis_type + "_" + goLabel + ".mat"; % just .mat for original data
+%filename = "tuned_channels_" + TaskCue + '_' + unit_region + "_" + analysis_type + "_" + 'Pixelated'; % Pixelated/Regular
 full_path = fullfile(directory, filename);
 load(full_path);
 
@@ -1128,7 +1165,7 @@ sum_bin_all = sum_bin_all(:,colsToKeep);
 
 figure('units','normalized','outerposition',[0 0 0.137 0.163]); %[0 0 0.5 0.45]) %[0 0 0.25 0.245]);
 err_bar = {};
-for n_type = 1:numel(taskCuesAll) %grasp_labels) %taskCuesAll)
+for n_type = 1%:numel(taskCuesAll) %grasp_labels) %taskCuesAll)
     dataTmp = cell2mat(sum_bin_all(n_type,sessionToInclude))*100;
     percentage_tuned_per_bin = dataTmp./(numUnitsPerSession(sessionToInclude)');
     percentage_tuned_per_bin_all{n_type} = percentage_tuned_per_bin;
@@ -1137,11 +1174,11 @@ for n_type = 1:numel(taskCuesAll) %grasp_labels) %taskCuesAll)
     per_bin_tuned_mean(n_type,:) = mean(percentage_tuned_per_bin,2);
 
     hold on
-    err_bar{n_type} = plot(1:length(dataTmp),per_bin_tuned_mean(n_type,:),'Color', color_info{n_type},'LineWidth',2);
+    err_bar{n_type} = plot(1:length(dataTmp),per_bin_tuned_mean(n_type,:),'Color', color_info{3},'LineWidth',2);
 
     ER = utile.shadedErrorBar(1:length(dataTmp),per_bin_tuned_mean(n_type,:),per_bin_yCI95(n_type,:));
-    ER.mainLine.Color = color_info{n_type};
-    ER.patch.FaceColor = color_info{n_type};
+    ER.mainLine.Color = color_info{3};
+    ER.patch.FaceColor = color_info{3};
     ER.edge(1).LineStyle = 'none'; %color_info{n_type};
     ER.edge(2).LineStyle = 'none'; %color_info{n_type};
 end
@@ -1150,16 +1187,16 @@ for n_phase = 1:numPhases
     xline(phase_changes(n_phase), 'k--', 'LineWidth', 1.5,'FontSize',12); %phaseNames{n_phase}
 end
 
-title(unit_region); %(['Tuned Units Throughout Trial in ' unit_region]);
-xlabel('Timebins (50ms)');
+%title(unit_region); %(['Tuned Units Throughout Trial in ' unit_region]);
+%xlabel('Timebins (50ms)');
 xlim([30 134]); %shortened %(min_timebin_length + 5)]) % 5 chosen as a buffer
 %xticks([1 42 83 124]);
-%xticklabels(phase_names); %0 2 4 6
-xtickangle(45);
-ylabel('% of Total Units');
+xticklabels([]); %0 2 4 6
+%xtickangle(45);
+%ylabel('% of Total Units');
 ylim([0 70]);
-yticks([0 70]);
-legend([err_bar{:}], taskCuesAll,'Location', 'Best','Interpreter', 'none','FontSize',12);
+yticks([]);
+%legend([err_bar{:}], taskCuesAll,'Location', 'Best','Interpreter', 'none','FontSize',12);
 %legend([err_bar{:}], grasp_labels,'Location', 'Best','Interpreter', 'none','FontSize',12);
 set(gca, 'FontSize', 12);
 

@@ -5,8 +5,8 @@ clear all
 close all
 
 %subject_id = 's2';  %FG
-%subject_id = 's3';  %AN
-subject_id = 's4';  %GB
+subject_id = 's3';  %AN
+%subject_id = 's4';  %GB
 
 % session details
 subject = hst.Subject(subject_id);
@@ -18,13 +18,13 @@ flag_shuffled = false; % true for shuffled images task
 flag_varied_size = false; % true for varied object/aperature size
 flag_GB_images = false; % true for task using images of GB's own hands and real objects
 flag_5050 = false; % true for 50/50 Go/NoGo task
-flag_combined = true; % true for combinations task
+flag_combined = false; % true for combinations task
 
 if strcmp(subject_id, 's2')
     %session_dates = {'20230831','20230907'};
-    session_dates = {'20250725'};
+    session_dates = {'20230831'};
 elseif strcmp(subject_id, 's3')
-    session_dates = {'20250424'};
+    session_dates = {'20251023'};
 elseif strcmp(subject_id, 's4')
     session_dates = {'20250818'};
 else 

@@ -6,13 +6,13 @@ close all
 % saveFolder = 'C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\s3\Data';
 % 
 spike_sorting_type = 'unsorted_aligned_thr_-4.5';
-taskName = 'GraspObject_4S_Action';
+%taskName = 'GraspObject_4S_Action';
 %taskName = 'GraspObject_Shuffled'; % shuffled images
 %taskName = 'GraspObject_Varied_Size'; % varied object/aperture sizes 
 %taskName = 'GraspObject_5050'; % 50% Go, 50% No-Go task
-%taskName = 'GraspObject_Combined'; % all grasp/object combinations task
+taskName = 'GraspObject_Combined'; % all grasp/object combinations task
 subject_id = 's3';
-session_date = {'20240610'}; % 0830, 0921, 0929, 1005, 1030 
+session_date = {'20250409a'}; % 0830, 0921, 0929, 1005, 1030 
 
 % LOAD DATA
 Data = load(['C:\Users\macthurston\OneDrive - Kaiser Permanente\CaltechData\GraspObject_project\' subject_id '\Data\Table_' subject_id '_' taskName '_' spike_sorting_type]);
@@ -69,7 +69,7 @@ if ~isempty(error_session)
     Data = Data(~condition,:);
 end
 
-brainAreas = Data.frPerChannel{6}; % 6 for original task, 7 for Ripple?
+brainAreas = Data.frPerChannel{7}; % 6 for original task, 7 for Ripple?
 phase_time_idx = Data.time_phase_labels{1,1};
 numPhases = numel(unique(phase_time_idx));
 phase_changes_idx = diff(phase_time_idx);
@@ -102,7 +102,7 @@ for n_brain = 3%:5 %:length(brainAreas) % 1:5 for AN, 1:3 for FG, [1, 3:6] for G
     numChannels = size(frData, 1);
     allTrials = cell(1,numChannels);
 
-    for n_channel = 1:numChannels
+    for n_channel = 1%:numChannels
         figure('units','normalized','outerposition',[0 0 0.5 1])
         sgtitle([brainAreas{n_brain} ' - Channel ' num2str(n_channel)]);
         
@@ -205,7 +205,7 @@ for i = 1:12
     xlabel('Timebins');
     ylabel('Value');
 end
-%% analyzing fr for each grasp separated by aperture size/object type
+%% analyzing fr for aperture size/object type (can sep by grasp type)
 if strcmp(taskName, 'GraspObject_Varied_Size')
     for n_brain = 1%:length(brainAreas) % 1:5 for AN, 1:3 for FG, [1, 3:6] for GB
         
@@ -279,12 +279,12 @@ if strcmp(taskName, 'GraspObject_Varied_Size')
                 hold off;
             %end
             % legend([err_bar{:}], uniqueApertureSize','Interpreter', 'none');
-            legend([err_bar{:}], [{'Large'} {'Small'}],'Interpreter', 'none');
+            %legend([err_bar{:}], [{'Large'} {'Small'}],'Interpreter', 'none');
             xlim([30 134]) % 174 (# timebins) + 5 (buffer)
             xticks([1 42 83 124]); %165
             xticklabels([0]); %8
-            %yticks([5 15]);
-            %ylim([5 16]);
+            yticks([]);
+            ylim([4 20]);
             set(gca, 'FontSize', 12);
             
         end
@@ -295,7 +295,7 @@ elseif strcmp(taskName, 'GraspObject_Combined')
         frData = Data.frPerChannel{n_brain};
         numChannels = size(frData, 1);
         
-        for n_channel = 84%1:numChannels
+        for n_channel = 1:numChannels
             figure('units','normalized','outerposition',[0 0 0.15 0.2]);%[0 0 0.5 1])
             %sgtitle([brainAreas{n_brain} ' - Channel ' num2str(n_channel)]);
             
@@ -363,10 +363,10 @@ elseif strcmp(taskName, 'GraspObject_Combined')
             % legend([err_bar{:}], uniqueApertureSize','Interpreter', 'none');
             %legend([err_bar{:}], uniqueObjectType,'Interpreter', 'none');
             xlim([30 134]) % 174 (# timebins) + 5 (buffer)
-            xticks([1 42 83 124]); %165
+            xticks([]); %165 [1 42 83 124]
             xticklabels([0]); %8
-            yticks([10 25]);
-            ylim([5 27]);
+            %yticks([20 30 40]);
+            %ylim([18 40]);
 
             
         end
@@ -380,7 +380,7 @@ for n_brain = 1%:length(brainAreas) % 1:5 for AN, 1:3 for FG, [1, 3:6] for GB
     frData = Data.frPerChannel{n_brain};
     numChannels = size(frData, 1);
     
-    for n_channel = 1:numChannels
+    for n_channel = 22%1:numChannels
         figure('units','normalized','outerposition',[0 0 0.15 0.2])
         %sgtitle([brainAreas{n_brain} ' - Channel ' num2str(n_channel)],'FontWeight','bold');
         
@@ -428,13 +428,13 @@ for n_brain = 1%:length(brainAreas) % 1:5 for AN, 1:3 for FG, [1, 3:6] for GB
         end
         
         % Set labels and legend
-        xlabel('Timebins (50 ms)');
-        %xlim([30 134]) % 174 (# timebins) + 5 (buffer)
-        %xticks([0]); % corresponds to phases and end of trial
-        ylabel('Average Firing Rate (Hz)');
-        %ylim([1 15]);
-        %yticks([5 15]);
-        legend(plotHandles, {'L', 'MW', 'PP', 'S3F'}, 'Interpreter', 'none', 'Location', 'best');
+        %xlabel('Timebins (50 ms)');
+        xlim([30 134]) % 174 (# timebins) + 5 (buffer)
+        xticks([]); % corresponds to phases and end of trial
+        %ylabel('Average Firing Rate (Hz)');
+        ylim([9 42]);
+        yticks([]);
+        %legend(plotHandles, {'L', 'MW', 'PP', 'S3F'}, 'Interpreter', 'none', 'Location', 'best');
         set(gca, 'FontSize', 12);
         
         hold off; % Release the plot hold
@@ -572,14 +572,14 @@ end
 %% SfN plots - ignore separation of grasps and just look at separation of cue
 
 % Analyzing fr for all grasps combined, separated by cue modality
-for n_brain = 3%:length(brainAreas) % 1:5 for AN, 1:3 for FG, [1, 3:6] for GB
+for n_brain = 6%:length(brainAreas) % 1:5 for AN, 1:3 for FG, [1, 3:6] for GB
     
     frData = Data.frPerChannel{n_brain};
     numChannels = size(frData, 1);
     
-    for n_channel = 1:numChannels
-        figure('units', 'normalized', 'outerposition', [0 0 0.15 0.2])
-        %sgtitle([brainAreas{n_brain} ' - Channel ' num2str(n_channel) ' - All Grasps '], 'FontWeight', 'bold');
+    for n_channel = 1%:numChannels
+        figure('units', 'normalized', 'outerposition', [0 0 0.25 0.27])
+        %sgtitle([brainAreas{n_brain} ' - Channel ' num2str(n_channel)], 'FontWeight', 'bold');
         hold on;
         
         % Combine activity for all grasps
@@ -596,7 +596,7 @@ for n_brain = 3%:length(brainAreas) % 1:5 for AN, 1:3 for FG, [1, 3:6] for GB
         color_info = {[.1176 .5333 .8980], [0.8471 0.1059 0.3765], [1 0.7569 0.0275]};
         err_bar = {}; % Initialize error bar handles for legend
 
-        for n_cueType = 4%1:2%numel(uniqueCueTypes) % Loop through cue modalities (e.g., HO, H, O)
+        for n_cueType = 1:numel(uniqueCueTypes) % Loop through cue modalities (e.g., HO, H, O)
             dataTmp = fr_sep_cue_type_trial{n_cueType}';
             
             % Compute confidence intervals using bootstrapping
@@ -629,9 +629,9 @@ for n_brain = 3%:length(brainAreas) % 1:5 for AN, 1:3 for FG, [1, 3:6] for GB
         xlim([30 134]) % 174 (# timebins) + 5 (buffer)
         xticks([0]); % corresponds to phases and end of trial
         %ylabel('Average Firing Rate (Hz)');
-        ylim([8 32]);
-        yticks([10 20 30]);
-        legend([err_bar{:}], {'G','G+O'}, 'Interpreter', 'none', 'Location', 'best'); %uniqueCueTypes
+        %ylim();
+        yticks([]);
+        %legend([err_bar{:}], {'G','G+O'}, 'Interpreter', 'none', 'Location', 'best'); %uniqueCueTypes
         set(gca, 'FontSize', 12);
 
         hold off; % Release the plot hold for this figure
@@ -1003,7 +1003,8 @@ legend([h2 h1 h4 h3], {'Grasp+Modality', 'Grasp-only', 'Modality+Grasp', 'Modali
     'Location', 'northeastoutside');
 
 %% GS, Size Parameters 
-phase_bins = 94:174; % cue = 42:82, action = 94:174
+%phase_bins = 42:82; % cue
+phase_bins = 94:174; % action
 alpha = 0.05;
 
 % Preallocate storage
@@ -1019,7 +1020,7 @@ for n_session = 1:numSessions
     SessionData = Data(strcmp(Data.session_date, session_date), :);
     fprintf('\n===== Session %d =====\n', n_session)
 
-    for n_brain = 1% [1,4,5] 
+    for n_brain = [1]%,4,5] 
         frData = SessionData.frPerChannel{n_brain};
         numChannels = size(frData, 1);
 
@@ -1113,7 +1114,7 @@ sizeOverlapColor     = [0.1059, 0.3451, 0.1451]; % Darker green
 
 
 % === Brain regions ===
-brainRegions = {'SMG'}; %, 'AIP', 'M1'};
+brainRegions = {'SMG', 'AIP', 'M1'};
 regionIdx = [1];%, 4, 5];
 x = 1:length(regionIdx);
 barWidth = 0.35;
@@ -1324,7 +1325,7 @@ objectOverlapColor   = [0.5294, 0.3961, 0.0627]; % Darker yellow
 
 % === Brain regions ===
 brainRegions = {'SMG', 'AIP', 'M1'};
-regionIdx = [1, 4, 5];
+regionIdx = [1,4,5];
 x = 1:length(regionIdx);
 barWidth = 0.35;
 
